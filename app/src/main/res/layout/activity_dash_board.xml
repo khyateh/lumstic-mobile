@@ -1,0 +1,54 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dash_board_background"
+    tools:context="lumstic.example.com.lumstic.UI.DashBoardActivity">
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="300dp"
+        android:background="@drawable/dashboard_bg_img"></View>
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_margin="10dp"
+        android:background="@color/dash_board_foreground"></View>
+    <ImageView
+        android:id="@+id/vendor_icon"
+        android:layout_width="87dp"
+        android:layout_height="87dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="60dp"
+        android:background="@drawable/splash_logo" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/vendor_icon"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp"
+        android:text="@string/welcome"
+        android:id="@+id/text"
+        android:textColor="#212121"
+        android:textSize="18sp" />
+    <lumstic.example.com.lumstic.Views.RobotoLightTextView
+        android:id="@+id/message"
+        android:layout_marginTop="32dp"
+        android:layout_below="@+id/text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="@string/welcome_message_one"
+        android:textColor="#6c6c6c"
+        android:textSize="16sp" />
+    <lumstic.example.com.lumstic.Views.RobotoLightTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/message"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:text="@string/welcome_message_two"
+        android:textColor="#6c6c6c"
+        android:textSize="16sp" />
+</RelativeLayout>

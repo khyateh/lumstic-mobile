@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+    <color name="blue_gradient">#E9EDF3</color>.
+    <color name="login_screen_background">#F9FBFD</color>
+    <color name="By_ashoka_text_color">#939596</color>
+    <color name="login_button_color">#FF301B</color>
+    <color name="forgot_password_text">#C0C1C1</color>
+    <color name="error_text_color">#F5161A</color>
+    <color name="dash_board_foreground">#FBFBFB</color>
+    <color name="dash_board_background">#D6D6D6</color>
+    <color name="text_color">#212121</color>
+    <color name="completed_survey_text">#7EC05C</color>
+    <color name="incomplete_survey_text">#FFDCAD</color>
+    <color name="uploaded_survey_text">#A7CEF8</color>
+    <color name="endson_text_color">#DFDFDF</color>
+    <color name="descrioption_text_color">#9C9B9A</color>
+    <color name="text_color_total">#909090</color>
+    <color name="orange_text">#F58220</color>
+    <color name="edittext_background">#F2F2F2</color>
+    <color name="edittext_corner">#b8b8b8</color>
+    <color name="back_button_background">#CDCDCD</color>
+    <color name="back_button_text">#909090</color>
+    <color name="next_button_background">#009688</color>
+    <color name="text_color_help_button">#008b78</color>
+</resources>

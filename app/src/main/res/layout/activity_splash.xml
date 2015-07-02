@@ -1,0 +1,51 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".MyActivity"
+ >
+    <ImageView
+        android:id="@+id/logo_image"
+        android:layout_width="98dp"
+        android:layout_height="98dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="100dp"
+        android:src="@drawable/splash_logo"></ImageView>
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/by_ashoka_text"
+        android:layout_below="@+id/logo_image"
+        android:layout_marginBottom="-10dp"
+        android:background="@drawable/splash_screen_background"></View>
+    <TextView
+        android:id="@+id/appname_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/logo_image"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="11dp"
+        android:text="By Ashoka Innovators for the Public"
+               android:textStyle="italic"
+        android:textColor="#212121"
+        android:textSize="14sp" />
+    <TextView
+        android:id="@+id/by_ashoka_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/appname_text"
+        android:layout_centerHorizontal="true"
+        android:padding="10dp"
+        android:text=""
+        android:textColor="@color/By_ashoka_text_color"
+        android:textSize="20sp"
+        android:textStyle="italic" />
+    <ImageView
+        android:id="@+id/background_image"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/by_ashoka_text"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/splash_bg_img"></ImageView>
+</RelativeLayout>

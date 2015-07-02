@@ -1,0 +1,33 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+tools:context="lumstic.example.com.lumstic.UI.DashBoardActivity" >
+
+
+<item
+    android:title="@string/action_help"
+    android:icon="@drawable/ic_action_ic_menu_overflow"
+    android:showAsAction="always">
+    <menu>
+
+        <item
+            android:id="@+id/action_about"
+            android:icon="@drawable/ic_about"
+            android:title="@string/action_about">
+
+        </item>
+        <item android:id="@+id/action_help"
+            android:title="@string/action_help"
+            android:icon="@drawable/ic_menu_help"
+            />
+        <item android:id="@+id/action_settings"
+            android:icon="@drawable/ic_settings"
+            android:title="@string/action_settings"
+            />
+
+    </menu>
+</item>
+
+
+
+
+</menu>

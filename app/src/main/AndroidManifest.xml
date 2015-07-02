@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="lumstic.example.com.lumstic" >
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"></uses-permission>
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"></uses-permission>
+    <application
+        android:name=".Utils.LumsticApp"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name=".UI.SplashActivity"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".UI.LoginActivity"
+            android:label="@string/title_activity_login" />
+        <activity
+            android:name=".UI.DashBoardActivity"
+            android:label="@string/title_activity_dash_board" />
+        <activity
+            android:name=".UI.ForgotPasswordActivity"
+            android:label="@string/title_activity_forgot_password" />
+        <activity
+            android:name=".UI.SurveyDetailsActivity"
+            android:label="@string/title_activity_survey_details" />
+        <activity
+            android:name=".UI.CompleteResponsesActivity"
+            android:label="@string/title_activity_complete_responses" />
+        <activity
+            android:name=".UI.ActiveSurveyActivity"
+            android:label="@string/title_activity_active_survey" />
+        <activity
+            android:name=".UI.IncompleteResponseActivity"
+            android:label="@string/title_activity_incomplete_response" />
+        <activity
+            android:name=".UI.NewResponseActivity"
+            android:label="@string/title_activity_new_response" />
+        <activity
+            android:name=".UI.HelpActivity"
+            android:label="@string/title_activity_help" >
+        </activity>
+        <activity
+            android:name=".UI.TestActivity"
+            android:label="@string/title_activity_test" >
+        </activity>
+        <activity
+            android:name=".UI.Sample"
+            android:label="@string/title_activity_sample" >
+        </activity>
+    </application>
+
+</manifest>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="10dp"
+    android:orientation="vertical"
+>
+
+    <lumstic.example.com.lumstic.Views.RobotoRegularTextView
+        android:layout_marginTop="12dp"
+        android:layout_marginRight="10dp"
+        android:id="@+id/survey_name_text"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Temperature details as per the city"
+        android:textColor="#212121"
+        android:textSize="19sp" />
+
+    <LinearLayout
+        android:layout_marginTop="9dp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+        <lumstic.example.com.lumstic.Views.RobotoRegularTextView
+            android:id="@+id/complete_survey_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_gravity="center"
+            android:text="complete  00"
+            android:textColor="#6c6c6c"
+            android:textSize="13sp" />
+
+
+        <lumstic.example.com.lumstic.Views.RobotoRegularTextView
+            android:id="@+id/incomplete_survey_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Incomplete  00"
+            android:layout_marginLeft="20dp"
+            android:textColor="#6c6c6c"
+            android:textSize="13sp" />
+
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginTop="9dp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <lumstic.example.com.lumstic.Views.RobotoLightTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ends on:"
+            android:textColor="#6c6c6c"
+            android:textSize="12sp" />
+
+
+        <lumstic.example.com.lumstic.Views.RobotoLightTextView
+            android:id="@+id/end_date_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="18th Feb 2015"
+            android:textColor="#6c6c6c"
+           android:layout_marginLeft="4dp"
+            android:textSize="12sp" />
+
+
+    </LinearLayout>
+
+
+</LinearLayout>
