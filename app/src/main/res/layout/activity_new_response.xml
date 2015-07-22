@@ -3,8 +3,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/dash_board_background"
-    tools:context="lumstic.example.com.lumstic.UI.DashBoardActivity">
-<View
+    tools:context="lumstic.ashoka.com.lumstic.UI.DashBoardActivity">
+
+    <View
         android:layout_width="fill_parent"
         android:layout_height="300dp"
         android:background="@drawable/dashboard_bg_img"></View>
@@ -13,36 +14,36 @@
         android:id="@+id/question_container"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
-        android:layout_marginBottom="10dp"
-        android:layout_alignParentTop="true"
         android:layout_above="@+id/controls_container"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="10dp"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginTop="10dp"
         android:background="@color/dash_board_foreground">
 
 
-
         <ScrollView
 
+            android:id="@+id/scrollView"
             android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="14dp"
             android:layout_marginRight="14dp"
-            android:layout_marginTop="14dp"
-            android:layout_height="wrap_content"
-            android:id="@+id/scrollView">
+            android:layout_marginTop="14dp">
+
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent">
 
 
-
                 <LinearLayout
-            android:orientation="vertical"
-            android:layout_below="@+id/question_text"
-            android:id="@+id/field_container"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+                    android:clickable="true"
+                    android:id="@+id/field_container"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_below="@+id/question_text"
+                    android:orientation="vertical">
 
                 </LinearLayout>
 
@@ -52,68 +53,62 @@
         </ScrollView>
 
 
-
     </RelativeLayout>
-
 
 
     <LinearLayout
         android:id="@+id/controls_container"
         android:layout_width="fill_parent"
         android:layout_height="48dp"
-        android:weightSum="3"
-        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
         android:background="@color/black"
-        android:layout_alignParentBottom="true">
+        android:orientation="horizontal"
+        android:weightSum="3">
 
 
-
-
-
-
-
-            <lumstic.example.com.lumstic.Views.RobotoBlackRegularButton
-                android:layout_weight="1"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:text="BACK"
-                android:layout_gravity="center"
-                android:drawableLeft="@drawable/ic_arrow_back_enable"
-                android:background="@color/back_button_background"
-                android:textColor="#727272"
-                android:textSize="14sp"
-                android:drawablePadding="2dip"
-                android:paddingLeft="30dip"
-                android:paddingRight="26dip"
-                android:singleLine="true"
-                android:gravity="center"
-                android:id="@+id/previous_question" />
-        <lumstic.example.com.lumstic.Views.RobotoLightButton
-            android:id="@+id/counter_button"
-            android:layout_weight="1"
-            android:background="@color/white"
-            android:textColor="#7e7e7e"
-            android:layout_width="fill_parent"
-            android:textSize="13sp"
-            android:layout_height="fill_parent"
-            android:text="1 out of 12"/>
-
-        <lumstic.example.com.lumstic.Views.RobotoBlackRegularButton
-            android:id="@+id/next_queation"
-            android:layout_weight="1"
-            android:background="@color/login_button_color"
-            android:textColor="@color/white"
+        <lumstic.ashoka.com.lumstic.Views.RobotoBlackRegularButton
+            android:id="@+id/previous_question"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:drawablePadding="2dip"
-            android:paddingLeft="30dip"
             android:layout_gravity="center"
-            android:drawableRight="@drawable/ic_arrow_next"
+            android:layout_weight="1"
+            android:background="@color/back_button_background"
+            android:drawableLeft="@drawable/ic_arrow_back_enable"
+            android:drawablePadding="2dip"
+            android:gravity="center"
+            android:paddingLeft="30dip"
             android:paddingRight="26dip"
             android:singleLine="true"
+            android:text="BACK"
+            android:textColor="#727272"
+            android:textSize="14sp" />
+
+        <lumstic.ashoka.com.lumstic.Views.RobotoLightButton
+            android:id="@+id/counter_button"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:text="1 out of 12"
+            android:textColor="#7e7e7e"
+            android:textSize="13sp" />
+
+        <lumstic.ashoka.com.lumstic.Views.RobotoBlackRegularButton
+            android:id="@+id/next_queation"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:background="@color/login_button_color"
+            android:drawablePadding="2dip"
+            android:drawableRight="@drawable/ic_arrow_next"
             android:gravity="center"
-            android:textSize="14sp"
-            android:text="NEXT"/>
+            android:paddingLeft="30dip"
+            android:paddingRight="26dip"
+            android:singleLine="true"
+            android:text="NEXT"
+            android:textColor="@color/white"
+            android:textSize="14sp" />
     </LinearLayout>
 
 </RelativeLayout>

@@ -2,16 +2,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="lumstic.example.com.lumstic.UI.HelpActivity"
-   >
+    tools:context="lumstic.ashoka.com.lumstic.UI.HelpActivity">
 
     <TextView
-        android:textColor="#ffbb00"
-        android:textSize="30sp"
-        android:padding="20dp"
-        android:text="this is help activity"
+        android:id="@+id/help_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/help_text" />
+        android:padding="20dp"
+        android:text="this is help activity"
+        android:textColor="#ffbb00"
+        android:textSize="30sp" />
 
 </RelativeLayout>

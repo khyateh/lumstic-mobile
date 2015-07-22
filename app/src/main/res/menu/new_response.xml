@@ -1,9 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="lumstic.example.com.lumstic.UI.NewResponseActivity" >
+    tools:context="lumstic.ashoka.com.lumstic.UI.NewResponseActivity">
 
-        <item android:id="@+id/save"
-            android:title="save"
-            android:showAsAction="always"/>
+    <item
+        android:id="@+id/save"
+        android:showAsAction="always"
+        android:title="save" />
 
 </menu>

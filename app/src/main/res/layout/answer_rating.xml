@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-    android:layout_height="fill_parent"
-    android:orientation="vertical"
-    android:layout_marginBottom="10dp"
-
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    xmlns:android="http://schemas.android.com/apk/res/android" >
+    android:layout_height="fill_parent"
+
+    android:layout_marginBottom="10dp"
+    android:orientation="vertical">
+
     <RatingBar
+        android:id="@+id/ratingBar"
+        style="@style/customRatingBar"
         android:layout_width="wrap_content"
         android:layout_height="70dp"
-        style="@style/customRatingBar"
-        android:id="@+id/ratingBar"
-    android:numStars="5"
-    android:stepSize="0.1"
- />
+        android:numStars="5"
+        android:stepSize="0.1" />
 </LinearLayout>

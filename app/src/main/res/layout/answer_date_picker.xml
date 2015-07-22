@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <TextView
-android:layout_width="fill_parent"
-android:layout_height="wrap_content"
-android:text="dd/yy/mm"
-android:gravity="center"
-    android:padding="14dp"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/answer_text_date"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
     android:layout_margin="14dp"
-    android:background="@drawable/edittext_modified_state"
-android:textSize="18sp"
     android:layout_marginBottom="30dp"
-android:id="@+id/answer_text_date"
-xmlns:android="http://schemas.android.com/apk/res/android" />
+    android:background="@drawable/edittext_modified_state"
+    android:gravity="center"
+    android:padding="14dp"
+    android:text="dd/yy/mm"
+    android:textSize="18sp" />
 
 

@@ -1,43 +1,41 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="lumstic.example.com.lumstic.UI.DashBoardActivity" >
+    tools:context="lumstic.ashoka.com.lumstic.UI.DashBoardActivity">
 
 
     <item
-        android:title="@string/action_help"
-
         android:icon="@drawable/ic_action_ic_menu_overflow"
-        android:showAsAction="always">
+
+        android:showAsAction="always"
+        android:title="@string/action_help">
         <menu>
 
-            <item
-                android:id="@+id/action_help1"
-                android:icon="@drawable/ic_menu_help"
-                android:title="@string/action_help">
+            <!--<item-->
+                <!--android:id="@+id/action_help1"-->
+                <!--android:icon="@drawable/ic_menu_help"-->
+                <!--android:title="@string/action_help">-->
 
-            </item>
-            <item android:id="@+id/action_fetch"
-                android:title="@string/action_fetch"
+            <!--</item>-->
+            <item
+                android:id="@+id/action_fetch"
                 android:icon="@drawable/ic_menu_fetch"
-                />
-            <item android:id="@+id/action_logout"
-                android:icon="@drawable/ic_menu_logout"
-                android:title="@string/action_logout"
-                />
+                android:title="@string/action_fetch" />
             <item
-                android:id="@+id/action_about"
-                android:icon="@drawable/ic_about"
-                android:title="@string/action_about"/>
+                android:id="@+id/action_logout"
+                android:icon="@drawable/ic_menu_logout"
+                android:title="@string/action_logout" />
+            <!--<item-->
+                <!--android:id="@+id/action_about"-->
+                <!--android:icon="@drawable/ic_about"-->
+                <!--android:title="@string/action_about" />-->
 
-            <item android:id="@+id/action_settings"
-                android:icon="@drawable/ic_settings"
-                android:title="@string/action_settings"
-                />
+            <!--<item-->
+                <!--android:id="@+id/action_settings"-->
+                <!--android:icon="@drawable/ic_settings"-->
+                <!--android:title="@string/action_settings" />-->
 
         </menu>
     </item>
-
-
 
 
 </menu>

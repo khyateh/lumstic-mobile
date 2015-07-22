@@ -3,7 +3,7 @@
 
     <bool name="isDebugEnabled">false</bool>
 
-    <string name="server_url">http://sxxws</string>
+    <string name="server_url">https://survey-web-stgng.herokuapp.com</string>
     <string name="app_name">LumStic</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -24,7 +24,7 @@
     <string name="welcome_message_two">Please fetch surveys to use the application</string>
     <string name="upload_comleted_responses">Upload Completed Responses</string>
     <string name="title_activity_forgot_password">ForgotPasswordActivity</string>
-    <string name="forgot_password_message">Enter your email address registered with us</string>
+    <string name="forgot_password_message">Enter your registered email id</string>
     <string name="check_mail_message">Please check email address</string>
     <string name="request_password">REQUEST PASSWORD</string>
     <string name="title_activity_survey_details">SurveyDetailsActivity</string>

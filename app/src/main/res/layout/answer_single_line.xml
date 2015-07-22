@@ -2,16 +2,15 @@
 
 <EditText xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/answer_text"
-    android:layout_centerHorizontal="true"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:hint="type your answer here"
+    android:layout_centerHorizontal="true"
     android:layout_marginBottom="30dp"
+    android:background="@drawable/edittext_modified_state"
 
+    android:hint="type your answer here"
     android:padding="14dp"
     android:singleLine="true"
-    android:maxLength="20"
+    android:textColor="@color/black"
     android:textColorHint="#bcbcbc"
-    android:background="@drawable/edittext_modified_state"
-    android:textSize="18sp"
-    android:textColor="@color/black" />
+    android:textSize="18sp" />
