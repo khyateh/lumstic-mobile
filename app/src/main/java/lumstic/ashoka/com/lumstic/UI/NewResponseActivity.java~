@@ -68,7 +68,6 @@ public class NewResponseActivity extends Activity {
     private List<Questions> nestedQuestions;
     private List<Questions> nestedQuestionList;
     private boolean proceed = true;
-
     private boolean hint = true;
     private boolean checked = false;
     private Long tsLong = null;
@@ -151,7 +150,7 @@ public class NewResponseActivity extends Activity {
             }
         });
 
-        //on next pressed on item
+        //on next pressed
         nextQuestion.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 onNextClick();

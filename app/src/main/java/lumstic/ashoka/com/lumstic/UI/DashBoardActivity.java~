@@ -143,9 +143,8 @@ public class DashBoardActivity extends Activity {
                     timestamp = tsLong.toString();
                     if (completeCount > 0) {
                         progressDialog = new ProgressDialog(DashBoardActivity.this);
-
-                        progressDialog.setIndeterminate(true);
                         progressDialog.setCancelable(false);
+                        progressDialog.setIndeterminate(true);
                         progressDialog.setMessage("Sync in Progress");
                         progressDialog.show();
                         uploadContainer.setVisibility(View.GONE);
