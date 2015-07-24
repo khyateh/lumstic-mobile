@@ -394,6 +394,10 @@ public class ActiveSurveyActivity extends Activity {
                     finish();
                 }
             });
+
+
+            if(surveysList==null)
+                uploadContainer.setVisibility(View.GONE);
         }
     }
 

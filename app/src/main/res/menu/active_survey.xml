@@ -15,10 +15,7 @@
                 <!--android:title="@string/action_help">-->
 
             <!--</item>-->
-            <item
-                android:id="@+id/action_fetch"
-                android:icon="@drawable/ic_menu_fetch"
-                android:title="@string/action_fetch" />
+
             <item
                 android:id="@+id/action_logout"
                 android:icon="@drawable/ic_menu_logout"
