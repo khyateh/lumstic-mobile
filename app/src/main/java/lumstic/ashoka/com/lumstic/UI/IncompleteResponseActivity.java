@@ -86,7 +86,7 @@ public class IncompleteResponseActivity extends Activity {
         }
 
         for (int i = 0; i < incompleteResponseCount; i++) {
-            identifierQuestionAnswers.add(dbAdapter.getAnswer(incompleteResponsesId.get(i), identifierQuestionId));
+            identifierQuestionAnswers.add(dbAdapter.getAnswer(incompleteResponsesId.get(i), identifierQuestionId,0));
             try {
                 incompleteResponseses.add(i, new IncompleteResponses(String.valueOf(incompleteResponsesId.get(i)), identifierQuestion.getContent() + " :" + "  " + identifierQuestionAnswers.get(i)));
             } catch (Exception e) {

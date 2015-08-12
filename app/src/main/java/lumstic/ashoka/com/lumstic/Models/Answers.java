@@ -10,6 +10,37 @@ public class Answers {
     int responseId;
     int question_id;
     String image;
+
+    public Answers() {
+    }
+
+    public Answers(int recordId, int responseId, int question_id, String content, long updated_at) {
+        this.recordId = recordId;
+        this.responseId = responseId;
+        this.question_id = question_id;
+        this.content = content;
+        this.updated_at = updated_at;
+    }
+
+    public Answers(int recordId, int responseId, int question_id, String content, long updated_at, String type) {
+        this.recordId = recordId;
+        this.responseId = responseId;
+        this.question_id = question_id;
+        this.content = content;
+        this.updated_at = updated_at;
+        this.type = type;
+    }
+
+    public Answers(int recordId, int responseId, int question_id, String content, long updated_at, String type, String image) {
+        this.recordId = recordId;
+        this.responseId = responseId;
+        this.question_id = question_id;
+        this.content = content;
+        this.updated_at = updated_at;
+        this.type = type;
+        this.image = image;
+    }
+
     String content;
     String type;
     ArrayList<Integer> optionIds;

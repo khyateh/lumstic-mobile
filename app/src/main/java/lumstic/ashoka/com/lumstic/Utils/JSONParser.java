@@ -201,7 +201,7 @@ public class JSONParser {
             }
 
             try {
-                questions.setMaxVlue(jsonObjectQuestions.getInt("max_value"));
+                questions.setMaxValue(jsonObjectQuestions.getInt("max_value"));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -387,6 +387,16 @@ public class JSONParser {
         return false;
     }
 
+    public int  parseRecordIdResult(String syncResponse) {
+        int parseId=0;
+        try {
+            JSONObject jsonObject = new JSONObject(syncResponse);
+            parseId=jsonObject.getInt("id");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return parseId;
+    }
     public int getResponseId(String syncResponse) {
         JSONObject jsonObject = null;
         int id = 0;

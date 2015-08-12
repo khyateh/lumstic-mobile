@@ -91,7 +91,7 @@ public class CompleteResponsesActivity extends Activity {
         }
         try {
             for (int i = 0; i < completeResponseCount; i++) {
-                identifierQuestionAnswers.add(dbAdapter.getAnswer(completeResponsesId.get(i), identifierQuestionId));
+                identifierQuestionAnswers.add(dbAdapter.getAnswer(completeResponsesId.get(i), identifierQuestionId,0));
                 completeResponseses.add(i, new CompleteResponses(String.valueOf(completeResponsesId.get(i)), identifierQuestion.getContent() + " :" + "  " + identifierQuestionAnswers.get(i)));
             }
         } catch (Exception e) {

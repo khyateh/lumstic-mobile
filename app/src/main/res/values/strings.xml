@@ -36,5 +36,6 @@
     <string name="title_activity_help">HelpActivity</string>
     <string name="title_activity_test">TestActivity</string>
     <string name="title_activity_sample">Sample</string>
+    <string name="multirecord_tag">tag</string>
 
 </resources>

@@ -11,7 +11,7 @@ public class Questions implements Serializable {
     int identifier;
     int parentId;
     int minValue;
-    int maxVlue;
+    int maxValue;
     int surveyId;
     int maxLength;
     int mandatory;
@@ -52,12 +52,12 @@ public class Questions implements Serializable {
         this.minValue = minValue;
     }
 
-    public int getMaxVlue() {
-        return maxVlue;
+    public int getMaxValue() {
+        return maxValue;
     }
 
-    public void setMaxVlue(int maxVlue) {
-        this.maxVlue = maxVlue;
+    public void setMaxValue(int maxValue) {
+        this.maxValue = maxValue;
     }
 
     public int getId() {
