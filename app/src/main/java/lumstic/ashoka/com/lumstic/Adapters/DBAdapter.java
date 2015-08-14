@@ -225,7 +225,7 @@ public class DBAdapter {
     }
 
 
-    public int UpldateCompleteResponse(int responseId, int surveyId) {
+    public int UpdateCompleteResponse(int responseId, int surveyId) {
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBhelper.STATUS, "complete");

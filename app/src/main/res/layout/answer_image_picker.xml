@@ -4,9 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <RelativeLayout
+    <FrameLayout
         android:id="@+id/image_container"
-        android:layout_width="260dp"
+        android:layout_width="match_parent"
         android:layout_height="300dp"
         android:layout_centerHorizontal="true"
         android:layout_margin="20dp"
@@ -14,7 +14,7 @@
 
         <ImageView
             android:id="@+id/image"
-            android:layout_width="2060dp"
+            android:layout_width="match_parent"
             android:layout_height="300dp"
             android:layout_centerHorizontal="true"
             android:background="@android:color/transparent" />
@@ -23,10 +23,7 @@
             android:id="@+id/delete_picture"
             android:layout_width="42dp"
             android:layout_height="42dp"
-            android:layout_alignRight="@+id/image"
-            android:layout_alignTop="@+id/image"
-            android:layout_marginRight="20dp"
-            android:layout_marginTop="5dp"
+            android:layout_gravity="right"
             android:alpha=".7"
             android:background="@color/black">
 
@@ -37,7 +34,7 @@
                 android:src="@drawable/ic_delete_img" />
         </RelativeLayout>
 
-    </RelativeLayout>
+    </FrameLayout>
 
     <LinearLayout
         android:id="@+id/takePictureContainer"

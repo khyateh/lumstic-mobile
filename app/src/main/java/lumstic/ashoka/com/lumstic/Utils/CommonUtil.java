@@ -79,4 +79,24 @@ public class CommonUtil {
 
         return progressDialog;
     }
+
+    //Question Type isCategory OR NOT
+    public static final int TYPE_QUESTION = 0;
+    public static final int TYPE_CATEGORY = 1;
+
+    //Question Type
+    public static final String QUESTION_TYPE_SINGLE_LINE_QUESTION = "SingleLineQuestion";
+    public static final String QUESTION_TYPE_NUMERIC_QUESTION = "NumericQuestion";
+    public static final String QUESTION_TYPE_DATE_QUESTION = "DateQuestion";
+    public static final String QUESTION_TYPE_RATING_QUESTION = "RatingQuestion";
+    public static final String QUESTION_TYPE_PHOTO_QUESTION = "PhotoQuestion";
+    public static final String QUESTION_TYPE_MULTI_CHOICE_QUESTION = "MultiChoiceQuestion";
+    public static final String QUESTION_TYPE_RADIO_QUESTION = "RadioQuestion";
+    public static final String QUESTION_TYPE_DROPDOWN_QUESTION = "DropDownQuestion";
+    public static final String QUESTION_TYPE_MULTI_LINE_QUESTION = "MultilineQuestion";
+
+    //category type
+    public static final String CATEGORY_TYPE_MULTI_RECORD = "MultiRecordCategory";
+
+
 }

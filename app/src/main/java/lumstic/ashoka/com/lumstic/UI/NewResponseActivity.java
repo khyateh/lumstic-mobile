@@ -26,6 +26,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -52,42 +53,34 @@ import lumstic.ashoka.com.lumstic.Models.Categories;
 import lumstic.ashoka.com.lumstic.Models.Choices;
 import lumstic.ashoka.com.lumstic.Models.DropDown;
 import lumstic.ashoka.com.lumstic.Models.MasterQuestion;
+import lumstic.ashoka.com.lumstic.Models.MasterSurveyQuestionModel;
 import lumstic.ashoka.com.lumstic.Models.Options;
 import lumstic.ashoka.com.lumstic.Models.Questions;
 import lumstic.ashoka.com.lumstic.Models.Surveys;
 import lumstic.ashoka.com.lumstic.Models.TagModel;
 import lumstic.ashoka.com.lumstic.R;
+import lumstic.ashoka.com.lumstic.Utils.CommonUtil;
 import lumstic.ashoka.com.lumstic.Utils.IntentConstants;
 import lumstic.ashoka.com.lumstic.Utils.LumsticApp;
 
 public class NewResponseActivity extends Activity {
     DBAdapter dbAdapter;
     ActionBar actionBar;
-    int countofcheck = 0;
-    private ArrayList<Integer> types = null;
-    private ArrayList<String> stringTypes = null;
     private List<Questions> questionsList;
     private List<Categories> categoriesList;
     private List<MasterQuestion> masterQuestionList = new ArrayList<>();
-    private Long tsLong = null;
     private String fname = "";
-    private int questionCount = 0;
-    private int categoryCount = 0;
     private int currentResponseId = 0;
-    private int categoryAndQuestionCount = 0;
     private int totalQuestionCount = 0;
     private int CAMERA_REQUEST = 1;
     private int questionCounter = 0;
     private int categoryQuestionCounter = 0;
     private Surveys surveys;
-    private Answers answers;
-    private Categories currentCategory;
-
     private EditText answer;
     private TextView dateText;
     private Spinner spinner;
     private RadioGroup radioGroup;
-    private RelativeLayout imageContainer;
+    private FrameLayout imageContainer;
     private ImageView imageViewPhotoQuestion;
     private RelativeLayout deleteImageRelativeLayout;
     private Button counterButton, markAsComplete;
@@ -98,14 +91,13 @@ public class NewResponseActivity extends Activity {
     private int recordId = 0;
     private LumsticApp lumsticApp;
     private String order = "";
-    private boolean numberlimitOk = true;
-    private boolean nextPressed = false;
-    private boolean addRecordPressed = false;
     private TagModel tagValue;
     private MasterQuestion tagMasterQuestion;
     private int addRecordCounter = 0;
     private int defaultParentIndex = 0;
     private LinearLayout takePictureContainer;
+    ArrayList<MasterSurveyQuestionModel> surveyQuestionsList = new ArrayList();
+    ArrayList<MasterSurveyQuestionModel> sortedSurveyQuestionsList = new ArrayList();
 
     public static ArrayList<View> getViewsByTag(ViewGroup root, TagModel tag) {
         ArrayList<View> views = new ArrayList<>();
@@ -138,9 +130,6 @@ public class NewResponseActivity extends Activity {
         dbAdapter = new DBAdapter(NewResponseActivity.this);
         lumsticApp = (LumsticApp) getApplication();
         //declaration of list items
-        stringTypes = new ArrayList<>();
-        types = new ArrayList<>();
-
         questionsList = new ArrayList<>();
         categoriesList = new ArrayList<>();
         //create mark as complete button and mandatory text
@@ -149,16 +138,30 @@ public class NewResponseActivity extends Activity {
         previousQuestion.setText("BACK");
         //surveys from previous activity
         surveys = (Surveys) getIntent().getExtras().getSerializable(IntentConstants.SURVEY);
+
         //remove category questions from questions array
         removeQuestionBelongingTOCategory(surveys);
+
         //remove categories which are not at root level
-        removeNonRootLevelCategories(surveys);
+//        removeNonRootLevelCategories(surveys);
+
+
         //get app response id
         getResponseId();
         //getTotalCountOfQuestionAndCategory
         getCategoryAndQuestionsCount(surveys);
-        //sort order of questions and category,type has order number stored and string types has question or category
-        sortOrder();
+        ///////////////////////////////
+        for (int i = 0; i < questionsList.size(); i++) {
+            surveyQuestionsList.add(new MasterSurveyQuestionModel(questionsList.get(i), CommonUtil.TYPE_QUESTION));
+        }
+        for (int i = 0; i < categoriesList.size(); i++) {
+            surveyQuestionsList.add(new MasterSurveyQuestionModel(categoriesList.get(i), CommonUtil.TYPE_CATEGORY));
+        }
+        //////////////////////////////////
+
+        getSortedQuestionList(surveyQuestionsList);
+
+        ////////////////////////////////////
         //build first question
         buildFirstQuestion();
         //check if first question is the last question
@@ -174,7 +177,9 @@ public class NewResponseActivity extends Activity {
         //on next pressed
         nextQuestion.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                onNextClick();
+                if ((questionCounter + 1) != totalQuestionCount) {
+                    onNextClick();
+                }
             }
         });
 
@@ -182,9 +187,42 @@ public class NewResponseActivity extends Activity {
         previousQuestion.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onBackClicked();
+                if (questionCounter != 0) {
+                    onBackClicked();
+                }
             }
         });
+    }
+
+    ArrayList<MasterSurveyQuestionModel> getSortedQuestionList(ArrayList<MasterSurveyQuestionModel> localMasterSurveyQuestionModelsList) {
+
+        sortedSurveyQuestionsList = localMasterSurveyQuestionModelsList;
+        for (int out = localMasterSurveyQuestionModelsList.size() - 1; out >= 0; out--) {
+            for (int i = 0; i < out; i++) {
+                int n = i + 1;
+                int x, y;
+                if (sortedSurveyQuestionsList.get(i).getType() == CommonUtil.TYPE_QUESTION) {
+                    x = ((Questions) sortedSurveyQuestionsList.get(i).getObject()).getOrderNumber();
+                } else {
+                    x = ((Categories) sortedSurveyQuestionsList.get(i).getObject()).getOrderNumber();
+                }
+
+                if (sortedSurveyQuestionsList.get(n).getType() == CommonUtil.TYPE_QUESTION) {
+                    y = ((Questions) sortedSurveyQuestionsList.get(n).getObject()).getOrderNumber();
+                } else {
+                    y = ((Categories) sortedSurveyQuestionsList.get(n).getObject()).getOrderNumber();
+                }
+
+
+                if (x > y) {
+                    MasterSurveyQuestionModel temp = sortedSurveyQuestionsList.get(i);
+                    sortedSurveyQuestionsList.set(i, sortedSurveyQuestionsList.get(n));
+                    sortedSurveyQuestionsList.set(n, temp);
+                }
+            }
+        }
+
+        return sortedSurveyQuestionsList;
     }
 
     public void setActionbar() {
@@ -249,7 +287,7 @@ public class NewResponseActivity extends Activity {
     }
 
     public void getCategoryAndQuestionsCount(Surveys surveys) {
-
+        int questionCount = 0, categoryCount = 0;
         if (surveys.getQuestions().size() > 0) {
             questionsList = surveys.getQuestions();
             questionCount = questionsList.size();
@@ -265,27 +303,6 @@ public class NewResponseActivity extends Activity {
         totalQuestionCount = categoryCount + questionCount;
     }
 
-    public void sortOrder() {
-        int i = 0;
-        for (int count = 0; count < 100; count++) {
-            for (i = 0; i < questionsList.size(); i++) {
-                if (questionsList.get(i).getOrderNumber() == count) {
-                    types.add(count);
-                    stringTypes.add("question");
-                }
-
-
-            }
-            for (i = 0; i < categoriesList.size(); i++) {
-                if (categoriesList.get(i).getOrderNumber() == count) {
-                    types.add(count);
-                    stringTypes.add("category");
-                }
-
-
-            }
-        }
-    }
 
     public void onMarkComplete() {
 
@@ -296,7 +313,14 @@ public class NewResponseActivity extends Activity {
         recordId = 0;
 
 
-        dbAdapter.UpldateCompleteResponse(currentResponseId, questionsList.get(0).getSurveyId());
+        if (sortedSurveyQuestionsList.get(questionCounter).getType() == CommonUtil.TYPE_QUESTION) {
+            int surveyID = ((Questions) sortedSurveyQuestionsList.get(questionCounter).getObject()).getSurveyId();
+            dbAdapter.UpdateCompleteResponse(currentResponseId, surveyID);
+        } else {
+            int surveyID = ((Categories) sortedSurveyQuestionsList.get(questionCounter).getObject()).getSurveyId();
+            dbAdapter.UpdateCompleteResponse(currentResponseId, surveyID);
+        }
+
         Intent intent = new Intent(NewResponseActivity.this, SurveyDetailsActivity.class);
         intent.putExtra(IntentConstants.SURVEY, (java.io.Serializable) surveys);
         startActivity(intent);
@@ -305,30 +329,24 @@ public class NewResponseActivity extends Activity {
     }
 
     public void buildFirstQuestion() {
-        //build from questions
-        for (int j = 0; j < questionsList.size(); j++) {
-            if (questionsList.get(j).getOrderNumber() == types.get(0)) {
-                Questions cq = questionsList.get(j);
-                counterButton.setText("1 out of " + totalQuestionCount);
-                buildLayout(cq, false, recordId, defaultParentIndex);
-                checkForAnswer(cq, currentResponseId, recordId);
-                break;
-            }
-        }
 
+        counterButton.setText("1 out of " + totalQuestionCount);
+        if (sortedSurveyQuestionsList.get(questionCounter).getType() == CommonUtil.TYPE_QUESTION) {
 
-        //build first question as category from category array
-        for (int j = 0; j < categoriesList.size(); j++) {
-            if (categoriesList.get(j).getOrderNumber() == types.get(0)) {
-                counterButton.setText("1 out of " + totalQuestionCount);
-                Categories currentCategory = categoriesList.get(j);
+            Questions cq = ((Questions) sortedSurveyQuestionsList.get(questionCounter).getObject());
+            buildLayout(cq, false, recordId, defaultParentIndex);
+        } else {
+            Categories currentCategory = ((Categories) sortedSurveyQuestionsList.get(questionCounter).getObject());
+            //for multi record questions
+            if (currentCategory.getType().equals(CommonUtil.CATEGORY_TYPE_MULTI_RECORD)) {
+
+                NextBackCommonCode(currentCategory);
+
+            } else {
                 buildCategoryLayout(currentCategory);
-                for (int k = 0; k < currentCategory.getQuestionsList().size(); k++) {
-                    checkForAnswer(currentCategory.getQuestionsList().get(k), currentResponseId, recordId);
-                }
-                break;
             }
         }
+
 
     }
 
@@ -356,42 +374,35 @@ public class NewResponseActivity extends Activity {
 
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
+//        if (id == R.id.action_settings) {
+//            return true;
+//        }
         if (id == R.id.save) {
-
             finish();
-
             return true;
-
-        }
-        if (id == android.R.id.home) {
-
+        } else if (id == android.R.id.home) {
             finish();
-
-            return true;
-
-        }
-        if (id == R.id.action_logout) {
-
-            final Dialog dialog = new Dialog(NewResponseActivity.this);
-            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); //before
-            dialog.setContentView(R.layout.logout_dialog);
-            dialog.show();
-            Button button = (Button) dialog.findViewById(R.id.okay);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    lumsticApp.getPreferences().setAccessToken("");
-                    Intent i = new Intent(NewResponseActivity.this, LoginActivity.class);
-                    startActivity(i);
-                    dialog.dismiss();
-                }
-            });
-
             return true;
         }
+//        if (id == R.id.action_logout) {
+//
+//            final Dialog dialog = new Dialog(NewResponseActivity.this);
+//            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); //before
+//            dialog.setContentView(R.layout.logout_dialog);
+//            dialog.show();
+//            Button button = (Button) dialog.findViewById(R.id.okay);
+//            button.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//                    lumsticApp.getPreferences().setAccessToken("");
+//                    Intent i = new Intent(NewResponseActivity.this, LoginActivity.class);
+//                    startActivity(i);
+//                    dialog.dismiss();
+//                }
+//            });
+//
+//            return true;
+//        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -400,9 +411,10 @@ public class NewResponseActivity extends Activity {
         nestedContainer.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        layoutParams.setMargins(10, 10, 10, 30);
+        layoutParams.setMargins(0, 10, 0, 0);
+        nestedContainer.setPadding(10, 20, 10, 20);
         nestedContainer.setLayoutParams(layoutParams);
-
+        nestedContainer.setBackgroundColor(Color.WHITE);
 
         return nestedContainer;
     }
@@ -461,11 +473,16 @@ public class NewResponseActivity extends Activity {
 
 
         //if question is single line question
-        if (ques.getType().equals("SingleLineQuestion")) {
+        if (ques.getType().equals(CommonUtil.QUESTION_TYPE_SINGLE_LINE_QUESTION)) {
             LinearLayout nestedContainer = createNestedContainer();
             TextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
-            nestedContainer.setId(ques.getId());
+            if (isChild) {
+                nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + parentRecordId);
+            } else {
+                nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + recordId);
+            }
+//            nestedContainer.setId(ques.getId());
             nestedContainer.addView(inflater.inflate(R.layout.answer_single_line, null));
             tagValue = new TagModel(ques.getId(), recordId, ques);
 
@@ -497,7 +514,7 @@ public class NewResponseActivity extends Activity {
                 public void onFocusChange(View view, boolean hasFocus) {
                     if (!hasFocus) {
                         answer = (EditText) view;
-                        tsLong = System.currentTimeMillis() / 1000;
+                        Long tsLong = System.currentTimeMillis() / 1000;
                         TagModel localTagModel = (TagModel) ((View) view.getParent()).getTag(R.string.multirecord_tag);
                         Answers localAnswer = new Answers(localTagModel.getRecordID(), currentResponseId, localTagModel.getqID(), answer.getText().toString(), tsLong);
                         saveAnswerIntoDB(localTagModel, localAnswer);
@@ -515,13 +532,17 @@ public class NewResponseActivity extends Activity {
                 e.printStackTrace();
                 checkHint();
             }
-        } else if (ques.getType().contains("MultilineQuestion")) {
+        } else if (ques.getType().contains(CommonUtil.QUESTION_TYPE_MULTI_LINE_QUESTION)) {
             LinearLayout nestedContainer = createNestedContainer();
             TextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
-            nestedContainer.setId(ques.getId());
+//            nestedContainer.setId(ques.getId());
+            if (isChild) {
+                nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + parentRecordId);
+            } else {
+                nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + recordId);
+            }
             nestedContainer.addView(inflater.inflate(R.layout.answer_multi_line, null));
-            nestedContainer.setId(ques.getId());
             tagValue = new TagModel(ques.getId(), recordId, ques);
             if (isChild) {
                 nestedContainer.setTag(R.string.multirecord_tag, new TagModel(ques.getId(), parentRecordId, ques));
@@ -548,7 +569,7 @@ public class NewResponseActivity extends Activity {
                     if (hasFocus) {
                         answer = (EditText) view;
                     } else {
-                        tsLong = System.currentTimeMillis() / 1000;
+                        Long tsLong = System.currentTimeMillis() / 1000;
                         TagModel localTagModel = (TagModel) ((View) view.getParent()).getTag(R.string.multirecord_tag);
                         Answers localAnswer = new Answers(localTagModel.getRecordID(), currentResponseId, localTagModel.getqID(), answer.getText().toString(), tsLong);
                         saveAnswerIntoDB(localTagModel, localAnswer);
@@ -568,35 +589,35 @@ public class NewResponseActivity extends Activity {
             }
             checkHint();
 
-        } else if (ques.getType().contains("DropDownQuestion")) {
+        } else if (ques.getType().contains(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION)) {
 
 
             final LinearLayout nestedContainer = createNestedContainer();
             TextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
+            if (isChild) {
+                nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + parentRecordId);
+            } else {
+                nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + recordId);
+            }
             tagValue = new TagModel(ques.getId(), recordId, ques);
             spinner = new Spinner(NewResponseActivity.this);
             spinner = (Spinner) getLayoutInflater().inflate(R.layout.answer_dropdown, null);
-
+            nestedContainer.addView(spinner);
             spinner.setTag(order);
             if (isChild) {
                 nestedContainer.setTag(R.string.multirecord_tag, new TagModel(ques.getId(), parentRecordId, ques));
-                fieldContainer.addView(nestedContainer, parentViewPosition);
-                nestedContainer.addView(spinner, parentViewPosition);
                 spinner.setId(ques.getId() + IntentConstants.VIEW_CONSTANT + parentRecordId);
+                fieldContainer.addView(nestedContainer, parentViewPosition);
                 masterQuestionList.add(new MasterQuestion(ques, parentRecordId, ques.getId() + IntentConstants.VIEW_CONSTANT + parentRecordId));
-//                if (!dbAdapter.doesAnswerExist(ques.getId(), currentResponseId, parentRecordId)) {
                 addAnswerNextClick(ques, parentRecordId);
-//                }
             } else {
                 nestedContainer.setTag(R.string.multirecord_tag, new TagModel(ques.getId(), recordId, ques));
-                fieldContainer.addView(nestedContainer);
                 spinner.setId(ques.getId() + IntentConstants.VIEW_CONSTANT + recordId);
+                fieldContainer.addView(nestedContainer);
                 masterQuestionList.add(new MasterQuestion(ques, recordId, ques.getId() + IntentConstants.VIEW_CONSTANT + recordId));
-//                if (!dbAdapter.doesAnswerExist(ques.getId(), currentResponseId, recordId)) {
                 addAnswerNextClick(ques, recordId);
-//                }
-                nestedContainer.addView(spinner);
+
             }
 
 
@@ -624,6 +645,9 @@ public class NewResponseActivity extends Activity {
                     if (i == 0) {
                         // addOptionToDataBase(null, ques, ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID());
                         removeOthersFromDataBaseForDefaultDropDown(ques, ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID());
+                        removeCategoryViewForDefaultDropDown(ques, ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID());
+                        removeQuestionViewForDefaultDropDown(ques, ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID());
+
                     }
 //                    } catch (Exception e) {
 //                        e.printStackTrace();
@@ -634,9 +658,6 @@ public class NewResponseActivity extends Activity {
                         Options options = ques.getOptions().get(i - 1);
                         addOptionToDataBase(options, ques, ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID());
                         removeOthersFromDataBase(options, ques, ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID());
-
-//                        //For Deleting Default Selection From DB
-//                        dbAdapter.deleteFromChoicesTableWhereOptionId(0, ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID());
 
 
                         String temp = order;
@@ -654,13 +675,21 @@ public class NewResponseActivity extends Activity {
                                 buildCategoryLayout(options.getCategories().get(j));
                             }
                         }
-
+//                        /////////////
+//                        Log.e("TAG", "SWAPNIL->>" + getViewsByTag(fieldContainer, ((TagModel) nestedContainer.getTag(R.string.multirecord_tag))).size());
+//                        ///////////
+//                        ArrayList<View> localViews = getViewsByTag(fieldContainer, ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)));
+//
+//                        for (int z = 2; z < localViews.size(); z++) {
+//                            Log.e("TAG", "SWAPNIL->> Loop" + localViews.get(i).getId());
+//                            fieldContainer.removeView(localViews.get(i));
+//                        }
 
                         //remove views from non selected nested categories and questions
                         for (int j = 0; j < ques.getOptions().size(); j++) {
                             if (!ques.getOptions().get(j).getContent().equals(options.getContent())) {
-                                removeQuestionView(ques.getOptions().get(j));
-                                removeCategoryView(ques.getOptions().get(j));
+                                removeQuestionViewForRadio(ques.getOptions().get(j), ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID());
+                                removeCategoryViewForRadio(ques.getOptions().get(j), ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID());
                             }
                         }
                     }
@@ -681,31 +710,35 @@ public class NewResponseActivity extends Activity {
             } catch (Exception e) {
 
             }
-        } else if (ques.getType().contains("MultiChoiceQuestion")) {
+        } else if (ques.getType().contains(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION)) {
 
 
             final LinearLayout nestedContainer = createNestedContainer();
             TextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
-            nestedContainer.setId(ques.getId());
-
+//            nestedContainer.setId(ques.getId());
+            if (isChild) {
+                nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + parentRecordId);
+            } else {
+                nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + recordId);
+            }
 
             if (isChild) {
                 nestedContainer.setTag(R.string.multirecord_tag, new TagModel(ques.getId(), parentRecordId, ques));
                 fieldContainer.addView(nestedContainer, parentViewPosition);
                 masterQuestionList.add(new MasterQuestion(ques, parentRecordId));
-                if (!dbAdapter.doesAnswerExist(ques.getId(), currentResponseId, parentRecordId)) {
-                    addAnswerNextClick(ques, parentRecordId);
+//                if (!dbAdapter.doesAnswerExist(ques.getId(), currentResponseId, parentRecordId)) {
+                addAnswerNextClick(ques, parentRecordId);
 
-                }
+//                }
             } else {
                 nestedContainer.setTag(R.string.multirecord_tag, new TagModel(ques.getId(), recordId, ques));
                 fieldContainer.addView(nestedContainer);
                 masterQuestionList.add(new MasterQuestion(ques, recordId));
-                if (!dbAdapter.doesAnswerExist(ques.getId(), currentResponseId, recordId)) {
-                    addAnswerNextClick(ques, recordId);
+//                if (!dbAdapter.doesAnswerExist(ques.getId(), currentResponseId, recordId)) {
+                addAnswerNextClick(ques, recordId);
 
-                }
+//                }
             }
             final LinearLayout ll = new LinearLayout(this);
             ll.setTag(order);
@@ -799,10 +832,10 @@ public class NewResponseActivity extends Activity {
                             Options options = (Options) checkBox1.getTag();
                             removeOptionFromDataBase(options, ques, ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID());
                             if (options.getQuestions().size() > 0) {
-                                removeQuestionView(options);
+                                removeQuestionViewForRadio(options, ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID());
                             }
                             if (options.getCategories().size() > 0) {
-                                removeCategoryView(options);
+                                removeCategoryViewForRadio(options, ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID());
                             }
                         }
                     }
@@ -820,12 +853,17 @@ public class NewResponseActivity extends Activity {
             }
 
             checkHint();
-        } else if (ques.getType().contains("NumericQuestion")) {
+        } else if (ques.getType().contains(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION)) {
             LinearLayout nestedContainer = createNestedContainer();
             TextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
             nestedContainer.addView(inflater.inflate(R.layout.answer_numeric, null));
-            nestedContainer.setId(ques.getId());
+//            nestedContainer.setId(ques.getId());
+            if (isChild) {
+                nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + parentRecordId);
+            } else {
+                nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + recordId);
+            }
             if (isChild) {
                 nestedContainer.setTag(R.string.multirecord_tag, new TagModel(ques.getId(), parentRecordId, ques));
                 fieldContainer.addView(nestedContainer, parentViewPosition);
@@ -852,7 +890,7 @@ public class NewResponseActivity extends Activity {
                     if (hasFocus) {
                         answer = (EditText) view;
                     } else {
-                        tsLong = System.currentTimeMillis() / 1000;
+                        Long tsLong = System.currentTimeMillis() / 1000;
                         TagModel localTagModel = (TagModel) ((View) view.getParent()).getTag(R.string.multirecord_tag);
                         Answers localAnswer = new Answers(localTagModel.getRecordID(), currentResponseId, localTagModel.getqID(), answer.getText().toString(), tsLong);
                         saveAnswerIntoDB(localTagModel, localAnswer);
@@ -870,12 +908,17 @@ public class NewResponseActivity extends Activity {
                 checkHint();
             }
             checkHint();
-        } else if (ques.getType().contains("DateQuestion")) {
+        } else if (ques.getType().contains(CommonUtil.QUESTION_TYPE_DATE_QUESTION)) {
             final LinearLayout nestedContainer = createNestedContainer();
             TextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
             nestedContainer.addView(inflater.inflate(R.layout.answer_date_picker, null));
-            nestedContainer.setId(ques.getId());
+//            nestedContainer.setId(ques.getId());
+            if (isChild) {
+                nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + parentRecordId);
+            } else {
+                nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + recordId);
+            }
             nestedContainer.setTag(ques);
 
             if (isChild) {
@@ -917,13 +960,18 @@ public class NewResponseActivity extends Activity {
                 e.printStackTrace();
                 checkHint();
             }
-        } else if (ques.getType().contains("RadioQuestion")) {
+        } else if (ques.getType().contains(CommonUtil.QUESTION_TYPE_RADIO_QUESTION)) {
 
 
             final LinearLayout nestedContainer = createNestedContainer();
             TextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
-            nestedContainer.setId(ques.getId());
+//            nestedContainer.setId(ques.getId());
+            if (isChild) {
+                nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + parentRecordId);
+            } else {
+                nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + recordId);
+            }
             nestedContainer.setTag(ques);
 
             tagValue = new TagModel(ques.getId(), recordId, ques);
@@ -943,6 +991,11 @@ public class NewResponseActivity extends Activity {
             }
             //create new radio group
             radioGroup = new RadioGroup(this);
+            if (isChild) {
+                radioGroup.setId(ques.getId() + IntentConstants.VIEW_CONSTANT + parentRecordId);
+            } else {
+                radioGroup.setId(ques.getId() + IntentConstants.VIEW_CONSTANT + recordId);
+            }
             radioGroup.setOrientation(RadioGroup.VERTICAL);
             nestedContainer.addView(radioGroup);
             radioGroup.setTag(order);
@@ -978,6 +1031,14 @@ public class NewResponseActivity extends Activity {
                 radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(RadioGroup group, int checkedId) {
+                        Log.e("TAG", "SWAPNIL->> RADIO" + group.getId() + "/" + radioGroup.getId());
+                        Log.e("TAG", "SWAPNIL->> RADIO TAG QID" + ((TagModel) group.getTag(R.string.multirecord_tag)).getqID() + "/" + ((TagModel) radioGroup.getTag(R.string.multirecord_tag)).getqID());
+                        Log.e("TAG", "SWAPNIL->> RADIO TAG RecordID" + ((TagModel) group.getTag(R.string.multirecord_tag)).getRecordID() + "/" + ((TagModel) radioGroup.getTag(R.string.multirecord_tag)).getRecordID());
+                        Log.e("TAG", "SWAPNIL->> RADIO TAG CU RecordID" + ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID());
+
+
+//                  if( ((TagModel) radioGroup.getTag(R.string.multirecord_tag)).getRecordID()==((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID()) {
+//                      Log.e("TAG", "SWAPNIL->> RADIO IF");
 
                         try {
                             answer.clearFocus();
@@ -1021,7 +1082,6 @@ public class NewResponseActivity extends Activity {
                             for (int i = 0; i < options.getQuestions().size(); i++) {
                                 order = tmp + Integer.toString(i + 1);
                                 buildLayout(options.getQuestions().get(i), true, ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID(), fieldContainer.indexOfChild(nestedContainer) + 1);
-                                //  checkForAnswer(options.getQuestions().get(i), currentResponseId, ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID());
                             }
                         }
 
@@ -1035,10 +1095,17 @@ public class NewResponseActivity extends Activity {
                         //remove unnecessary questions and categories on other item selected
                         for (int i = 0; i < ques.getOptions().size(); i++) {
                             if (!ques.getOptions().get(i).getContent().equals(options.getContent())) {
-                                removeQuestionView(ques.getOptions().get(i));
-                                removeCategoryView(ques.getOptions().get(i));
+                                removeQuestionViewForRadio(ques.getOptions().get(i), ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID());
+                                removeCategoryViewForRadio(ques.getOptions().get(i), ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID());
                             }
                         }
+
+
+//                  }else{
+//                      Log.e("TAG", "SWAPNIL->> RADIO ELSE");
+//                  }
+
+
                     }
                 });
             }
@@ -1054,15 +1121,19 @@ public class NewResponseActivity extends Activity {
             checkHint();
 
 
-        } else if (ques.getType().equals("RatingQuestion")) {
+        } else if (ques.getType().equals(CommonUtil.QUESTION_TYPE_RATING_QUESTION)) {
 
             final LinearLayout nestedContainer = createNestedContainer();
             TextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
 
             nestedContainer.addView(questionTextSingleLine);
             nestedContainer.addView(inflater.inflate(R.layout.answer_rating, null));
-            nestedContainer.setId(ques.getId());
-
+//            nestedContainer.setId(ques.getId());
+            if (isChild) {
+                nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + parentRecordId);
+            } else {
+                nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + recordId);
+            }
             if (isChild) {
                 nestedContainer.setTag(R.string.multirecord_tag, new TagModel(ques.getId(), parentRecordId, ques));
                 fieldContainer.addView(nestedContainer, parentViewPosition);
@@ -1091,7 +1162,7 @@ public class NewResponseActivity extends Activity {
                 public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
 
 
-                    tsLong = System.currentTimeMillis() / 1000;
+                    Long tsLong = System.currentTimeMillis() / 1000;
                     TagModel localTagModel = (TagModel) (nestedContainer).getTag(R.string.multirecord_tag);
 
                     if (dbAdapter.doesAnswerExist(ques.getId(), currentResponseId)) {
@@ -1113,12 +1184,17 @@ public class NewResponseActivity extends Activity {
 
             }
             checkHint();
-        } else if (ques.getType().equals("PhotoQuestion")) {
+        } else if (ques.getType().equals(CommonUtil.QUESTION_TYPE_PHOTO_QUESTION)) {
 
             final LinearLayout nestedContainer = createNestedContainer();
             TextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
-            //   nestedContainer.setId(ques.getId());
+//            nestedContainer.setId(ques.getId());
+            if (isChild) {
+                nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + parentRecordId);
+            } else {
+                nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + recordId);
+            }
             nestedContainer.addView(inflater.inflate(R.layout.answer_image_picker, null));
 
             tagValue = new TagModel(ques.getId(), recordId, ques);
@@ -1141,7 +1217,7 @@ public class NewResponseActivity extends Activity {
             imageViewPhotoQuestion = (ImageView) findViewById(R.id.image);
 
             //  imageViewPhotoQuestion.setId(ques.getId());
-            imageContainer = (RelativeLayout) findViewById(R.id.image_container);
+            imageContainer = (FrameLayout) findViewById(R.id.image_container);
 
 
 //Don't include this code in above if else
@@ -1196,27 +1272,8 @@ public class NewResponseActivity extends Activity {
             try {
                 if (isChild) {
                     checkForAnswer(ques, currentResponseId, parentRecordId);
-
-//                    PhotoBitmapModel localPhotoBitmapModel = checkForAnswer(ques, currentResponseId, parentRecordId);
-//                    if (localPhotoBitmapModel.getBitmap() != null)
-//                        imageViewPhotoQuestion.setImageBitmap(localPhotoBitmapModel.getBitmap());
-//                    if (localPhotoBitmapModel.getIsExist()) {
-//                        imageContainer.setVisibility(View.VISIBLE);
-//                    } else {
-//                        imageContainer.setVisibility(View.GONE);
-//                }
-
                 } else {
                     checkForAnswer(ques, currentResponseId, recordId);
-//                    PhotoBitmapModel localPhotoBitmapModel = checkForAnswer(ques, currentResponseId, recordId);
-//                    if (localPhotoBitmapModel.getBitmap() != null)
-//                        imageViewPhotoQuestion.setImageBitmap(localPhotoBitmapModel.getBitmap());
-//                    if (localPhotoBitmapModel.getIsExist()) {
-//                        imageContainer.setVisibility(View.VISIBLE);
-//                    } else {
-//                        imageContainer.setVisibility(View.GONE);
-//                    }
-
                 }
             } catch (Exception e) {
 
@@ -1295,7 +1352,7 @@ public class NewResponseActivity extends Activity {
             Log.e("Master", "Master Details QID->>" + masterQuestionList.get(i).getQuestions().getId() + "RecordID->>" + masterQuestionList.get(i).getRecordID());
 
 //Check For validation for these types of Questions
-            if (masterQuestionList.get(i).getQuestions().getType().equals("SingleLineQuestion") || masterQuestionList.get(i).getQuestions().getType().equals("MultilineQuestion")) {
+            if (masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_SINGLE_LINE_QUESTION) || masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_MULTI_LINE_QUESTION)) {
                 int localMaxLength = masterQuestionList.get(i).getQuestions().getMaxLength();
                 if (localMaxLength != 0)
                     if (((EditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString().trim().length() > localMaxLength) {
@@ -1304,7 +1361,7 @@ public class NewResponseActivity extends Activity {
                         return success;
                     }
             }
-            if (masterQuestionList.get(i).getQuestions().getType().equals("NumericQuestion")) {
+            if (masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION)) {
                 int localMaxValue = masterQuestionList.get(i).getQuestions().getMaxValue();
                 int localMinValue = masterQuestionList.get(i).getQuestions().getMinValue();
                 if (localMaxValue != localMinValue) {
@@ -1329,7 +1386,7 @@ public class NewResponseActivity extends Activity {
             if (masterQuestionList.get(i).getQuestions().getMandatory() == 1) {
 
                 if (checkMandatoryQuestion(masterQuestionList.get(i).getQuestions().getType(), masterQuestionList.get(i).getRecordID(), masterQuestionList.get(i).getQuestions().getId())) {
-                    if (!masterQuestionList.get(i).getQuestions().getType().equals("MultiChoiceQuestion") && !masterQuestionList.get(i).getQuestions().getType().equals("DropDownQuestion") && !masterQuestionList.get(i).getQuestions().getType().equals("RadioQuestion")) {
+                    if (!masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION)) {
                         addAnswerNextClick(masterQuestionList.get(i).getQuestions(), masterQuestionList.get(i).getRecordID());
                     }
                 } else {
@@ -1339,7 +1396,7 @@ public class NewResponseActivity extends Activity {
 
             } else {
 
-                if (!masterQuestionList.get(i).getQuestions().getType().equals("MultiChoiceQuestion") && !masterQuestionList.get(i).getQuestions().getType().equals("DropDownQuestion") && !masterQuestionList.get(i).getQuestions().getType().equals("RadioQuestion")) {
+                if (!masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION)) {
                     addAnswerNextClick(masterQuestionList.get(i).getQuestions(), masterQuestionList.get(i).getRecordID());
                 }
             }
@@ -1390,35 +1447,54 @@ public class NewResponseActivity extends Activity {
             questionCounter++;
 
             counterButton.setText(questionCounter + 1 + " out of " + totalQuestionCount);
-//for category type questions
 
 
-            for (int j = 0; j < categoriesList.size(); j++) {
-                if (categoriesList.get(j).getOrderNumber() == types.get(questionCounter)) {
+            //////////////////////////////////////////////////////////////////////////////
 
-                    currentCategory = categoriesList.get(j);
-                    //for multi record questions
-                    if (currentCategory.getType().equals("MultiRecordCategory")) {
+            if (sortedSurveyQuestionsList.get(questionCounter).getType() == CommonUtil.TYPE_QUESTION) {
 
-                        NextBackCommonCode();
+                Questions cq = ((Questions) sortedSurveyQuestionsList.get(questionCounter).getObject());
+                buildLayout(cq, false, recordId, defaultParentIndex);
+            } else {
+                Categories currentCategory = ((Categories) sortedSurveyQuestionsList.get(questionCounter).getObject());
+                //for multi record questions
+                if (currentCategory.getType().equals(CommonUtil.CATEGORY_TYPE_MULTI_RECORD)) {
 
-                    } else {
-                        buildCategoryLayout(currentCategory);
-                    }
+                    NextBackCommonCode(currentCategory);
 
+                } else {
+                    buildCategoryLayout(currentCategory);
                 }
             }
 
+            //////////////////////////////////////////////////////////////////////////////
 
-            //for general questions
-            for (int j = 0; j < questionsList.size(); j++) {
-                if (questionsList.get(j).getOrderNumber() == types.get(questionCounter)) {
-                    Questions cq = questionsList.get(j);
-                    buildLayout(cq, false, recordId, defaultParentIndex);
-                    //  checkForAnswer(cq, currentResponseId, recordId);
-                    break;
-                }
-            }
+//            //for category type questions
+//            for (int j = 0; j < categoriesList.size(); j++) {
+//                if (categoriesList.get(j).getOrderNumber() == types.get(questionCounter)) {
+//                    Categories currentCategory = categoriesList.get(j);
+//                    //for multi record questions
+//                    if (currentCategory.getType().equals(CommonUtil.CATEGORY_TYPE_MULTI_RECORD)) {
+//
+//                        NextBackCommonCode(currentCategory);
+//
+//                    } else {
+//                        buildCategoryLayout(currentCategory);
+//                    }
+//
+//                }
+//            }
+//
+//
+//            //for general questions
+//            for (int j = 0; j < questionsList.size(); j++) {
+//                if (questionsList.get(j).getOrderNumber() == types.get(questionCounter)) {
+//                    Questions cq = questionsList.get(j);
+//                    buildLayout(cq, false, recordId, defaultParentIndex);
+//                    //  checkForAnswer(cq, currentResponseId, recordId);
+//                    break;
+//                }
+//            }
 
             //check if questions is the last question
             checkIfLastQuestion();
@@ -1434,11 +1510,11 @@ public class NewResponseActivity extends Activity {
 
     }
 
-    public void onAddRecordClick(int localRecordID) {
+    public void onAddRecordClick(int localRecordID, Categories currentCategory) {
         recordId = localRecordID;
         addRecordCounter++;
         setCategoryQuestion(currentCategory, localRecordID);
-        createDeleteRecord(tagValue);
+        createDeleteRecord(tagValue, currentCategory);
         try {
             answer.clearFocus();
         } catch (Exception e) {
@@ -1446,7 +1522,6 @@ public class NewResponseActivity extends Activity {
 
         }
 
-        addRecordPressed = true;
     }
 
     public void buildMultiRecordTitle(Categories categories) {
@@ -1456,24 +1531,32 @@ public class NewResponseActivity extends Activity {
         questionTextSingleLine.setTextSize(20);
         questionTextSingleLine.setTextColor(Color.BLACK);
         questionTextSingleLine.setPadding(8, 12, 8, 20);
-        questionTextSingleLine.setText("" + categories.getContent());
+        questionTextSingleLine.setText("Q." + (questionCounter + 1) + " " + categories.getContent());
         nestedContainer.addView(questionTextSingleLine);
         nestedContainer.setId(categories.getId());
         nestedContainer.setTag(categories);
-        fieldContainer.addView(nestedContainer);
+        nestedContainer.setBackgroundColor(Color.WHITE);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+        layoutParams.setMargins(0, 10, 0, 10);
+        fieldContainer.addView(nestedContainer, layoutParams);
 
 
     }
 
-    public void createDeleteRecord(TagModel tmpTagModel) {
+    public void createDeleteRecord(TagModel tmpTagModel, Categories currentCategory) {
 
-        if (currentCategory.getType().equals("MultiRecordCategory")) {
+        if (currentCategory.getType().equals(CommonUtil.CATEGORY_TYPE_MULTI_RECORD)) {
             final Button deleteRecord = new Button(this);
             deleteRecord.setBackgroundResource(R.drawable.custom_button);
             deleteRecord.setText("Delete Record");
             deleteRecord.setTextColor(getResources().getColor(R.color.white));
             deleteRecord.setTag(R.string.multirecord_tag, tmpTagModel);
-            fieldContainer.addView(deleteRecord);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            layoutParams.setMargins(0, 10, 0, 10);
+            fieldContainer.addView(deleteRecord, layoutParams);
 
 
             deleteRecord.setOnClickListener(new View.OnClickListener() {
@@ -1483,8 +1566,8 @@ public class NewResponseActivity extends Activity {
 
                     TagModel tag = (TagModel) view.getTag(R.string.multirecord_tag);
 
-                    Log.e("TAG", "TAgValue BUTTON VALUE->> QID->>" + tagValue.getqID() + "RecordID->>" + tagValue.getRecordID());
-                    Log.e("TAG", "DELETE BUTTON VALUE->> QID->>" + tag.getqID() + "RecordID->>" + tag.getRecordID());
+//                    Log.e("TAG", "TAgValue BUTTON VALUE->> QID->>" + tagValue.getqID() + "RecordID->>" + tagValue.getRecordID());
+//                    Log.e("TAG", "DELETE BUTTON VALUE->> QID->>" + tag.getqID() + "RecordID->>" + tag.getRecordID());
 
                     ArrayList<MasterQuestion> localMasterQuestions = getQuestionByRecordID(new MasterQuestion(tag.getQues(), tag.getRecordID()));
 
@@ -1534,8 +1617,7 @@ public class NewResponseActivity extends Activity {
         return views;
     }
 
-    private void NextBackCommonCode() {
-        // recordId = currentCategory.getId();
+    private void createAddRecordButton(final Categories currentCategory) {
         Button addRecord = new Button(this);
         addRecord.setBackgroundResource(R.drawable.custom_button);
         addRecord.setText("+  Add Record");
@@ -1550,28 +1632,39 @@ public class NewResponseActivity extends Activity {
                 } else {
                     recordId = recordId + 20;
                 }
-                onAddRecordClick(recordId);
+                onAddRecordClick(recordId, currentCategory);
 
 
             }
         });
+    }
 
-        Cursor multiRecordCursor = dbAdapter.findNoOfEntries(currentCategory.getQuestionsList().get(0).getId(), currentResponseId);
+    private void NextBackCommonCode(final Categories currentCategory) {
 
+
+        int localCategorySize = currentCategory.getQuestionsList().size();
+        Cursor multiRecordCursor = null;
+        if (localCategorySize > 0) {
+            multiRecordCursor = dbAdapter.findNoOfEntries(currentCategory.getQuestionsList().get(0).getId(), currentResponseId);
+        }
         int entries = 0;
         if (multiRecordCursor != null) {
             addRecordCounter = entries = multiRecordCursor.getCount();
             Log.e("TAG", "LOCAL->> C" + entries);
         }
+
+        buildMultiRecordTitle(currentCategory);
+
+        createAddRecordButton(currentCategory);
+
+
         if (entries == 0) {
             recordId = currentCategory.getCategoryId();
-            buildMultiRecordTitle(currentCategory);
         } else {
             multiRecordCursor.moveToFirst();
             for (int i = 0; i < entries; i++) {
                 int localRecordID = multiRecordCursor.getInt(multiRecordCursor.getColumnIndex(DBAdapter.DBhelper.RECORD_ID));
-                buildMultiRecordTitle(currentCategory);
-                onAddRecordClick(localRecordID);
+                onAddRecordClick(localRecordID, currentCategory);
                 multiRecordCursor.moveToNext();
             }
         }
@@ -1589,7 +1682,7 @@ public class NewResponseActivity extends Activity {
         for (int i = 0; i < masterQuestionList.size(); i++) {
             Log.e("Master", "Master Details QID->>" + masterQuestionList.get(i).getQuestions().getId() + "RecordID->>" + masterQuestionList.get(i).getRecordID());
 
-            if (!masterQuestionList.get(i).getQuestions().getType().equals("MultiChoiceQuestion") && !masterQuestionList.get(i).getQuestions().getType().equals("DropDownQuestion") && !masterQuestionList.get(i).getQuestions().getType().equals("RadioQuestion"))
+            if (!masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION))
                 addAnswerNextClick(masterQuestionList.get(i).getQuestions(), masterQuestionList.get(i).getRecordID());
         }
 
@@ -1612,32 +1705,52 @@ public class NewResponseActivity extends Activity {
 
             counterButton.setText(questionCounter + 1 + " out of " + totalQuestionCount);
 
-            for (int j = 0; j < categoriesList.size(); j++) {
-                if (categoriesList.get(j).getOrderNumber() == types.get(questionCounter)) {
+            //////////////////////////////////////////////////////////////////////////////
 
-                    currentCategory = categoriesList.get(j);
-                    //for multi record questions
-                    if (currentCategory.getType().equals("MultiRecordCategory")) {
+            if (sortedSurveyQuestionsList.get(questionCounter).getType() == CommonUtil.TYPE_QUESTION) {
 
-                        NextBackCommonCode();
+                Questions cq = ((Questions) sortedSurveyQuestionsList.get(questionCounter).getObject());
+                buildLayout(cq, false, recordId, defaultParentIndex);
+            } else {
+                Categories currentCategory = ((Categories) sortedSurveyQuestionsList.get(questionCounter).getObject());
+                //for multi record questions
+                if (currentCategory.getType().equals(CommonUtil.CATEGORY_TYPE_MULTI_RECORD)) {
 
-                    } else {
-                        buildCategoryLayout(currentCategory);
-                    }
+                    NextBackCommonCode(currentCategory);
 
-
+                } else {
+                    buildCategoryLayout(currentCategory);
                 }
             }
 
-            //build question layout
-            for (int j = 0; j < questionsList.size(); j++) {
-                if (questionsList.get(j).getOrderNumber() == types.get(questionCounter)) {
-                    Questions cq = questionsList.get(j);
-                    buildLayout(cq, false, recordId, defaultParentIndex);
-                    //   checkForAnswer(cq, currentResponseId, recordId);
-                    break;
-                }
-            }
+            //////////////////////////////////////////////////////////////////////////////
+
+
+//            for (int j = 0; j < categoriesList.size(); j++) {
+//                if (categoriesList.get(j).getOrderNumber() == types.get(questionCounter)) {
+//                    Categories currentCategory = categoriesList.get(j);
+//                    //for multi record questions
+//                    if (currentCategory.getType().equals(CommonUtil.CATEGORY_TYPE_MULTI_RECORD)) {
+//
+//                        NextBackCommonCode(currentCategory);
+//
+//                    } else {
+//                        buildCategoryLayout(currentCategory);
+//                    }
+//
+//
+//                }
+//            }
+
+//            //build question layout
+//            for (int j = 0; j < questionsList.size(); j++) {
+//                if (questionsList.get(j).getOrderNumber() == types.get(questionCounter)) {
+//                    Questions cq = questionsList.get(j);
+//                    buildLayout(cq, false, recordId, defaultParentIndex);
+//                    //   checkForAnswer(cq, currentResponseId, recordId);
+//                    break;
+//                }
+//            }
             //if its the first question
             if (questionCounter == 0) {
                 previousQuestion.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_arrow_back_enable, 0, 0, 0);
@@ -1723,20 +1836,21 @@ public class NewResponseActivity extends Activity {
         TextView questionTextSingleLine = new TextView(this);
         questionTextSingleLine.setTextSize(20);
         questionTextSingleLine.setTextColor(Color.BLACK);
-        questionTextSingleLine.setPadding(8, 12, 8, 20);
-        questionTextSingleLine.setText("" + categories.getContent());
+        questionTextSingleLine.setPadding(8, 20, 8, 20);
+        questionTextSingleLine.setText("Q." + (questionCounter + 1) + " " + categories.getContent());
         nestedContainer.addView(questionTextSingleLine);
         nestedContainer.setId(categories.getId());
         nestedContainer.setTag(categories);
+//        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+//                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        nestedContainer.setBackgroundColor(Color.WHITE);
+//        layoutParams.setMargins(10, 10, 10, 10);
         fieldContainer.addView(nestedContainer);
 
 
         for (int j = 0; j < categories.getQuestionsList().size(); j++) {
             categoryQuestionCounter++;
             buildLayout(categories.getQuestionsList().get(j), false, recordId, defaultParentIndex);
-
-            //  swer(categories.getQuestionsList().get(j), currentResponseId, recordId);
-
         }
         categoryQuestionCounter = 0;
 
@@ -1747,26 +1861,43 @@ public class NewResponseActivity extends Activity {
         for (int j = categories.getQuestionsList().size() - 1; j >= 0; j--) {
             categoryQuestionCounter++;
             buildLayout(categories.getQuestionsList().get(j), false, localRecordID, defaultParentIndex);
-
-//            swer(categories.getQuestionsList().get(j), currentResponseId, localRecordID);
-
         }
         categoryQuestionCounter = 0;
 
     }
 
+//    //remove questions view from main container
+//    public void removeQuestionView(Options options) {
+//        try {
+//            for (int i = 0; i < options.getQuestions().size(); i++) {
+//                View myView = findViewById(options.getQuestions().get(i).getId());
+//                ViewGroup parent = (ViewGroup) myView.getParent();
+//                parent.removeView(myView);
+//
+//                if (options.getQuestions().get(i).getOptions().size() > 0) {
+//                    for (int j = 0; j < options.getQuestions().get(i).getOptions().size(); j++) {
+//                        removeQuestionView(options.getQuestions().get(i).getOptions().get(j));
+//                        removeCategoryView(options.getQuestions().get(i).getOptions().get(j));
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+
     //remove questions view from main container
-    public void removeQuestionView(Options options) {
+    public void removeQuestionViewForRadio(Options options, int localRecordID) {
         try {
             for (int i = 0; i < options.getQuestions().size(); i++) {
-                View myView = findViewById(options.getQuestions().get(i).getId());
+                View myView = findViewById(options.getQuestions().get(i).getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + localRecordID);
                 ViewGroup parent = (ViewGroup) myView.getParent();
                 parent.removeView(myView);
 
                 if (options.getQuestions().get(i).getOptions().size() > 0) {
                     for (int j = 0; j < options.getQuestions().get(i).getOptions().size(); j++) {
-                        removeQuestionView(options.getQuestions().get(i).getOptions().get(j));
-                        removeCategoryView(options.getQuestions().get(i).getOptions().get(j));
+                        removeQuestionViewForRadio(options.getQuestions().get(i).getOptions().get(j), localRecordID);
+                        removeCategoryViewForRadio(options.getQuestions().get(i).getOptions().get(j), localRecordID);
                     }
                 }
             }
@@ -1775,23 +1906,21 @@ public class NewResponseActivity extends Activity {
         }
     }
 
-    //remove category views from main container
-    public void removeCategoryView(Options options) {
-
+    //remove questions view from main container
+    public void removeQuestionViewForDefaultDropDown(Questions question, int localRecordID) {
         try {
-            for (int k = 0; k < options.getCategories().size(); k++) {
+            for (int w = 0; w < question.getOptions().size(); w++) {
+                for (int i = 0; i < question.getOptions().get(w).getQuestions().size(); i++) {
+                    View myView = findViewById(question.getOptions().get(w).getQuestions().get(i).getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + localRecordID);
+                    ViewGroup parent = (ViewGroup) myView.getParent();
+                    parent.removeView(myView);
 
-                View myView = findViewById(options.getCategories().get(k).getId());
-                ViewGroup parent = (ViewGroup) myView.getParent();
-                parent.removeView(myView);
-                for (int h = 0; h < options.getCategories().get(k).getQuestionsList().size(); h++) {
-                    View myView2 = findViewById(options.getCategories().get(k).getQuestionsList().get(h).getId());
-                    ViewGroup parent2 = (ViewGroup) myView2.getParent();
-                    parent2.removeView(myView2);
-                    if (options.getCategories().get(k).getQuestionsList().get(h).getOptions().size() > 0) {
-                        for (int j = 0; j < options.getCategories().get(k).getQuestionsList().get(h).getOptions().size(); j++) {
-                            removeQuestionView(options.getCategories().get(k).getQuestionsList().get(h).getOptions().get(j));
-                            removeCategoryView(options.getCategories().get(k).getQuestionsList().get(h).getOptions().get(j));
+                    if (question.getOptions().get(w).getQuestions().get(i).getOptions().size() > 0) {
+                        for (int j = 0; j < question.getOptions().get(w).getQuestions().get(i).getOptions().size(); j++) {
+                            for (int k = 0; k < question.getOptions().get(w).getQuestions().get(i).getOptions().get(j).getQuestions().size(); k++) {
+                                removeQuestionViewForDefaultDropDown(question.getOptions().get(w).getQuestions().get(i).getOptions().get(j).getQuestions().get(k), localRecordID);
+                                removeCategoryViewForDefaultDropDown(question.getOptions().get(w).getQuestions().get(i).getOptions().get(j).getQuestions().get(k), localRecordID);
+                            }
                         }
                     }
                 }
@@ -1801,14 +1930,95 @@ public class NewResponseActivity extends Activity {
         }
     }
 
+    public void removeCategoryViewForDefaultDropDown(Questions question, int localRecordID) {
+
+        try {
+
+            for (int w = 0; w < question.getOptions().size(); w++) {
+                for (int k = 0; k < question.getOptions().get(w).getCategories().size(); k++) {
+
+                    View myView = findViewById(question.getOptions().get(w).getQuestions().get(k).getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + localRecordID);
+                    ViewGroup parent = (ViewGroup) myView.getParent();
+                    parent.removeView(myView);
+                    for (int h = 0; h < question.getOptions().get(w).getCategories().get(k).getQuestionsList().size(); h++) {
+                        View myView2 = findViewById(question.getOptions().get(w).getCategories().get(k).getQuestionsList().get(h).getId());
+                        ViewGroup parent2 = (ViewGroup) myView2.getParent();
+                        parent2.removeView(myView2);
+                        if (question.getOptions().get(w).getCategories().get(k).getQuestionsList().get(h).getOptions().size() > 0) {
+                            for (int j = 0; j < question.getOptions().get(w).getCategories().get(k).getQuestionsList().get(h).getOptions().size(); j++) {
+                                for (int l = 0; l < question.getOptions().get(w).getCategories().get(k).getQuestionsList().get(h).getOptions().get(j).getQuestions().size(); l++) {
+                                    removeQuestionViewForDefaultDropDown(question.getOptions().get(w).getCategories().get(k).getQuestionsList().get(h).getOptions().get(j).getQuestions().get(l), localRecordID);
+                                    removeCategoryViewForDefaultDropDown(question.getOptions().get(w).getCategories().get(k).getQuestionsList().get(h).getOptions().get(j).getQuestions().get(l), localRecordID);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    //remove category views from main container
+    public void removeCategoryViewForRadio(Options options, int localRecordID) {
+
+        try {
+            for (int k = 0; k < options.getCategories().size(); k++) {
+
+                View myView = findViewById(options.getQuestions().get(k).getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + localRecordID);
+                ViewGroup parent = (ViewGroup) myView.getParent();
+                parent.removeView(myView);
+                for (int h = 0; h < options.getCategories().get(k).getQuestionsList().size(); h++) {
+                    View myView2 = findViewById(options.getCategories().get(k).getQuestionsList().get(h).getId());
+                    ViewGroup parent2 = (ViewGroup) myView2.getParent();
+                    parent2.removeView(myView2);
+                    if (options.getCategories().get(k).getQuestionsList().get(h).getOptions().size() > 0) {
+                        for (int j = 0; j < options.getCategories().get(k).getQuestionsList().get(h).getOptions().size(); j++) {
+                            removeQuestionViewForRadio(options.getCategories().get(k).getQuestionsList().get(h).getOptions().get(j), localRecordID);
+                            removeCategoryViewForRadio(options.getCategories().get(k).getQuestionsList().get(h).getOptions().get(j), localRecordID);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+//    //remove category views from main container
+//    public void removeCategoryView(Options options) {
+//
+//        try {
+//            for (int k = 0; k < options.getCategories().size(); k++) {
+//
+//                View myView = findViewById(options.getCategories().get(k).getId());
+//                ViewGroup parent = (ViewGroup) myView.getParent();
+//                parent.removeView(myView);
+//                for (int h = 0; h < options.getCategories().get(k).getQuestionsList().size(); h++) {
+//                    View myView2 = findViewById(options.getCategories().get(k).getQuestionsList().get(h).getId());
+//                    ViewGroup parent2 = (ViewGroup) myView2.getParent();
+//                    parent2.removeView(myView2);
+//                    if (options.getCategories().get(k).getQuestionsList().get(h).getOptions().size() > 0) {
+//                        for (int j = 0; j < options.getCategories().get(k).getQuestionsList().get(h).getOptions().size(); j++) {
+//                            removeQuestionView(options.getCategories().get(k).getQuestionsList().get(h).getOptions().get(j));
+//                            removeCategoryView(options.getCategories().get(k).getQuestionsList().get(h).getOptions().get(j));
+//                        }
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+
     public void addAnswerNextClick(Questions questions, int localRecordID) {
 
-
-        tsLong = System.currentTimeMillis() / 1000;
+        Long tsLong = System.currentTimeMillis() / 1000;
         Answers localAnswer;
 
         try {
-            if (questions.getType().equals("SingleLineQuestion")) {
+            if (questions.getType().equals(CommonUtil.QUESTION_TYPE_SINGLE_LINE_QUESTION)) {
                 String localAns = ((EditText) findViewById(questions.getId() + IntentConstants.VIEW_CONSTANT + localRecordID)).getText().toString().trim();
                 if (localRecordID != 0) {
                     localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), localAns, tsLong, "multirecord");
@@ -1818,59 +2028,52 @@ public class NewResponseActivity extends Activity {
                 if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID)) {
                     dbAdapter.insertDataAnswersTable(localAnswer);
                 }
-            } else if (questions.getType().equals("MultilineQuestion")) {
+            } else if (questions.getType().equals(CommonUtil.QUESTION_TYPE_MULTI_LINE_QUESTION)) {
                 String localAns = ((EditText) findViewById(questions.getId() + IntentConstants.VIEW_CONSTANT + localRecordID)).getText().toString().trim();
                 localAnswer = new Answers(localRecordID, (int) dbAdapter.getMaxID(), questions.getId(), localAns, tsLong);
 
                 if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID)) {
                     dbAdapter.insertDataAnswersTable(localAnswer);
                 }
-            } else if (questions.getType().equals("NumericQuestion")) {
+            } else if (questions.getType().equals(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION)) {
                 String localAns = ((EditText) findViewById(questions.getId() + IntentConstants.VIEW_CONSTANT + localRecordID)).getText().toString().trim();
                 localAnswer = new Answers(localRecordID, (int) dbAdapter.getMaxID(), questions.getId(), localAns, tsLong);
 
                 if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID)) {
                     dbAdapter.insertDataAnswersTable(localAnswer);
                 }
-            } else if (questions.getType().equals("DateQuestion")) {
+            } else if (questions.getType().equals(CommonUtil.QUESTION_TYPE_DATE_QUESTION)) {
 
                 localAnswer = new Answers(localRecordID, (int) dbAdapter.getMaxID(), questions.getId(), dateText.getText().toString(), tsLong);
 
                 if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID))
                     dbAdapter.insertDataAnswersTable(localAnswer);
 
-            } else if (questions.getType().equals("RatingQuestion")) {
+            } else if (questions.getType().equals(CommonUtil.QUESTION_TYPE_RATING_QUESTION)) {
                 RatingBar localRatingBar = (RatingBar) findViewById(questions.getId() + IntentConstants.VIEW_CONSTANT + localRecordID);
                 localAnswer = new Answers(localRecordID, (int) dbAdapter.getMaxID(), questions.getId(), String.valueOf(localRatingBar.getRating()), tsLong);
                 if (!dbAdapter.doesAnswerExist(questions.getId(), (int) dbAdapter.getMaxID(), localRecordID))
                     dbAdapter.insertDataAnswersTable(localAnswer);
 
-            } else if (questions.getType().equals("PhotoQuestion")) {
-                localAnswer = new Answers(localRecordID, (int) dbAdapter.getMaxID(), questions.getId(), "", tsLong, "PhotoQuestion", fname);
+            } else if (questions.getType().equals(CommonUtil.QUESTION_TYPE_PHOTO_QUESTION)) {
+                localAnswer = new Answers(localRecordID, (int) dbAdapter.getMaxID(), questions.getId(), "", tsLong, CommonUtil.QUESTION_TYPE_PHOTO_QUESTION, fname);
                 if (!dbAdapter.doesAnswerExist(questions.getId(), (int) dbAdapter.getMaxID(), localRecordID)) {
                     dbAdapter.insertDataAnswersTable(localAnswer);
                 }
                 fname = "";
 
-
-//            } else if (questions.getType().equals("PhotoQuestion")) {
-//                localAnswer = new Answers(localRecordID, (int) dbAdapter.getMaxID(), questions.getId(), "", tsLong, "PhotoQuestion", fname);
-//                if (!dbAdapter.doesAnswerExist(questions.getId(), (int) dbAdapter.getMaxID(), localRecordID)) {
-//                    dbAdapter.insertDataAnswersTable(localAnswer);
-//                }
-
-            } else if (questions.getType().equals("RadioQuestion")) {
-                localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), "", tsLong, "RadioQuestion");
+            } else if (questions.getType().equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION)) {
+                localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), "", tsLong, CommonUtil.QUESTION_TYPE_RADIO_QUESTION);
                 if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID)) {
                     dbAdapter.insertDataAnswersTable(localAnswer);
                 }
-            } else if (questions.getType().equals("DropDownQuestion")) {
-                localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), "", tsLong, "DropDownQuestion");
+            } else if (questions.getType().equals(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION)) {
+                localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), "", tsLong, CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION);
                 if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID)) {
                     dbAdapter.insertDataAnswersTable(localAnswer);
                 }
-            } else if (questions.getType().equals("MultiChoiceQuestion")) {
-                localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), "", tsLong, "MultiChoiceQuestion");
+            } else if (questions.getType().equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION)) {
+                localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), "", tsLong, CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION);
                 if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID)) {
                     dbAdapter.insertDataAnswersTable(localAnswer);
                 }
@@ -1886,13 +2089,13 @@ public class NewResponseActivity extends Activity {
     //this will check if the answer is saved and can be retrieved from the tables
     public void checkForAnswer(Questions qu, int responseId, int localRecordId) {
 
-        if ((qu.getType().equals("SingleLineQuestion")) || (qu.getType().equals("MultilineQuestion")) || (qu.getType().equals("NumericQuestion"))) {
+        if ((qu.getType().equals(CommonUtil.QUESTION_TYPE_SINGLE_LINE_QUESTION)) || (qu.getType().equals(CommonUtil.QUESTION_TYPE_MULTI_LINE_QUESTION)) || (qu.getType().equals(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION))) {
             answer = (EditText) findViewById(qu.getId() + IntentConstants.VIEW_CONSTANT + localRecordId);
             answer.setText(dbAdapter.getAnswer(responseId, qu.getId(), localRecordId));
-        } else if (qu.getType().equals("DateQuestion")) {
+        } else if (qu.getType().equals(CommonUtil.QUESTION_TYPE_DATE_QUESTION)) {
             dateText = (TextView) findViewById(qu.getId() + IntentConstants.VIEW_CONSTANT + localRecordId);
             dateText.setText(dbAdapter.getAnswer(responseId, qu.getId(), localRecordId));
-        } else if (qu.getType().equals("RatingQuestion")) {
+        } else if (qu.getType().equals(CommonUtil.QUESTION_TYPE_RATING_QUESTION)) {
 
             ratingBar = (RatingBar) findViewById(qu.getId() + IntentConstants.VIEW_CONSTANT + localRecordId);
             dbAdapter.getAnswer(responseId, qu.getId(), localRecordId);
@@ -1902,7 +2105,7 @@ public class NewResponseActivity extends Activity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        } else if (qu.getType().equals("PhotoQuestion")) {
+        } else if (qu.getType().equals(CommonUtil.QUESTION_TYPE_PHOTO_QUESTION)) {
             String localfname = dbAdapter.getImage(responseId, qu.getId(), localRecordId);
             if (!localfname.equals("")) {
                 Bitmap b = loadImageFromStorage(Environment.getExternalStorageDirectory().toString() + "/saved_images", localfname);
@@ -1910,7 +2113,7 @@ public class NewResponseActivity extends Activity {
                 findViewById(qu.getId() + IntentConstants.VIEW_CONSTANT_FOR_PHOTO4 + localRecordId).setVisibility(View.GONE);
                 ((ImageView) findViewById(qu.getId() + IntentConstants.VIEW_CONSTANT_FOR_PHOTO2 + localRecordId)).setImageBitmap(b);
             }
-        } else if (qu.getType().equals("MultiChoiceQuestion")) {
+        } else if (qu.getType().equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION)) {
 
 
             List<Options> options = qu.getOptions();
@@ -1946,7 +2149,7 @@ public class NewResponseActivity extends Activity {
                 }
             }
 
-        } else if (qu.getType().equals("RadioQuestion")) {
+        } else if (qu.getType().equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION)) {
 
             List<Options> options = qu.getOptions();
             for (int i = 0; i < options.size(); i++) {
@@ -1966,6 +2169,9 @@ public class NewResponseActivity extends Activity {
                     int optionId = dbAdapter.getOptionIdFromPrimaryId(choiceTableIds.get(i));
                     optionId = optionId + localRecordId;
 
+//                    int radioButtonID = radioButtonGroup.getCheckedRadioButtonId();
+//                    RadioButton radioButton =(RadioButton) findViewById(qu.getId() + IntentConstants.VIEW_CONSTANT + localRecordId).findViewById(optionId);
+//                    int idx = radioButtonGroup.indexOfChild(radioButton);
 
                     RadioButton radioButton = (RadioButton) findViewById(optionId);
                     radioButton.setChecked(true);
@@ -1976,7 +2182,7 @@ public class NewResponseActivity extends Activity {
                 }
             }
 
-        } else if (qu.getType().equals("DropDownQuestion")) {
+        } else if (qu.getType().equals(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION)) {
             List<Options> options = qu.getOptions();
             for (int i = 0; i < options.size(); i++) {
                 options.get(i).getId();
@@ -1993,7 +2199,7 @@ public class NewResponseActivity extends Activity {
 
                     for (int j = 0; j < qu.getOptions().size(); j++) {
                         if (qu.getOptions().get(j).getId() == list2.get(i)) {
-//                            spinner = (Spinner) findViewById(qu.getId() + IntentConstants.VIEW_CONSTANT + localRecordId);
+                            spinner = (Spinner) findViewById(qu.getId() + IntentConstants.VIEW_CONSTANT + localRecordId);
                             spinner.setSelection(j + 1);
 
                         }
@@ -2146,7 +2352,7 @@ public class NewResponseActivity extends Activity {
     public boolean checkMandatoryQuestion(String type, int recordId, int qId) {
 
         //this will check for answers for questions having answers in answers table
-        if ((type.equals("SingleLineQuestion")) || (type.equals("MultilineQuestion") || (type.equals("NumericQuestion")))) {
+        if ((type.equals(CommonUtil.QUESTION_TYPE_SINGLE_LINE_QUESTION)) || (type.equals(CommonUtil.QUESTION_TYPE_MULTI_LINE_QUESTION) || (type.equals(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION)))) {
 
 
             if (((EditText) findViewById(qId + IntentConstants.VIEW_CONSTANT + recordId)).getText().toString().trim().equals("")) {
@@ -2154,14 +2360,14 @@ public class NewResponseActivity extends Activity {
             } else
                 return true;
         }
-        if ((type.equals("DateQuestion"))) {
+        if ((type.equals(CommonUtil.QUESTION_TYPE_DATE_QUESTION))) {
 
             if (dbAdapter.doesAnswerExistAsNonNull(qId, currentResponseId, recordId).equals("")) {
                 return false;
             } else
                 return true;
         }
-        if ((type.equals("RatingQuestion"))) {
+        if ((type.equals(CommonUtil.QUESTION_TYPE_RATING_QUESTION))) {
             if (dbAdapter.doesAnswerExistAsNonNull(qId, currentResponseId, recordId).equals("0.0")) {
                 return false;
 
@@ -2170,7 +2376,7 @@ public class NewResponseActivity extends Activity {
 
 
         //this wil check questions having answers in choices tables have answers or not
-        if (type.equals("RadioQuestion") || type.equals("MultiChoiceQuestion")) {
+        if (type.equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION) || type.equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION)) {
             int ansID = dbAdapter.getAnswerId(currentResponseId, qId, recordId);
             if (ansID == 0) {
                 return false;
@@ -2184,7 +2390,7 @@ public class NewResponseActivity extends Activity {
 
         }
 
-        if (type.equals("DropDownQuestion")) {
+        if (type.equals(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION)) {
             int ansID = dbAdapter.getAnswerId(currentResponseId, qId, recordId);
             if (ansID == 0) {
                 return false;
@@ -2199,7 +2405,7 @@ public class NewResponseActivity extends Activity {
         }
 
         // this wil check if photo mandatory questions have answers in te answers table or not
-        if (type.equals("PhotoQuestion")) {
+        if (type.equals(CommonUtil.QUESTION_TYPE_PHOTO_QUESTION)) {
 
             if (dbAdapter.doesImageExistAsNonNull(qId, currentResponseId, recordId).equals("")) {
                 return false;
@@ -2263,7 +2469,7 @@ public class NewResponseActivity extends Activity {
             dateText = (TextView) findViewById(localQuestions.getId() + IntentConstants.VIEW_CONSTANT + localRecordID);
             dateText.setText(new StringBuilder().append(mYear).append("/").append(mMonth + 1).append("/").append(mDay).toString());
 
-            tsLong = System.currentTimeMillis() / 1000;
+            Long tsLong = System.currentTimeMillis() / 1000;
             Answers localAnswer = new Answers(localRecordID, (int) dbAdapter.getMaxID(), localQuestions.getId(), dateText.getText().toString(), tsLong);
             saveAnswerIntoDB(new TagModel(localQuestions.getId(), localRecordID), localAnswer);
 

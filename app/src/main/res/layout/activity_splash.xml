@@ -50,6 +50,8 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_below="@+id/by_ashoka_text"
-        android:layout_centerHorizontal="true"
-        android:background="@drawable/splash_bg_img"></ImageView>
+        android:layout_centerInParent="true"
+        android:adjustViewBounds="true"
+        android:background="@drawable/splash_bg_img"
+        android:scaleType="centerCrop"></ImageView>
 </RelativeLayout>

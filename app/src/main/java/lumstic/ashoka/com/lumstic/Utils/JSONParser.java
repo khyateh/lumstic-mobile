@@ -265,15 +265,15 @@ public class JSONParser {
 
         questions.setOptions(optionses);
 
-        try {
-
-            if ((!jsonObjectQuestions.has("options")) && (jsonObjectQuestions.getInt("parent_id") >= 0)) {
-                Log.e("workingwork", "abc");
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//
+//            if ((!jsonObjectQuestions.has("options")) && (jsonObjectQuestions.getInt("parent_id") >= 0)) {
+////                Log.e("workingwork", "abc");
+//
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
 
         return questions;
