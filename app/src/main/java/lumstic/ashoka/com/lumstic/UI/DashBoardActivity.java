@@ -1,335 +1,362 @@
 package lumstic.ashoka.com.lumstic.UI;
 
 import android.app.ActionBar;
-import android.app.Activity;
-import android.app.Dialog;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.location.Location;
-import android.location.LocationManager;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import lumstic.ashoka.com.lumstic.Adapters.DBAdapter;
 import lumstic.ashoka.com.lumstic.Adapters.DashBoardAdapter;
 import lumstic.ashoka.com.lumstic.Models.Answers;
+import lumstic.ashoka.com.lumstic.Models.Categories;
+import lumstic.ashoka.com.lumstic.Models.Options;
+import lumstic.ashoka.com.lumstic.Models.Questions;
 import lumstic.ashoka.com.lumstic.Models.Surveys;
 import lumstic.ashoka.com.lumstic.R;
+import lumstic.ashoka.com.lumstic.Utils.CommonUtil;
 import lumstic.ashoka.com.lumstic.Utils.IntentConstants;
 import lumstic.ashoka.com.lumstic.Utils.JSONParser;
 import lumstic.ashoka.com.lumstic.Utils.JsonHelper;
-import lumstic.ashoka.com.lumstic.Utils.LumsticApp;
+import lumstic.ashoka.com.lumstic.Utils.NetworkUtil;
 import lumstic.ashoka.com.lumstic.Views.RobotoBlackButton;
 
 
-public class DashBoardActivity extends Activity {
+public class DashBoardActivity extends BaseActivity {
 
-    private LumsticApp lumsticApp;
     private ActionBar actionBar;
-
+    private boolean asynTaskCheck = false;
     private JsonHelper jsonHelper;
     private DBAdapter dbAdapter;
-    private Surveys surveys;
     private DashBoardAdapter dashBoardAdapter;
-    private LocationManager locationManager;
     private ProgressDialog progressDialog;
-
-    private JSONArray jsonArray;
     private JSONParser jsonParser;
-
     private ListView listView;
     private LinearLayout uploadContainer;
+    private RelativeLayout dashboardContainer, activeSurveyContainer;
     private RobotoBlackButton uploadButton;
-
     private List<Integer> completedResponseIds;
-    private List<Answers> answerses;
-    private List<String> jsonSyncResponses;
     private List<Surveys> surveysList;
-
-    private int surveyId;
+    private int surveyUploadCount = 0, surveyUploadFailedCount = 0;
     private int completeCount = 0;
-    private int uploadCount = 0;
+    private int totalCompletedResponses = 0;
     private String timestamp = "";
-    private String mobilId;
-    private String baseUrl = "";
-
+    private String loginUrl = "/api/login";
+    private String recordUrl = "/api/records";
+    private String fetchUrl = "/api/deep_surveys?access_token=";
     private String uploadUrl = "/api/responses.json?";
-    private String jsonStr = null;
-    private String syncString = "";
-    private boolean gps_enabled = false;
-    private boolean network_enabled = false;
-    private double lat = 0, lon = 0;
+
+    private List<Answers> answers;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dash_board);
+
+        dashboardContainer = (RelativeLayout) findViewById(R.id.dashboardContainer);
+        activeSurveyContainer = (RelativeLayout) findViewById(R.id.activeSurveyContainer);
+        uploadContainer = (LinearLayout) findViewById(R.id.upload_container);
+        listView = (ListView) findViewById(R.id.active_survey_list);
+        uploadContainer = (LinearLayout) findViewById(R.id.upload_container);
+        uploadButton = (RobotoBlackButton) findViewById(R.id.upload_all);
+
+
         //setting up action bar
         actionBar = getActionBar();
         actionBar.setTitle("Dashboard");
         dbAdapter = new DBAdapter(DashBoardActivity.this);
-        lumsticApp = (LumsticApp) getApplication();
-        if(lumsticApp.getPreferences().getBaseUrl()==null){
-            baseUrl=DashBoardActivity.this.getResources().getString(R.string.server_url);
+
+
+        uploadUrl = baseUrl + uploadUrl;
+        recordUrl = baseUrl + recordUrl;
+        fetchUrl = baseUrl + fetchUrl;
+
+
+        jsonHelper = new JsonHelper();
+        jsonParser = new JSONParser();
+        surveysList = jsonHelper.tryParsing(lumsticApp.getPreferences().getSurveyData());
+
+
+        progressDialog = new ProgressDialog(DashBoardActivity.this);
+        progressDialog.setCancelable(false);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage("Sync in Progress");
+
+        initListView();
+        checkForUploadUI();
+        uploadButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                surveyUploadCount = 0;
+                surveyUploadFailedCount = 0;
+                asynTaskCheck = false;
+
+                Long tsLong = System.currentTimeMillis() / 1000;
+                timestamp = tsLong.toString();
+                if (completeCount > 0) {
+
+                    if (NetworkUtil.iSConnected(getApplicationContext()) == NetworkUtil.TYPE_CONNECTED) {
+                        progressDialog.show();
+                        new uploadingMultiRecordResponse().execute();
+                    } else {
+                        lumsticApp.showToast("Please check your internet connection");
+                    }
+
+
+                }
+            }
+        });
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Surveys surveys = surveysList.get(i);
+                Intent intent = new Intent(DashBoardActivity.this, SurveyDetailsActivity.class);
+                intent.putExtra(IntentConstants.SURVEY, surveys);
+                startActivity(intent);
+            }
+        });
+    }
+
+    private void initListView() {
+        if (!lumsticApp.getPreferences().getSurveyData().equals("")) {
+
+            activeSurveyContainer.setVisibility(View.VISIBLE);
+
+            if (surveysList != null) {
+                dashBoardAdapter = new DashBoardAdapter(getApplicationContext(), surveysList);
+                listView.setAdapter(dashBoardAdapter);
+
+            }
+
         }
-        else
-            baseUrl=lumsticApp.getPreferences().getBaseUrl();
-        uploadUrl=baseUrl+uploadUrl;
-        surveysList = new ArrayList<Surveys>();
-        jsonHelper = new JsonHelper(DashBoardActivity.this);
+    }
+
+    private void checkForUploadUI() {
+        completeCount = dbAdapter.getCompleteResponseFull();
+        try {
+            dashBoardAdapter.notifyDataSetChanged();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (completeCount != 0) {
+            uploadContainer.setVisibility(View.VISIBLE);
+        } else {
+            uploadContainer.setVisibility(View.GONE);
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (!lumsticApp.getPreferences().getSurveyData().equals("")) {
-            setContentView(R.layout.test);
-            uploadContainer = (LinearLayout) findViewById(R.id.upload_container);
-            uploadContainer.setVisibility(View.GONE);
-            uploadButton = (RobotoBlackButton) findViewById(R.id.upload_all);
-            completeCount = dbAdapter.getCompleteResponseFull();
-            jsonParser = new JSONParser();
-            uploadButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mobilId = UUID.randomUUID().toString();
-                    if (checkLocationOn()) {
-                        Location location = getLocation();
-                        if (null != location) {
-                            lat = location.getLatitude();
-                            lon = location.getLongitude();
-                        }
-                    } else {
-                        lat = 18.54194666666656;
-                        lon = 73.8291466666657;
-                    }
-                    Long tsLong = System.currentTimeMillis() / 1000;
-                    timestamp = tsLong.toString();
-                    if (completeCount > 0) {
-                        progressDialog = new ProgressDialog(DashBoardActivity.this);
-                        progressDialog.setCancelable(false);
-                        progressDialog.setIndeterminate(true);
-                        progressDialog.setMessage("Sync in Progress");
-                        progressDialog.show();
-                        uploadContainer.setVisibility(View.GONE);
-                        new uploadResponse().execute();
-                    }
-                }
-            });
-            surveysList = jsonHelper.tryParsing(lumsticApp.getPreferences().getSurveyData());
-            listView = (ListView) findViewById(R.id.active_survey_list);
-            if (surveysList != null) {
-                dashBoardAdapter = new DashBoardAdapter(getApplicationContext(), surveysList);
-                listView.setAdapter(dashBoardAdapter);
-                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        Surveys surveys = surveysList.get(i);
-                        Intent intent = new Intent(DashBoardActivity.this, SurveyDetailsActivity.class);
-                        intent.putExtra(IntentConstants.SURVEY, surveys);
-                        startActivity(intent);
-                    }
-                });
+
+        checkForUploadUI();
+
+    }
+
+    public void addQuestionFromCategories(Categories categories) {
+        for (int m = 0; m < categories.getQuestionsList().size(); m++) {
+            Questions question = categories.getQuestionsList().get(m);
+            long value1 = dbAdapter.insertDataQuestionTable(question);
+            Log.e("value", value1 + "");
+            if (question.getOptions().size() > 0)
+                addOptions(question);
+        }
+    }
+
+    public void addOptions(Questions questions) {
+        for (int k = 0; k < questions.getOptions().size(); k++) {
+            Options options = questions.getOptions().get(k);
+            long value1 = dbAdapter.insertDataOptionsTable(options);
+            Log.e("value", value1 + "");
+            if (options.getQuestions().size() > 0)
+                addNestedQuestions(options);
+            if (options.getCategories().size() > 0)
+                addNestedCategories(options);
+        }
+    }
+
+    public void addNestedCategories(Options options) {
+        for (int d = 0; d < options.getCategories().size(); d++) {
+            Categories categories = options.getCategories().get(d);
+            long value1 = dbAdapter.insertDataCategoriesTable(categories);
+            Log.e("value", value1 + "");
+            if (categories.getQuestionsList().size() > 0)
+                addQuestionFromCategories(categories);
+        }
+    }
+
+    public void addNestedQuestions(Options options) {
+        for (int l = 0; l < options.getQuestions().size(); l++) {
+            Questions question = options.getQuestions().get(l);
+            long value1 = dbAdapter.insertDataQuestionTable(question);
+            Log.e("value", value1 + "");
+            if (question.getOptions().size() > 0)
+                addOptions(question);
+        }
+    }
+
+    public void addCategories(Surveys surveys) {
+        for (int h = 0; h < surveys.getCategories().size(); h++) {
+            Categories categories = surveys.getCategories().get(h);
+            long value1 = dbAdapter.insertDataCategoriesTable(categories);
+            Log.e("value", value1 + "");
+            if (categories.getQuestionsList().size() > 0)
+                addQuestionFromCategories(categories);
+        }
+    }
+
+    public void addQuestions(Surveys surveys) {
+
+        for (int j = 0; j < surveys.getQuestions().size(); j++) {
+            Questions question = surveys.getQuestions().get(j);
+            long value1 = dbAdapter.insertDataQuestionTable(question);
+            Log.e("value", value1 + "");
+            if (question.getOptions().size() > 0)
+                addOptions(question);
+        }
+    }
+
+    class FetchSurvey extends AsyncTask<Void, Void, String> {
+        String jsonFetchString;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog.show();
+        }
+
+        @Override
+        protected String doInBackground(Void... voids) {
+
+            if (CommonUtil.isTokenExpired(lumsticApp)) {
+                CommonUtil.reValidateToken(lumsticApp, baseUrl + loginUrl);
             }
+
             try {
-                dashBoardAdapter.notifyDataSetChanged();
+                HttpClient httpclient = new DefaultHttpClient();
+                HttpGet httpGet = new HttpGet(fetchUrl + lumsticApp.getPreferences().getAccessToken());
+                HttpResponse httpResponse = httpclient.execute(httpGet);
+                HttpEntity httpEntity = httpResponse.getEntity();
+                jsonFetchString = EntityUtils.toString(httpEntity);
+
+
+            } catch (ClientProtocolException e) {
+            } catch (IOException e) {
+            }
+
+            return jsonFetchString;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+
+            try {
+                if (s != null && s.length() > 0) {
+                    lumsticApp.getPreferences().setSurveyData(s);
+                    surveysList = jsonHelper.tryParsing(s);
+                }
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            if (s != null && s.length() > 0) {
+                if (surveysList != null) {
+                    dashBoardAdapter = new DashBoardAdapter(getApplicationContext(), surveysList);
+                    progressDialog.dismiss();
+                    dashboardContainer.setVisibility(View.GONE);
+                    activeSurveyContainer.setVisibility(View.VISIBLE);
+                    Toast.makeText(DashBoardActivity.this, "Saving surveys to the device", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                progressDialog.dismiss();
+                Toast.makeText(DashBoardActivity.this, "Unable to fetch survey,Please try again", Toast.LENGTH_SHORT).show();
+            }
             completeCount = dbAdapter.getCompleteResponseFull();
+
             if (dbAdapter.getCompleteResponseFull() != 0) {
                 uploadContainer.setVisibility(View.VISIBLE);
-            }
-            if (dbAdapter.getCompleteResponseFull() == 0) {
+            } else {
                 uploadContainer.setVisibility(View.GONE);
             }
-        }
-    }
 
-    //get location
-    public Location getLocation() {
-        if (null != locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)) {
-            return locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        } else if (null != locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)) {
-            return locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        }
-        return locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
-    }
-
-    //if location is on
-    public boolean checkLocationOn() {
-        try {
-            gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        } catch (Exception ex) {
-        }
-        try {
-            network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-
-        } catch (Exception ex) {
-        }
-        if (!gps_enabled && !network_enabled) {
-            return false;
-        } else
-            return true;
-    }
-
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.dash_board, menu);
-        return true;
-    }
-
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_fetch) {
-            Intent i = new Intent(DashBoardActivity.this, ActiveSurveyActivity.class);
-            startActivity(i);
-
-            return true;
-        }
-        if (id == R.id.action_logout) {
-            final Dialog dialog = new Dialog(DashBoardActivity.this);
-            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); //before
-            dialog.setContentView(R.layout.logout_dialog);
-            dialog.show();
-            Button button = (Button) dialog.findViewById(R.id.okay);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    lumsticApp.getPreferences().setAccessToken("");
-                    Intent i = new Intent(DashBoardActivity.this, LoginActivity.class);
-                    startActivity(i);
-                    dialog.dismiss();
+            try {
+                for (int i = 0; i < surveysList.size(); i++) {
+                    Surveys surveys = surveysList.get(i);
+                    long value = dbAdapter.insertDataSurveysTable(surveys);
+                    if (surveys.getCategories().size() > 0)
+                        addCategories(surveys);
+                    if (surveys.getQuestions().size() > 0)
+                        addQuestions(surveys);
                 }
-            });
-            return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            listView.setAdapter(dashBoardAdapter);
         }
-        return super.onOptionsItemSelected(item);
+
     }
 
-    public class uploadResponse extends AsyncTask<Void, Void, String> {
-        protected String doInBackground(Void... voids) {
-            for (int count = 0; count < surveysList.size(); count++) {
-                jsonSyncResponses = new ArrayList<>();
-                completedResponseIds = new ArrayList<Integer>();
-                surveys = surveysList.get(count);
-                surveyId = surveys.getId();
-                completedResponseIds = dbAdapter.getCompleteResponsesIds(surveyId);
+    private void doTaskResponseUploading() {
+        if (asynTaskCheck) {
+            lumsticApp.showToast("Something went wrong , please try again");
+            progressDialog.dismiss();
+        } else {
+
+            for (int w = 0; w < surveysList.size(); w++) {
+                completedResponseIds = dbAdapter.getCompleteResponsesIds(surveysList.get(w).getId());
+
+                totalCompletedResponses = totalCompletedResponses + completedResponseIds.size();
+
                 for (int i = 0; i < completedResponseIds.size(); i++) {
-                    answerses = new ArrayList<Answers>();
+                    answers = new ArrayList<>();
                     completedResponseIds.get(i);
-                    answerses = null;
-                    answerses = dbAdapter.getAnswerByResponseId(completedResponseIds.get(i));
-                    jsonArray = new JSONArray();
-                    for (int j = 0; j < answerses.size(); j++) {
-                        JSONObject jsonObject = new JSONObject();
-                        try {
-                            jsonObject.put("question_id", answerses.get(j).getQuestion_id());
-                            jsonObject.put("updated_at", answerses.get(j).getUpdated_at());
-                            jsonObject.put("content", answerses.get(j).getContent());
-
-                            try {
-                                if ((answerses.get(j).getType().equals("MultiChoiceQuestion")) && (dbAdapter.getChoicesCount(answerses.get(j).getId()) == 0)) {
-                                    Log.e("thereisastring", dbAdapter.getChoicesCount(answerses.get(j).getId()) + "cdcdcd");
-                                    Log.e("testing", answerses.get(j).getType() + "this is a type");
-                                    jsonObject.put("option_ids", JSONObject.NULL);
-                                    jsonObject.remove("content");
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-
-
-                            try {
-                                if ((answerses.get(j).getType().equals("DropDownQuestion")) || (answerses.get(j).getType().equals("MultiChoiceQuestion")) || (answerses.get(j).getType().equals("RadioQuestion"))) {
-                                    if ((answerses.get(j).getContent().equals("")) && (dbAdapter.getChoicesCountWhereAnswerIdIs(answerses.get(j).getId(),0) > 0)) {
-                                        Log.e("goingintheloop", "intheloop");
-                                        String type = dbAdapter.getQuestionTypeWhereAnswerIdIs(answerses.get(j).getId());
-                                        if (type.equals("RadioQuestion")) {
-                                            jsonObject.put("content", dbAdapter.getChoicesWhereAnswerCountIsOne(answerses.get(j).getId()));
-                                        }
-                                        if (type.equals("DropDownQuestion")) {
-                                            jsonObject.put("content", dbAdapter.getChoicesWhereAnswerCountIsOne(answerses.get(j).getId()));
-                                        }
-                                        if (type.equals("MultiChoiceQuestion")) {
-                                            List<Integer> options = new ArrayList<>();
-                                            options = dbAdapter.getChoicesWhereAnswerCountIsMoreThanOne(answerses.get(j).getId());
-                                            if (options.size() > 0)
-                                                jsonObject.putOpt("option_ids", options);
-                                            jsonObject.remove("content");
-                                        }
-                                    }
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            try {
-                                if (answerses.get(j).getType().equals("PhotoQuestion")) {
-                                    Log.e("answers", "dex");
-                                    String path = Environment.getExternalStorageDirectory().toString() + "/saved_images";
-                                    Bitmap b = null;
-                                    String fileName = answerses.get(j).getImage();
-                                    //Toast.makeText(SurveyDetailsActivity.this,fileName,Toast.LENGTH_SHORT).show();
-                                    try {
-                                        File f = new File(path, fileName);
-                                        b = BitmapFactory.decodeStream(new FileInputStream(f));
-                                    } catch (FileNotFoundException e) {
-                                        e.printStackTrace();
-                                    }
-                                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                                    b.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-                                    byte[] byteArray = byteArrayOutputStream.toByteArray();
-                                    String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
-                                    jsonObject.put("photo", encoded);
-                                    jsonObject.put("content", "");
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        jsonArray.put(jsonObject);
-                    }
+                    answers = null;
+                    answers = dbAdapter.getAnswerByResponseId(completedResponseIds.get(i));
+                    String lat = dbAdapter.getLatitudeFromResponseIDAndSurveyID(completedResponseIds.get(i), surveysList.get(w).getId());
+                    String lon = dbAdapter.getLongitudeFromResponseIDAndSurveyID(completedResponseIds.get(i), surveysList.get(w).getId());
                     JSONObject obj = new JSONObject();
+
+                    JSONObject localJsonObject = CommonUtil.getAnswerJsonObject(answers, dbAdapter);
+                    String mobilId = dbAdapter.getMobileIDFromResponseIDAndSurveyID(completedResponseIds.get(i), surveysList.get(w).getId());
                     try {
                         obj.put("status", "complete");
-                        obj.put("survey_id", surveys.getId());
+                        obj.put("survey_id", surveysList.get(w).getId());
                         obj.put("updated_at", timestamp);
                         obj.put("longitude", lon);
                         obj.put("latitude", lat);
@@ -337,69 +364,345 @@ public class DashBoardActivity extends Activity {
                         obj.put("organization_id", lumsticApp.getPreferences().getOrganizationId());
                         obj.put("access_token", lumsticApp.getPreferences().getAccessToken());
                         obj.put("mobile_id", mobilId);
-                        obj.put("answers_attributes", jsonArray);
-                        jsonStr = obj.toString();
-                        Log.e("jsonString", jsonStr);
+                        obj.put("answers_attributes", localJsonObject);
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    UUID.randomUUID().toString();
-                    HttpClient httpclient = new DefaultHttpClient();
-                    HttpPost httppost = new HttpPost(uploadUrl);
-                    List nameValuePairs = new ArrayList();
-                    nameValuePairs.add(new BasicNameValuePair("answers_attributes", jsonArray.toString()));
-                    nameValuePairs.add(new BasicNameValuePair("response", jsonStr));
-                    nameValuePairs.add(new BasicNameValuePair("status", "complete"));
-                    nameValuePairs.add(new BasicNameValuePair("survey_id", surveys.getId() + ""));
-                    nameValuePairs.add(new BasicNameValuePair("updated_at", timestamp));
-                    nameValuePairs.add(new BasicNameValuePair("longitude", lon + ""));
-                    nameValuePairs.add(new BasicNameValuePair("latitude", lat + ""));
-                    nameValuePairs.add(new BasicNameValuePair("access_token", lumsticApp.getPreferences().getAccessToken()));
-                    nameValuePairs.add(new BasicNameValuePair("user_id", lumsticApp.getPreferences().getUserId()));
-                    nameValuePairs.add(new BasicNameValuePair("organization_id", lumsticApp.getPreferences().getOrganizationId()));
-                    nameValuePairs.add(new BasicNameValuePair("mobile_id", mobilId));
-                    try {
-                        httppost.addHeader("access_token", lumsticApp.getPreferences().getAccessToken());
-                        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-                        HttpResponse httpResponse = httpclient.execute(httppost);
-                        HttpEntity httpEntity = httpResponse.getEntity();
-                        syncString = EntityUtils.toString(httpEntity);
-                        Log.e("jsonsyncresponse", syncString);
-                        jsonSyncResponses.add(syncString);
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    } catch (ClientProtocolException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+
+
+                    new uploadResponse().execute(localJsonObject.toString(), obj.toString(), surveysList.get(w).getId() + "", timestamp, lat + "", lon + "", mobilId, completedResponseIds.get(i) + "");
                 }
-                for (int i = 0; i < jsonSyncResponses.size(); i++) {
-                    if (jsonParser.parseSyncResult(jsonSyncResponses.get(i))) {
-                        uploadCount++;
-                        dbAdapter.deleteFromResponseTableOnUpload(surveyId);
-                    }
-                }
+
             }
+        }
+
+    }
+
+    public class uploadingMultiRecordResponse extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            if (CommonUtil.isTokenExpired(lumsticApp)) {
+                CommonUtil.reValidateToken(lumsticApp, baseUrl + loginUrl);
+            }
+            generateRecordId();
             return null;
         }
 
         @Override
-        protected void onPostExecute(String s) {
-            progressDialog.dismiss();
-            if (uploadCount == completeCount) {
-                dashBoardAdapter.notifyDataSetChanged();
-                Toast.makeText(DashBoardActivity.this, "Responses uploaded successfully:  " + uploadCount + "    Errors:0", Toast.LENGTH_LONG).show();
-                uploadCount = 0;
-                completeCount = dbAdapter.getCompleteResponseFull();
+        protected void onPostExecute(Void result) {
+            doTaskResponseUploading();
+        }
+    }
 
-                if (dbAdapter.getCompleteResponseFull() != 0) {
-                    uploadContainer.setVisibility(View.VISIBLE);
+    private static HttpEntity createStringEntity(JSONObject params) {
+        StringEntity se = null;
+        try {
+            se = new StringEntity(params.toString(), "UTF-8");
+            se.setContentType("application/json; charset=UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            Log.e("TAG", "Failed to create StringEntity", e);
+        }
+        return se;
+    }
+
+    public void getWebIdFromServer(Integer[] integer) {
+
+        int answerId = 0;
+        answerId = integer[1];
+        String recordsyncString = "";
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("category_id", integer[0]);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        HttpClient httpclient = new DefaultHttpClient();
+        HttpPost httppost = new HttpPost(recordUrl);
+        //attributes for survey sync
+        try {
+            httppost.addHeader("access_token", lumsticApp.getPreferences().getAccessToken());
+            httppost.setEntity(createStringEntity(jsonObject));
+            HttpResponse httpResponse = httpclient.execute(httppost);
+            HttpEntity httpEntity = httpResponse.getEntity();
+            recordsyncString = EntityUtils.toString(httpEntity);
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        int recordId = jsonParser.parseRecordIdResult(recordsyncString);
+
+        if (recordId != 0) {
+            dbAdapter.updateForMultiRecord(answerId, recordId);
+        } else {
+            asynTaskCheck = true;
+        }
+
+    }
+
+    public void getWebIdFromServerCaseTwo(Integer[] integer) {
+        int answerId;
+        int webId;
+
+        answerId = integer[1];
+        webId = integer[2];
+        String recordsyncString = "";
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("category_id", integer[0]);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        HttpClient httpclient = new DefaultHttpClient();
+
+        HttpPut httppost = new HttpPut(baseUrl + "/api/records/" + webId + ".json");
+        //attributes for survey sync
+        try {
+            httppost.addHeader("access_token", lumsticApp.getPreferences().getAccessToken());
+            httppost.setEntity(createStringEntity(jsonObject));
+            HttpResponse httpResponse = httpclient.execute(httppost);
+            HttpEntity httpEntity = httpResponse.getEntity();
+            recordsyncString = EntityUtils.toString(httpEntity);
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        int recordId = jsonParser.parseRecordIdResult(recordsyncString);
+        if (recordId != 0) {
+            dbAdapter.updateForMultiRecord(answerId, recordId);
+        } else {
+            asynTaskCheck = true;
+        }
+
+    }
+
+    public void generateRecordId() {
+        for (int w = 0; w < surveysList.size(); w++) {
+            completedResponseIds = dbAdapter.getCompleteResponsesIds(surveysList.get(w).getId());
+
+
+            for (int k = 0; k < completedResponseIds.size(); k++) {
+                int responseId = completedResponseIds.get(k);
+                for (int i = 0; i < surveysList.get(w).getCategories().size(); i++) {
+                    if (surveysList.get(w).getCategories().get(i).getType().equals(CommonUtil.CATEGORY_TYPE_MULTI_RECORD)) {
+
+
+                        for (int j = 0; j < surveysList.get(w).getCategories().get(i).getQuestionsList().size(); j++) {
+                            Cursor cursor = dbAdapter.getRecords(surveysList.get(w).getCategories().get(i).getQuestionsList().get(j).getId(), responseId);
+
+                            cursor.moveToFirst();
+                            if (cursor.getCount() > 0) {
+                                for (int l = 0; l < cursor.getCount(); l++) {
+
+                                    int webId = cursor.getInt(cursor.getColumnIndex(DBAdapter.DBhelper.WEB_ID));
+                                    int answerId = cursor.getInt(cursor.getColumnIndex(DBAdapter.DBhelper.ID));
+                                    if (webId == 0) {
+                                        //default url
+                                        Integer[] categoryId = {surveysList.get(w).getCategories().get(i).getId(), answerId};
+                                        getWebIdFromServer(categoryId);
+                                    } else {
+                                        int recordId = cursor.getInt(cursor.getColumnIndex(DBAdapter.DBhelper.RECORD_ID));
+                                        //dynamic url
+                                        Integer[] categoryId = {surveysList.get(w).getCategories().get(i).getId(), answerId, recordId};
+                                        getWebIdFromServerCaseTwo(categoryId);
+                                    }
+                                    cursor.moveToNext();
+                                }
+
+                            }
+                        }
+                    }
                 }
-                if (dbAdapter.getCompleteResponseFull() == 0) {
-                    uploadContainer.setVisibility(View.GONE);
+
+            }
+
+        }
+
+    }
+
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_dash_board, menu);
+        return true;
+    }
+
+    public static int daysBetween(String publishDate, String expiryDate) {
+        SimpleDateFormat dfDate = new SimpleDateFormat("yyyy-MM-dd");
+        Date d1 = null, d2 = null;
+        try {
+            d1 = dfDate.parse(publishDate);
+            d2 = dfDate.parse(expiryDate);
+        } catch (ParseException e) {
+
+        }
+        int daysToExpire = 0;
+        try {
+            daysToExpire = (int) ((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24));
+        } catch (Exception e) {
+
+        }
+        return daysToExpire;
+    }
+
+    private boolean checkForExpiredSurveys() {
+        boolean isSyncRequired = false;
+        if (surveysList != null) {
+            for (int i = 0; i < surveysList.size(); i++) {
+                int daysToExpire = daysBetween(surveysList.get(i).getPublishedOn(), surveysList.get(i).getExpiryDate());
+                int completedResponseCount = dbAdapter.getCompleteResponse(surveysList.get(i).getId());
+                Log.e("TAG", "Completed Response : " + completedResponseCount + " Days To Expire : " + daysToExpire);
+                if (completedResponseCount > 0 && daysToExpire <= 0) {
+                    isSyncRequired = true;
+                    break;
                 }
             }
         }
+        return isSyncRequired;
     }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_fetch) {
+            if (NetworkUtil.iSConnected(getApplicationContext()) == NetworkUtil.TYPE_CONNECTED) {
+                if (checkForExpiredSurveys()) {
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(DashBoardActivity.this);
+                    alertDialogBuilder
+                            .setMessage("You have completed responses for an expired survey. Please sync responses before fetching..")
+                            .setCancelable(false)
+                            .setPositiveButton("yes",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog,
+                                                            int id) {
+                                            progressDialog.show();
+                                            surveyUploadCount = 0;
+                                            surveyUploadFailedCount = 0;
+                                            asynTaskCheck = false;
+                                            new uploadingMultiRecordResponse().execute();
+                                        }
+                                    });
+                    alertDialogBuilder.setNegativeButton("No",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+                    AlertDialog alert = alertDialogBuilder.create();
+                    alert.show();
+                } else {
+                    new FetchSurvey().execute();
+                }
+
+            } else {
+                lumsticApp.showToast("Please check your internet connection");
+            }
+            return true;
+        } else if (id == R.id.action_logout) {
+            CommonUtil.Logout(DashBoardActivity.this, lumsticApp);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public class uploadResponse extends AsyncTask<String, Void, String> {
+        private String syncString = null;
+        String localResponseID;
+        String localSurveyID;
+
+        protected String doInBackground(String... string) {
+
+
+            String answers_attributes = string[0];
+            String response = string[1];
+            localSurveyID = string[2];
+            String updated_at = string[3];
+            String lat = string[4];
+            String lon = string[5];
+            String mob_id = string[6];
+            localResponseID = string[7];
+
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpPost httppost = new HttpPost(uploadUrl);
+
+            JSONObject finalJsonObject = new JSONObject();
+            try {
+                finalJsonObject.put("answers_attributes", new JSONObject(answers_attributes));
+                finalJsonObject.put("response", new JSONObject(response));
+                finalJsonObject.put("status", "complete");
+                finalJsonObject.put("survey_id", localSurveyID);
+                finalJsonObject.put("updated_at", updated_at);
+                finalJsonObject.put("longitude", lon + "");
+                finalJsonObject.put("latitude", lat + "");
+                finalJsonObject.put("access_token", lumsticApp.getPreferences().getAccessToken());
+                finalJsonObject.put("user_id", lumsticApp.getPreferences().getUserId());
+                finalJsonObject.put("organization_id", lumsticApp.getPreferences().getOrganizationId());
+                finalJsonObject.put("mobile_id", mob_id);
+                finalJsonObject.put("format", "json");
+                finalJsonObject.put("action", "create");
+                finalJsonObject.put("controller", "api/v1/responses");
+            } catch (Exception e) {
+
+            }
+
+
+            Log.e("TAG", "FINAL->>" + finalJsonObject.toString());
+
+            try {
+                httppost.addHeader("access_token", lumsticApp.getPreferences().getAccessToken());
+
+                StringEntity se = new StringEntity(finalJsonObject.toString());
+                se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+                httppost.setEntity(se);
+
+                HttpResponse httpResponse = httpclient.execute(httppost);
+                if (httpResponse.getStatusLine().getStatusCode() == 200) {
+                    HttpEntity httpEntity = httpResponse.getEntity();
+                    syncString = EntityUtils.toString(httpEntity);
+                }
+
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } catch (ClientProtocolException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return syncString;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            if (jsonParser.parseSyncResult(s)) {
+                surveyUploadCount++;
+                dbAdapter.deleteFromResponseTableOnUpload(Integer.parseInt(localSurveyID), localResponseID);
+                dbAdapter.deleteFromAnswerTableWithResponseID(localResponseID);
+            } else {
+                surveyUploadFailedCount++;
+            }
+
+            completeCount = dbAdapter.getCompleteResponseFull();
+
+            if ((surveyUploadCount + surveyUploadFailedCount) == totalCompletedResponses) {
+                Toast.makeText(DashBoardActivity.this, "Responses uploaded successfully:  " + surveyUploadCount + "    Errors:" + (totalCompletedResponses - surveyUploadCount), Toast.LENGTH_LONG).show();
+                if (completeCount != 0)
+                    uploadContainer.setVisibility(View.VISIBLE);
+                else
+                    uploadContainer.setVisibility(View.GONE);
+
+                progressDialog.dismiss();
+            }
+        }
+    }
+
+
 }

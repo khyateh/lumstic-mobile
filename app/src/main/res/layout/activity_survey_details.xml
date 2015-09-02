@@ -145,17 +145,14 @@
                             android:id="@+id/upload_button"
                             android:layout_width="48dp"
                             android:layout_height="48dp"
-                            android:background="@drawable/custom_button">
+                            android:background="@drawable/selector_custom_button">
 
                             <ImageView
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
                                 android:layout_centerInParent="true"
-
                                 android:layout_gravity="center"
-                                android:background="@drawable/custom_button"
-
-
+                                android:background="@drawable/selector_custom_button"
                                 android:src="@drawable/ic_upload"
                                 android:textColor="@color/white" />
                         </RelativeLayout>
@@ -232,7 +229,7 @@
                 android:layout_marginBottom="30dp"
                 android:layout_marginRight="30dp"
                 android:layout_marginTop="12dp"
-                android:background="@drawable/custom_button"
+                android:background="@drawable/selector_custom_button"
                 android:text="+  ADD RESPONSE"
                 android:textColor="@color/white"
                 android:textSize="16sp" />

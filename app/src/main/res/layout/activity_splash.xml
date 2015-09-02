@@ -1,57 +1,46 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    tools:context=".MyActivity">
+    android:background="@color/white">
 
     <ImageView
-        android:id="@+id/logo_image"
+        android:id="@+id/img_logo"
         android:layout_width="98dp"
         android:layout_height="98dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="100dp"
-        android:src="@drawable/splash_logo"></ImageView>
+        android:src="@drawable/ic_logo_splash" />
 
     <View
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/by_ashoka_text"
-        android:layout_below="@+id/logo_image"
+        android:layout_alignBottom="@+id/tv_appname"
+        android:layout_below="@+id/img_logo"
         android:layout_marginBottom="-10dp"
         android:background="@drawable/splash_screen_background"></View>
 
     <TextView
-        android:id="@+id/appname_text"
+        android:id="@+id/tv_appname"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/logo_image"
+        android:layout_below="@+id/img_logo"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="11dp"
+        android:layout_marginBottom="9dp"
+        android:layout_marginTop="10dp"
+        android:paddingBottom="10dp"
         android:text="By Ashoka Innovators for the Public"
         android:textColor="#212121"
         android:textSize="14sp"
         android:textStyle="italic" />
 
-    <TextView
-        android:id="@+id/by_ashoka_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/appname_text"
-        android:layout_centerHorizontal="true"
-        android:padding="10dp"
-        android:text=""
-        android:textColor="@color/By_ashoka_text_color"
-        android:textSize="20sp"
-        android:textStyle="italic" />
 
     <ImageView
         android:id="@+id/background_image"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@+id/by_ashoka_text"
+        android:layout_below="@+id/tv_appname"
         android:layout_centerInParent="true"
         android:adjustViewBounds="true"
-        android:background="@drawable/splash_bg_img"
-        android:scaleType="centerCrop"></ImageView>
+        android:background="@drawable/bg_splash"
+        android:scaleType="centerCrop" />
 </RelativeLayout>

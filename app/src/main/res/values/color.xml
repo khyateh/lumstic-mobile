@@ -6,6 +6,7 @@
     <color name="login_screen_background">#F9FBFD</color>
     <color name="By_ashoka_text_color">#939596</color>
     <color name="login_button_color">#FF301B</color>
+    <color name="login_button_color_pressed">#c11f0e</color>
     <color name="forgot_password_text">#C0C1C1</color>
     <color name="error_text_color">#F5161A</color>
     <color name="dash_board_foreground">#FBFBFB</color>

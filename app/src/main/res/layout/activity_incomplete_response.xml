@@ -64,7 +64,7 @@
             android:layout_centerHorizontal="true"
             android:layout_marginLeft="24dp"
             android:layout_marginTop="9dp"
-            android:background="@drawable/custom_button"
+            android:background="@drawable/selector_custom_button"
             android:text="Upload Completed Responses"
             android:textColor="@color/white"
             android:textSize="16sp"

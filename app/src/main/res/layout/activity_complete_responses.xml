@@ -64,7 +64,7 @@
             android:layout_gravity="center"
             android:layout_marginLeft="30dp"
             android:layout_marginTop="19dp"
-            android:background="@drawable/custom_button"
+            android:background="@drawable/selector_custom_button"
             android:gravity="center"
             android:orientation="horizontal"
             android:padding="8dp">

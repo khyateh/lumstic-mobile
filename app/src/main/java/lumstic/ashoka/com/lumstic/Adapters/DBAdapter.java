@@ -216,6 +216,12 @@ public class DBAdapter {
 
     }
 
+    public int deleteFromChoicesTableWhereAnswerId(int localAnswerID) {
+        String[] selectionArgs = {String.valueOf(localAnswerID)};
+        int id1 = sqLiteDatabase.delete(DBhelper.TABLE_choices, DBhelper.ANSWER_ID + " =? ", selectionArgs);
+        return id1;
+    }
+
 
     public int deleteImagePath(int responseId, int questionId, int recordId) {
         int id = 0;
@@ -224,6 +230,17 @@ public class DBAdapter {
         return id1;
     }
 
+
+    public int UpdateCompleteResponse(int responseId, int surveyId, String latitude, String longitude) {
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBhelper.LATITUDE, latitude);
+        contentValues.put(DBhelper.LONGITUDE, longitude);
+        String[] args = {String.valueOf(responseId), String.valueOf(surveyId)};
+        int x = sqLiteDatabase.update(DBhelper.TABLE_responses, contentValues, DBhelper.ID + " =? AND " + DBhelper.SURVEY_ID + " =?", args);
+        return x;
+
+    }
 
     public int UpdateCompleteResponse(int responseId, int surveyId) {
 
@@ -296,6 +313,47 @@ public class DBAdapter {
         return value;
     }
 
+    public String getMobileIDFromResponseIDAndSurveyID(int localResponseID, int localSurveyID) {
+        String latitude = null;
+        String[] coloums = {DBhelper.ID, DBhelper.MOBILE_ID, DBhelper.SURVEY_ID};
+        String[] selectionArgs = {String.valueOf(localResponseID), String.valueOf(localSurveyID)};
+        Cursor cursor = sqLiteDatabase.query(DBhelper.TABLE_responses, coloums, DBhelper.ID + " =? AND " + DBhelper.SURVEY_ID + " =?", selectionArgs, null, null, null);
+
+        if (cursor != null & cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            latitude = cursor.getString(cursor.getColumnIndex(DBhelper.MOBILE_ID));
+        }
+
+        return latitude;
+    }
+
+    public String getLatitudeFromResponseIDAndSurveyID(int localResponseID, int localSurveyID) {
+        String latitude = null;
+        String[] coloums = {DBhelper.ID, DBhelper.LATITUDE, DBhelper.SURVEY_ID};
+        String[] selectionArgs = {String.valueOf(localResponseID), String.valueOf(localSurveyID)};
+        Cursor cursor = sqLiteDatabase.query(DBhelper.TABLE_responses, coloums, DBhelper.ID + " =? AND " + DBhelper.SURVEY_ID + " =?", selectionArgs, null, null, null);
+
+        if (cursor != null & cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            latitude = cursor.getString(cursor.getColumnIndex(DBhelper.LATITUDE));
+        }
+
+        return latitude;
+    }
+
+    public String getLongitudeFromResponseIDAndSurveyID(int localResponseID, int localSurveyID) {
+        String longitude = null;
+        String[] coloums = {DBhelper.ID, DBhelper.LONGITUDE, DBhelper.SURVEY_ID};
+        String[] selectionArgs = {String.valueOf(localResponseID), String.valueOf(localSurveyID)};
+        Cursor cursor = sqLiteDatabase.query(DBhelper.TABLE_responses, coloums, DBhelper.ID + " =? AND " + DBhelper.SURVEY_ID + " =?", selectionArgs, null, null, null);
+
+        if (cursor != null & cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            longitude = cursor.getString(cursor.getColumnIndex(DBhelper.LONGITUDE));
+        }
+
+        return longitude;
+    }
 
     public List<Integer> getIncompleteResponsesIds(int surveyId) {
         List<Integer> ids;
@@ -319,7 +377,7 @@ public class DBAdapter {
 
     public List<Integer> getCompleteResponsesIds(int surveyId) {
         List<Integer> ids;
-        ids = new ArrayList<Integer>();
+        ids = new ArrayList<>();
         String[] coloums = {DBhelper.STATUS, DBhelper.ID};
         String[] selectionArgs = {String.valueOf(surveyId)};
         Cursor cursor = sqLiteDatabase.query(DBhelper.TABLE_responses, coloums, DBhelper.SURVEY_ID + " =?", selectionArgs, null, null, null);
@@ -377,6 +435,14 @@ public class DBAdapter {
         return id1;
     }
 
+
+    public int deleteFromResponseTableOnUpload(int surveyId, String localResponseID) {
+
+        int id = surveyId;
+        String[] selectionArgs = {String.valueOf(id), "complete", localResponseID};
+        int id1 = sqLiteDatabase.delete(DBhelper.TABLE_responses, DBhelper.SURVEY_ID + " =? AND " + DBhelper.STATUS + " =? AND " + DBhelper.ID + " =?", selectionArgs);
+        return id1;
+    }
 
     public int getChoicesCountWhereAnswerIdIs(int answerId, int recordId) {
         int count = 0;
@@ -644,6 +710,12 @@ public class DBAdapter {
         return id1;
     }
 
+    public int deleteFromAnswerTableWithResponseID(String responseId) {
+
+        String[] selectionArgs = {responseId};
+        int id1 = sqLiteDatabase.delete(DBhelper.TABLE_answers, DBhelper.RESPONSE_ID + " =?", selectionArgs);
+        return id1;
+    }
 
     public int deleteFromAnswerTable(int questionId, int responseId, int recordId) {
 
@@ -778,7 +850,7 @@ public class DBAdapter {
     }
 
     public class DBhelper extends SQLiteOpenHelper {
-        private static final String DATABASE_NAME = "SurveyAppDatabase";
+        public static final String DATABASE_NAME = "SurveyAppDatabase";
         private static final int DATABASE_VERSION = 1;
         private static final String TABLE_sqlite_sequence = "sqlite_sequence";
         private static final String TABLE_choices = "choices";

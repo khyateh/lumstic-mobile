@@ -1,7 +1,6 @@
 package lumstic.ashoka.com.lumstic.UI;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,7 +24,7 @@ import lumstic.ashoka.com.lumstic.R;
 import lumstic.ashoka.com.lumstic.Utils.IntentConstants;
 import lumstic.ashoka.com.lumstic.Utils.LumsticApp;
 
-public class IncompleteResponseActivity extends Activity {
+public class IncompleteResponseActivity extends BaseActivity {
 
     private IncompleteResponsesAdapter incompleteResponsesAdapter;
     private DBAdapter dbAdapter;
@@ -52,7 +51,7 @@ public class IncompleteResponseActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_incomplete_response);
 
-        lumsticApp= (LumsticApp) getApplication();
+        lumsticApp = (LumsticApp) getApplication();
         //setting up action bar
         actionBar = getActionBar();
         actionBar.setTitle("Incomplete Responses");
@@ -86,7 +85,7 @@ public class IncompleteResponseActivity extends Activity {
         }
 
         for (int i = 0; i < incompleteResponseCount; i++) {
-            identifierQuestionAnswers.add(dbAdapter.getAnswer(incompleteResponsesId.get(i), identifierQuestionId,0));
+            identifierQuestionAnswers.add(dbAdapter.getAnswer(incompleteResponsesId.get(i), identifierQuestionId, 0));
             try {
                 incompleteResponseses.add(i, new IncompleteResponses(String.valueOf(incompleteResponsesId.get(i)), identifierQuestion.getContent() + " :" + "  " + identifierQuestionAnswers.get(i)));
             } catch (Exception e) {
@@ -106,14 +105,14 @@ public class IncompleteResponseActivity extends Activity {
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        if(lumsticApp.getPreferences().getBack_pressed()){
+        if (lumsticApp.getPreferences().getBack_pressed()) {
             finish();
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.incomplete_response, menu);
+        getMenuInflater().inflate(R.menu.menu_complete_responses, menu);
         return true;
     }
 
@@ -121,21 +120,11 @@ public class IncompleteResponseActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
+
         if (id == android.R.id.home) {
             finish();
             return true;
-        }
-        if (id == R.id.action_fetch) {
-
-            Intent i = new Intent(IncompleteResponseActivity.this, ActiveSurveyActivity.class);
-            startActivity(i);
-            finish();
-            return true;
-        }
-        if (id == R.id.action_logout) {
+        } else if (id == R.id.action_logout) {
             final Dialog dialog = new Dialog(IncompleteResponseActivity.this);
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); //before
             dialog.setContentView(R.layout.logout_dialog);
@@ -145,10 +134,12 @@ public class IncompleteResponseActivity extends Activity {
                 @Override
                 public void onClick(View view) {
                     lumsticApp.getPreferences().setAccessToken("");
-                    finish();
+
                     Intent i = new Intent(IncompleteResponseActivity.this, LoginActivity.class);
+                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(i);
                     dialog.dismiss();
+                    finish();
 
                 }
             });

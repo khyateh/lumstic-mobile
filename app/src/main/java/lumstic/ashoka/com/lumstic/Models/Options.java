@@ -2,6 +2,7 @@ package lumstic.ashoka.com.lumstic.Models;
 
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Options implements Serializable {
@@ -9,8 +10,8 @@ public class Options implements Serializable {
     int id;
     int questionId;
     String content;
-    List<Questions> questions;
-    List<Categories> categories;
+    List<Questions> questions = new ArrayList<>();
+    List<Categories> categories = new ArrayList<>();
 
 
     public List<Questions> getQuestions() {

@@ -1,14 +1,14 @@
 package lumstic.ashoka.com.lumstic.UI;
 
 import android.app.ActionBar;
-import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,24 +32,23 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import lumstic.ashoka.com.lumstic.Adapters.DBAdapter;
 import lumstic.ashoka.com.lumstic.Models.UserModel;
 import lumstic.ashoka.com.lumstic.R;
 import lumstic.ashoka.com.lumstic.Utils.CommonUtil;
 import lumstic.ashoka.com.lumstic.Utils.JSONParser;
-import lumstic.ashoka.com.lumstic.Utils.LumsticApp;
+import lumstic.ashoka.com.lumstic.Utils.NetworkUtil;
 
-public class LoginActivity extends Activity {
+public class LoginActivity extends BaseActivity {
 
-    private String baseUrl = "";
-    private String loginUrl="/api/login";
-    private  String url = "";
+    private String loginUrl = "/api/login";
     private UserModel userModel;
-    private LumsticApp lumsticApp;
     private ProgressDialog progressDialog;
     private ActionBar actionBar;
-    private TextView fogotPassword;
+    private TextView forgotPassword;
     private Button loginButton;
     private EditText emailEditText, passwordEditText;
     private String jsonLoginString = "";
@@ -59,26 +58,6 @@ public class LoginActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        lumsticApp = (LumsticApp) getApplication();
-        if(lumsticApp.getPreferences().getBaseUrl()==null){
-            baseUrl=LoginActivity.this.getResources().getString(R.string.server_url);
-        }
-        else
-        baseUrl=lumsticApp.getPreferences().getBaseUrl();
-
-
-
-        url=baseUrl+loginUrl;
-        //if USER IS SIGNED IN
-        try {
-            if (!lumsticApp.getPreferences().getAccessToken().equals("")) {
-                Intent i = new Intent(LoginActivity.this, DashBoardActivity.class);
-                startActivity(i);
-                finish();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         //initialize action bar
         actionBar = getActionBar();
@@ -93,7 +72,7 @@ public class LoginActivity extends Activity {
         emailEditText = (EditText) findViewById(R.id.email_edit_text);
         passwordEditText = (EditText) findViewById(R.id.password_edit_text);
         loginButton = (Button) findViewById(R.id.login_button);
-        fogotPassword = (TextView) findViewById(R.id.forgot_password);
+        forgotPassword = (TextView) findViewById(R.id.forgot_password);
 
         //on login button click
         loginButton.setOnClickListener(new View.OnClickListener() {
@@ -102,15 +81,28 @@ public class LoginActivity extends Activity {
 
                 email = emailEditText.getText().toString();
                 password = passwordEditText.getText().toString();
-                progressDialog = new ProgressDialog(LoginActivity.this);
-                progressDialog.setCancelable(false);
-                progressDialog.setIndeterminate(true);
-                progressDialog.setMessage("Logging in");
-                progressDialog.show();
+
                 //validation of email
                 if (!TextUtils.isEmpty(email) && CommonUtil.validateEmail(email)) {
                     lumsticApp.getPreferences().setSurveyData("");
-                    new Login().execute();
+
+                    if (NetworkUtil.iSConnected(getApplicationContext()) == NetworkUtil.TYPE_CONNECTED) {
+                        progressDialog = new ProgressDialog(LoginActivity.this);
+                        progressDialog.setCancelable(false);
+                        progressDialog.setIndeterminate(true);
+                        progressDialog.setMessage("Logging in");
+                        progressDialog.show();
+
+                        lumsticApp.getPreferences().setUsername(email);
+                        lumsticApp.getPreferences().setPassword(password);
+
+
+                        new Login().execute();
+                    } else {
+                        lumsticApp.showToast("Please check your internet connection");
+                    }
+
+
                 } else {
                     lumsticApp.showToast("Enter Valid Email ");
                 }
@@ -118,7 +110,7 @@ public class LoginActivity extends Activity {
         });
 
         //on user forgot password
-        fogotPassword.setOnClickListener(new View.OnClickListener() {
+        forgotPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
@@ -129,7 +121,7 @@ public class LoginActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.login, menu);
+        getMenuInflater().inflate(R.menu.menu_login, menu);
         return true;
     }
 
@@ -138,21 +130,49 @@ public class LoginActivity extends Activity {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
 
-             final Dialog dialog = new Dialog(LoginActivity.this);
-            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); //before
-            dialog.setContentView(R.layout.settings_dialog);
-            dialog.show();
+            final Dialog mainDialog = new Dialog(LoginActivity.this);
+            mainDialog.requestWindowFeature(Window.FEATURE_NO_TITLE); //before
+            mainDialog.setContentView(R.layout.settings_dialog);
+            mainDialog.show();
 
-            final EditText url=(EditText)dialog.findViewById(R.id.server_address);
-            url.setText(lumsticApp.getPreferences().getBaseUrl());
+            final EditText etURL = (EditText) mainDialog.findViewById(R.id.server_address);
+            if (lumsticApp.getPreferences().getBaseUrl() != null) {
+                etURL.setText(lumsticApp.getPreferences().getBaseUrl());
+            } else {
+                etURL.setText(getResources().getString(R.string.server_url));
+            }
 
-            Button button = (Button) dialog.findViewById(R.id.save);
-           button.setOnClickListener(new View.OnClickListener() {
+            Button button = (Button) mainDialog.findViewById(R.id.save);
+            button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if(!url.getText().toString().equals(""))
-                    lumsticApp.getPreferences().setBaseUrl(url.getText().toString());
-                    dialog.dismiss();
+
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoginActivity.this);
+                    alertDialogBuilder.setTitle("Change of Server")
+                            .setMessage("This will clear the database and log you out, Are you sure?")
+                            .setCancelable(false)
+                            .setPositiveButton("Yes",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog,
+                                                            int id) {
+                                            lumsticApp.getPreferences().setBaseUrl(etURL.getText().toString());
+                                            baseUrl = etURL.getText().toString();
+                                            dialog.dismiss();
+                                            mainDialog.dismiss();
+                                            getApplicationContext().deleteDatabase(DBAdapter.DBhelper.DATABASE_NAME);
+                                        }
+                                    });
+                    alertDialogBuilder.setNegativeButton("Cancel",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.dismiss();
+                                    mainDialog.dismiss();
+                                }
+                            });
+                    AlertDialog alert = alertDialogBuilder.create();
+                    alert.show();
+
+
                 }
             });
 
@@ -163,44 +183,55 @@ public class LoginActivity extends Activity {
 
         return super.onOptionsItemSelected(item);
     }
+
     //asyn class on new thread to api call progress
     public class Login extends AsyncTask<Void, Void, String> {
 
+        Boolean isAuthorized = false;
 
         protected String doInBackground(Void... voids) {
 
             //sends email and password to the server as name value pairs
             try {
                 HttpClient httpclient = new DefaultHttpClient();
-                HttpPost httppost = new HttpPost(url);
-                Log.e("urlis",url);
+                HttpPost httppost = new HttpPost(baseUrl + loginUrl);
+
                 List nameValuePairs = new ArrayList();
                 nameValuePairs.add(new BasicNameValuePair("username", email));
                 nameValuePairs.add(new BasicNameValuePair("password", password));
                 httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
                 HttpResponse httpResponse = httpclient.execute(httppost);
-                HttpEntity httpEntity = httpResponse.getEntity();
-                jsonLoginString = EntityUtils.toString(httpEntity);
-                Log.e("datainfo", jsonLoginString);
+
+                if (httpResponse.getStatusLine().getStatusCode() == 401) {
+                    isAuthorized = false;
+                } else {
+                    HttpEntity httpEntity = httpResponse.getEntity();
+                    jsonLoginString = EntityUtils.toString(httpEntity);
+                    isAuthorized = true;
+                }
+
+
             } catch (ClientProtocolException e) {
             } catch (IOException e) {
             }
             return jsonLoginString;
         }
+
         // response back from server
         @Override
         protected void onPostExecute(String result) {
 
-            Log.e("isthisworking", jsonLoginString);
-            JSONObject jsonObjectLogin = null;
             try {
-                jsonObjectLogin = new JSONObject(jsonLoginString);
+                JSONObject jsonObjectLogin = new JSONObject(jsonLoginString);
                 JSONParser jsonParser = new JSONParser();
                 userModel = jsonParser.parseLogin(jsonObjectLogin);
                 lumsticApp.getPreferences().setAccessToken(userModel.getAccess_token());
                 lumsticApp.getPreferences().setUserId(String.valueOf(userModel.getUser_id()));
                 lumsticApp.getPreferences().setOrganizationId(String.valueOf(userModel.getOrganisation_id()));
+                lumsticApp.getPreferences().setAccess_token_created_at(String.valueOf(new Date().getTime()));
             } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (NullPointerException e) {
                 e.printStackTrace();
             }
             if (userModel != null) {
@@ -210,6 +241,12 @@ public class LoginActivity extends Activity {
                 startActivity(intent);
                 finish();
             }
+
+            if (!isAuthorized) {
+                Toast.makeText(LoginActivity.this, "Invalid Username or Password", Toast.LENGTH_LONG).show();
+                progressDialog.dismiss();
+            }
         }
     }
+
 }

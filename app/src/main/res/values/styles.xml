@@ -5,6 +5,13 @@
         <item name="android:actionBarStyle">@style/MyActionBar</item>
         <item name="android:actionMenuTextColor">@color/orange_text</item>
         <item name="android:popupMenuStyle">@style/PopupMenu.Example</item>
+        <item name="android:listChoiceBackgroundIndicator">
+            @drawable/apptheme_list_selector_holo_light
+        </item>
+
+        <item name="android:activatedBackgroundIndicator">
+            @drawable/apptheme_activated_background_holo_light
+        </item>
     </style>
 
 

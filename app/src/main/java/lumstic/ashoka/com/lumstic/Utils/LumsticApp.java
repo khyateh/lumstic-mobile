@@ -40,4 +40,5 @@ public class LumsticApp  extends Application {
     public synchronized Preferences getPreferences() {
         return preferences;
     }
+
 }

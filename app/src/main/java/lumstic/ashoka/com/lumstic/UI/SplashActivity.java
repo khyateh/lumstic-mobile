@@ -1,47 +1,47 @@
 package lumstic.ashoka.com.lumstic.UI;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import lumstic.ashoka.com.lumstic.R;
-import lumstic.ashoka.com.lumstic.Utils.LumsticApp;
+import lumstic.ashoka.com.lumstic.Utils.CommonUtil;
 
 
-public class SplashActivity extends Activity {
+public class SplashActivity extends BaseActivity {
 
-    private LumsticApp lumsticApp;
+
+    int SPLASH_SCREEN_DELAY = 2000;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        lumsticApp = (LumsticApp) getApplication();
-        //set timer for splash screen
-        TimerTask task = new TimerTask() {
+
+        new Handler().postDelayed(new Runnable() {
 
             @Override
             public void run() {
-
-                Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
-                startActivity(intent);
+                if (CommonUtil.isLoggedIn(lumsticApp)) {
+                    Intent i = new Intent(SplashActivity.this, DashBoardActivity.class);
+                    startActivity(i);
+                } else {
+                    Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
+                    startActivity(intent);
+                }
                 finish();
             }
+        }, SPLASH_SCREEN_DELAY);
 
-        };
-        Timer t = new Timer();
-        t.schedule(task, 2000);
+
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.my, menu);
+        getMenuInflater().inflate(R.menu.menu_splash, menu);
         return true;
     }
 
@@ -53,4 +53,6 @@ public class SplashActivity extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
+
 }
+

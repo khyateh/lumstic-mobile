@@ -1,7 +1,6 @@
 package lumstic.ashoka.com.lumstic.UI;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -34,11 +33,11 @@ import lumstic.ashoka.com.lumstic.R;
 import lumstic.ashoka.com.lumstic.Utils.CommonUtil;
 import lumstic.ashoka.com.lumstic.Utils.JSONParser;
 import lumstic.ashoka.com.lumstic.Utils.LumsticApp;
+import lumstic.ashoka.com.lumstic.Utils.NetworkUtil;
 
-public class ForgotPasswordActivity extends Activity {
+public class ForgotPasswordActivity extends BaseActivity {
 
-    private String baseUrl = "";
-    private  String url = "/api/password_resets";
+    private String url = "/api/password_resets";
     private ProgressDialog progressDialog;
     private LumsticApp lumsticApp;
     private Button requestPasswordButton;
@@ -62,14 +61,7 @@ public class ForgotPasswordActivity extends Activity {
         actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setDisplayUseLogoEnabled(false);
 
-        lumsticApp = (LumsticApp) getApplication();
-
-        if(lumsticApp.getPreferences().getBaseUrl()==null){
-            baseUrl=ForgotPasswordActivity.this.getResources().getString(R.string.server_url);
-        }
-        else
-            baseUrl=lumsticApp.getPreferences().getBaseUrl();
-        url=baseUrl+url;
+        url = baseUrl + url;
 
         //setting up views
         emailET = (EditText) findViewById(R.id.email_edit_text);
@@ -82,13 +74,18 @@ public class ForgotPasswordActivity extends Activity {
             public void onClick(View view) {
                 email = emailET.getText().toString();
                 //show progress dialog
-                progressDialog = new ProgressDialog(ForgotPasswordActivity.this);
-                progressDialog.setCancelable(false);
-                progressDialog.setIndeterminate(true);
-                progressDialog.setMessage("Processing ");
-                progressDialog.show();
+
                 if (!TextUtils.isEmpty(email) && CommonUtil.validateEmail(email)) {
-                    new RequestPassword().execute();
+                    if (NetworkUtil.iSConnected(getApplicationContext()) == NetworkUtil.TYPE_CONNECTED) {
+                        progressDialog = new ProgressDialog(ForgotPasswordActivity.this);
+                        progressDialog.setCancelable(false);
+                        progressDialog.setIndeterminate(true);
+                        progressDialog.setMessage("Processing ");
+                        progressDialog.show();
+                        new RequestPassword().execute();
+                    } else {
+                        lumsticApp.showToast("Please check your internet connection");
+                    }
                 } else {
                     lumsticApp.showToast("Enter Valid Email ");
                     progressDialog.dismiss();
@@ -134,10 +131,9 @@ public class ForgotPasswordActivity extends Activity {
                 if (!proceed) {
                     progressDialog.dismiss();
                     errorContainer.setVisibility(View.VISIBLE);
-                }
-                else{
+                } else {
 
-                    Toast.makeText(ForgotPasswordActivity.this,"Network error",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ForgotPasswordActivity.this, "Network error", Toast.LENGTH_SHORT).show();
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
