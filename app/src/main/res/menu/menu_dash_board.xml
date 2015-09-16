@@ -1,6 +1,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="lumstic.ashoka.com.lumstic.UI.DashBoardActivity">
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="com.lumstic.ashoka.ui.DashBoardActivity">
 
 
     <item
@@ -10,19 +10,19 @@
         <menu>
 
             <!--<item-->
-                <!--android:id="@+id/action_help1"-->
-                <!--android:icon="@drawable/ic_menu_help"-->
-                <!--android:title="@string/action_help">-->
+            <!--android:id="@+id/action_help1"-->
+            <!--android:icon="@drawable/ic_menu_help"-->
+            <!--android:title="@string/action_help">-->
 
             <!--</item>-->
             <item
                 android:id="@+id/action_fetch"
                 android:icon="@drawable/ic_menu_fetch"
-                android:title="@string/action_fetch" />
+                android:title="@string/action_fetch"/>
             <item
                 android:id="@+id/action_logout"
                 android:icon="@drawable/ic_menu_logout"
-                android:title="@string/action_logout" />
+                android:title="@string/action_logout"/>
 
         </menu>
     </item>

@@ -1,9 +1,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/blue_gradient"
-    tools:context="lumstic.ashoka.com.lumstic.UI.LoginActivity">
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/blue_gradient"
+                tools:context="com.lumstic.ashoka.ui.LoginActivity">
 
     <View
         android:layout_width="fill_parent"
@@ -35,7 +35,7 @@
         android:layout_height="99dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="44dp"
-        android:background="@drawable/ic_logo_splash" />
+        android:background="@drawable/ic_logo_splash"/>
 
     <EditText
         android:id="@+id/email_edit_text"
@@ -50,8 +50,7 @@
         android:hint="@string/emailid"
         android:inputType="textEmailAddress"
         android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:text="devendra@userworkstech.com" />
+        android:paddingRight="20dp"/>
 
     <RelativeLayout
         android:id="@+id/email_error_container"
@@ -68,7 +67,7 @@
             android:layout_height="wrap_content"
             android:text="Please check email id"
             android:textColor="@color/error_text_color"
-            android:textSize="12sp" />
+            android:textSize="12sp"/>
 
         <View
             android:layout_width="13dp"
@@ -90,8 +89,7 @@
         android:hint="@string/password"
         android:inputType="textPassword"
         android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:text="devendra@123#" />
+        android:paddingRight="20dp"/>
 
     <RelativeLayout
         android:id="@+id/password_error_container"
@@ -108,7 +106,7 @@
             android:layout_height="wrap_content"
             android:text="Please check password "
             android:textColor="@color/error_text_color"
-            android:textSize="12sp" />
+            android:textSize="12sp"/>
 
         <View
             android:layout_width="13dp"
@@ -119,24 +117,16 @@
 
     <Button
         android:id="@+id/login_button"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/password_error_container"
         android:layout_centerHorizontal="true"
-        android:layout_marginRight="60dp"
         android:layout_marginTop="20dp"
         android:background="@drawable/selector_custom_button"
+        android:paddingLeft="100dp"
+        android:paddingRight="100dp"
         android:text="@string/login"
-        android:textColor="@color/white" />
+        android:textColor="@color/white"/>
 
-    <TextView
-        android:id="@+id/forgot_password"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/login_button"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"
-        android:text="@string/forgot_password"
-        android:textColor="#727272"
-        android:textSize="16sp" />
+
 </RelativeLayout>

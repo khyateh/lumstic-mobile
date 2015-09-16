@@ -11,15 +11,16 @@ android {
         exclude 'META-INF/NOTICE'
     }
     defaultConfig {
-        applicationId 'lumstic.ashoka.com.lumstic'
+        applicationId 'com.lumstic.ashoka'
         minSdkVersion 15
         targetSdkVersion 22
-        versionCode 1
-        versionName "1.0"
+        versionCode 4
+        versionName "1.3"
     }
     buildTypes {
         release {
             minifyEnabled false
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -29,6 +30,5 @@ android {
 
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.google.android.gms:play-services:7.5.0'
 }

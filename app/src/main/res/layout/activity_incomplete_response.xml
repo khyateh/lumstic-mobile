@@ -1,9 +1,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/dash_board_background"
-    tools:context="lumstic.ashoka.com.lumstic.UI.DashBoardActivity">
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/dash_board_background"
+                tools:context="com.lumstic.ashoka.ui.DashBoardActivity">
 
     <View
         android:layout_width="fill_parent"
@@ -17,18 +17,17 @@
         android:background="@color/dash_board_foreground">
 
 
-        <lumstic.ashoka.com.lumstic.Views.RobotoRegularTextView
+        <com.lumstic.ashoka.views.RobotoRegularTextView
             android:id="@+id/survey_title_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingBottom="9dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-
-            android:paddingTop="20dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="16dp"
             android:text="Temperature Details As per the city"
             android:textColor="@color/black"
-            android:textSize="20sp" />
+            android:textSize="20sp"/>
 
         <LinearLayout
             android:id="@+id/total_survey_container"
@@ -38,21 +37,21 @@
             android:layout_marginLeft="16dp"
             android:orientation="horizontal">
 
-            <lumstic.ashoka.com.lumstic.Views.RobotoRegularTextView
+            <com.lumstic.ashoka.views.RobotoRegularTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Total:"
                 android:textColor="@color/text_color_total"
-                android:textSize="16sp" />
+                android:textSize="16sp"/>
 
-            <lumstic.ashoka.com.lumstic.Views.RobotoRegularTextView
+            <com.lumstic.ashoka.views.RobotoRegularTextView
                 android:id="@+id/incomplete_response_count"
                 android:layout_width="wrap_content"
 
                 android:layout_height="wrap_content"
                 android:text="20"
                 android:textColor="@color/text_color_total"
-                android:textSize="16sp" />
+                android:textSize="16sp"/>
 
         </LinearLayout>
 
@@ -68,7 +67,7 @@
             android:text="Upload Completed Responses"
             android:textColor="@color/white"
             android:textSize="16sp"
-            android:visibility="gone" />
+            android:visibility="gone"/>
 
         <ListView
             android:id="@+id/listview"
@@ -77,6 +76,7 @@
             android:layout_below="@+id/upload_response_button"
             android:layout_marginBottom="16dp"
             android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:layout_marginTop="10dp"></ListView>
 
 

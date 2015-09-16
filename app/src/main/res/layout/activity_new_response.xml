@@ -1,9 +1,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/dash_board_background"
-    tools:context="lumstic.ashoka.com.lumstic.UI.DashBoardActivity">
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/dash_board_background"
+                tools:context="com.lumstic.ashoka.ui.DashBoardActivity">
 
     <View
         android:layout_width="fill_parent"
@@ -26,8 +26,7 @@
 
             android:id="@+id/scrollView"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-           >
+            android:layout_height="wrap_content">
             <!--android:layout_marginLeft="14dp"-->
             <!--android:layout_marginRight="14dp"-->
             <!--android:layout_marginTop="14dp"-->
@@ -65,7 +64,7 @@
         android:weightSum="3">
 
 
-        <lumstic.ashoka.com.lumstic.Views.RobotoBlackRegularButton
+        <com.lumstic.ashoka.views.RobotoBlackRegularButton
             android:id="@+id/previous_question"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -80,9 +79,9 @@
             android:singleLine="true"
             android:text="BACK"
             android:textColor="#727272"
-            android:textSize="14sp" />
+            android:textSize="14sp"/>
 
-        <lumstic.ashoka.com.lumstic.Views.RobotoLightButton
+        <com.lumstic.ashoka.views.RobotoLightButton
             android:id="@+id/counter_button"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -90,9 +89,9 @@
             android:background="@color/white"
             android:text="1 out of 12"
             android:textColor="#7e7e7e"
-            android:textSize="13sp" />
+            android:textSize="13sp"/>
 
-        <lumstic.ashoka.com.lumstic.Views.RobotoBlackRegularButton
+        <com.lumstic.ashoka.views.RobotoBlackRegularButton
             android:id="@+id/next_queation"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -107,7 +106,7 @@
             android:singleLine="true"
             android:text="NEXT"
             android:textColor="@color/white"
-            android:textSize="14sp" />
+            android:textSize="14sp"/>
     </LinearLayout>
 
 </RelativeLayout>

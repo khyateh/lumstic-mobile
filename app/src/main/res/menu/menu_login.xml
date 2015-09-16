@@ -1,28 +1,28 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="lumstic.ashoka.com.lumstic.UI.DashBoardActivity">
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="com.lumstic.ashoka.ui.DashBoardActivity">
 
 
     <item
         android:icon="@drawable/ic_action_ic_menu_overflow"
         android:showAsAction="always"
-        android:title="@string/action_help">
+        android:title="@string/action_settings">
         <menu>
 
             <!--<item-->
-                <!--android:id="@+id/action_about"-->
-                <!--android:icon="@drawable/ic_about"-->
-                <!--android:title="@string/action_about">-->
+            <!--android:id="@+id/action_about"-->
+            <!--android:icon="@drawable/ic_about"-->
+            <!--android:title="@string/action_about">-->
 
             <!--</item>-->
             <!--<item-->
-                <!--android:id="@+id/action_help"-->
-                <!--android:icon="@drawable/ic_menu_help"-->
-                <!--android:title="@string/action_help" />-->
+            <!--android:id="@+id/action_help"-->
+            <!--android:icon="@drawable/ic_menu_help"-->
+            <!--android:title="@string/action_help" />-->
             <item
                 android:id="@+id/action_settings"
                 android:icon="@drawable/ic_settings"
-                android:title="@string/action_settings" />
+                android:title="@string/action_settings"/>
 
         </menu>
     </item>
