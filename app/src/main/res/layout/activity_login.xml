@@ -9,7 +9,7 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_marginTop="240dp"
-        android:background="@drawable/bg_splash"></View>
+        android:background="@drawable/bg_splash"/>
 
     <View
         android:id="@+id/solid_background"
@@ -18,7 +18,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:alpha=".9"
-        android:background="@color/login_screen_background"></View>
+        android:background="@color/login_screen_background"/>
 
     <View
         android:layout_width="fill_parent"
@@ -27,7 +27,7 @@
         android:layout_marginLeft="12dp"
         android:layout_marginRight="12dp"
         android:alpha=".9"
-        android:background="@color/login_screen_background"></View>
+        android:background="@color/login_screen_background"/>
 
     <ImageView
         android:id="@+id/img_logo"
@@ -37,7 +37,7 @@
         android:layout_marginTop="44dp"
         android:background="@drawable/ic_logo_splash"/>
 
-    <EditText
+    <com.lumstic.ashoka.views.RobotoLightEditText
         android:id="@+id/email_edit_text"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -62,7 +62,7 @@
         android:layout_marginTop="10dp"
         android:visibility="gone">
 
-        <TextView
+        <com.lumstic.ashoka.views.RobotoLightTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Please check email id"
@@ -73,10 +73,10 @@
             android:layout_width="13dp"
             android:layout_height="15dp"
             android:layout_alignParentRight="true"
-            android:background="@drawable/ic_error"></View>
+            android:background="@drawable/ic_error"/>
     </RelativeLayout>
 
-    <EditText
+    <com.lumstic.ashoka.views.RobotoLightEditText
         android:id="@+id/password_edit_text"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -112,17 +112,17 @@
             android:layout_width="13dp"
             android:layout_height="15dp"
             android:layout_alignParentRight="true"
-            android:background="@drawable/ic_error"></View>
+            android:background="@drawable/ic_error"/>
     </RelativeLayout>
 
-    <Button
+    <com.lumstic.ashoka.views.RobotoRegularButton
         android:id="@+id/login_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/password_error_container"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
-        android:background="@drawable/selector_custom_button"
+        android:background="@drawable/selector_button"
         android:paddingLeft="100dp"
         android:paddingRight="100dp"
         android:text="@string/login"

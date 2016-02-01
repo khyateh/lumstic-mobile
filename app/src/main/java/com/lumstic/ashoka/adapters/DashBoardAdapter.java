@@ -5,26 +5,26 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.TextView;
 
 import com.lumstic.ashoka.R;
 import com.lumstic.ashoka.models.Surveys;
+import com.lumstic.ashoka.views.RobotoLightTextView;
+import com.lumstic.ashoka.views.RobotoRegularTextView;
 
 import java.util.List;
 
 
 public class DashBoardAdapter extends BaseAdapter {
-    Context context;
-
+    Context mContext;
     List<Surveys> surveyList;
     DBAdapter dbAdapter;
-    LayoutInflater inflater;
+    LayoutInflater mInflater;
 
-    public DashBoardAdapter(Context context, List<Surveys> surveyList) {
-        this.context = context;
+    public DashBoardAdapter(Context mContext, List<Surveys> surveyList) {
+        this.mContext = mContext;
         this.surveyList = surveyList;
-        dbAdapter = new DBAdapter(context);
-        inflater = (LayoutInflater) context
+        dbAdapter = new DBAdapter(mContext);
+        mInflater = (LayoutInflater) mContext
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
@@ -46,16 +46,17 @@ public class DashBoardAdapter extends BaseAdapter {
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
         ViewHolder viewHolder;
-        if (view == null) {
-            view = inflater.inflate(R.layout.item_active_survey, null);
+        View localView = view;
+        if (localView == null) {
+            localView = mInflater.inflate(R.layout.item_active_survey, null);
             viewHolder = new ViewHolder();
-            viewHolder.surveyName = (TextView) view.findViewById(R.id.survey_name_text);
-            viewHolder.completedSurvey = (TextView) view.findViewById(R.id.complete_survey_text);
-            viewHolder.incompleteSurvey = (TextView) view.findViewById(R.id.incomplete_survey_text);
-            viewHolder.endDate = (TextView) view.findViewById(R.id.end_date_text);
-            view.setTag(viewHolder);
+            viewHolder.surveyName = (RobotoRegularTextView) localView.findViewById(R.id.survey_name_text);
+            viewHolder.completedSurvey = (RobotoRegularTextView) localView.findViewById(R.id.complete_survey_text);
+            viewHolder.incompleteSurvey = (RobotoRegularTextView) localView.findViewById(R.id.incomplete_survey_text);
+            viewHolder.endDate = (RobotoLightTextView) localView.findViewById(R.id.end_date_text);
+            localView.setTag(viewHolder);
         } else {
-            viewHolder = (ViewHolder) view.getTag();
+            viewHolder = (ViewHolder) localView.getTag();
         }
 
 
@@ -66,10 +67,11 @@ public class DashBoardAdapter extends BaseAdapter {
             viewHolder.surveyName.setText(survey.getName());
             viewHolder.endDate.setText(survey.getExpiryDate());
         }
-        return view;
+        return localView;
     }
 
     private static class ViewHolder {
-        TextView surveyName, completedSurvey, incompleteSurvey, endDate;
+        RobotoLightTextView endDate;
+        RobotoRegularTextView surveyName, completedSurvey, incompleteSurvey;
     }
 }

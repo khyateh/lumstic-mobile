@@ -10,11 +10,10 @@ import android.view.KeyEvent;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.lumstic.ashoka.R;
-import com.lumstic.ashoka.utils.LumsticApp;
+import com.lumstic.ashoka.utils.AppController;
 
 
 public class BaseActivity extends Activity implements GoogleApiClient.ConnectionCallbacks,
@@ -29,8 +28,7 @@ public class BaseActivity extends Activity implements GoogleApiClient.Connection
     private static int DISPLACEMENT = 100; // 100 meters
     boolean mIsInForegroundMode;
     Context mContext;
-    GoogleCloudMessaging gcm;
-    LumsticApp lumsticApp;
+    AppController appController;
     private double latitude = 0, longitude = 0;
     // Google client to interact with Google API
     private GoogleApiClient mGoogleApiClient;
@@ -54,17 +52,17 @@ public class BaseActivity extends Activity implements GoogleApiClient.Connection
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = getApplicationContext();
-        lumsticApp = (LumsticApp) getApplication();
+        appController = AppController.getInstance();
 
-        if (lumsticApp.getPreferences().getBaseUrl() == null) {
+        if (appController.getPreferences().getBaseUrl() == null) {
             baseUrl = getResources().getString(R.string.server_url);
         } else
-            baseUrl = lumsticApp.getPreferences().getBaseUrl();
+            baseUrl = appController.getPreferences().getBaseUrl();
 
-        if (lumsticApp.getPreferences().getUser_base_url() == null) {
+        if (appController.getPreferences().getUserBaseUrl() == null) {
             userBaseUrl = getResources().getString(R.string.user_server_url);
         } else
-            userBaseUrl = lumsticApp.getPreferences().getUser_base_url();
+            userBaseUrl = appController.getPreferences().getUserBaseUrl();
 
 
         if (checkPlayServices()) {
@@ -72,7 +70,6 @@ public class BaseActivity extends Activity implements GoogleApiClient.Connection
             // Building the GoogleApi client
             buildGoogleApiClient();
             createLocationRequest();
-            gcm = GoogleCloudMessaging.getInstance(this);
 
         } else {
             Log.i(TAG, "No valid Google Play Services APK found.");
@@ -83,7 +80,7 @@ public class BaseActivity extends Activity implements GoogleApiClient.Connection
     /**
      * checking Google play services is available or not
      *
-     * @return
+     * @return boolean
      */
     private boolean checkPlayServices() {
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
@@ -108,11 +105,9 @@ public class BaseActivity extends Activity implements GoogleApiClient.Connection
 
         mIsInForegroundMode = true;
         // Resuming the periodic location updates.
-        if (mGoogleApiClient != null) {
-            if (mGoogleApiClient.isConnected() && mIsInForegroundMode) {
-                startLocationUpdates();
-                Log.d(TAG, "Location update resumed .....................");
-            }
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && mIsInForegroundMode) {
+            startLocationUpdates();
+            Log.d(TAG, "Location update resumed .....................");
         }
 
     }
@@ -121,10 +116,8 @@ public class BaseActivity extends Activity implements GoogleApiClient.Connection
     protected void onPause() {
         super.onPause();
         mIsInForegroundMode = false;
-        if (mGoogleApiClient != null) {
-            if (mGoogleApiClient.isConnected()) {
-                stopLocationUpdates();
-            }
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            stopLocationUpdates();
         }
     }
 
@@ -230,8 +223,8 @@ public class BaseActivity extends Activity implements GoogleApiClient.Connection
         if (mLastLocation != null) {
             latitude = mLastLocation.getLatitude();
             longitude = mLastLocation.getLongitude();
-            lumsticApp.getPreferences().setLatitude(String.valueOf(latitude));
-            lumsticApp.getPreferences().setLongitude(String.valueOf(longitude));
+            appController.getPreferences().setLatitude(String.valueOf(latitude));
+            appController.getPreferences().setLongitude(String.valueOf(longitude));
         } else {
             latitude = 0;
             longitude = 0;

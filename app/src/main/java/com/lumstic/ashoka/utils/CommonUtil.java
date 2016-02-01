@@ -2,25 +2,21 @@ package com.lumstic.ashoka.utils;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
-import android.widget.Button;
 
 import com.lumstic.ashoka.R;
 import com.lumstic.ashoka.adapters.DBAdapter;
 import com.lumstic.ashoka.models.Answers;
 import com.lumstic.ashoka.models.UserModel;
 import com.lumstic.ashoka.ui.LoginActivity;
+import com.lumstic.ashoka.views.RobotoRegularButton;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -67,9 +63,12 @@ public class CommonUtil {
     //category type
     public static final String CATEGORY_TYPE_MULTI_RECORD = "MultiRecordCategory";
 
+    public static final String APP_IMAGE_DIR = "Lumstic";
+    public static final boolean IS_CHILD_VIEW = true;
+    public static final boolean IS_PARENT_VIEW = false;
 
-    public static final boolean isChildView = true;
-    public static final boolean isParentView = false;
+    public static final String SURVEY_STATUS_COMPLETE = "complete";
+    public static final String SURVEY_STATUS_INCOMPLETE = "incomplete";
 
     private CommonUtil() {
     }
@@ -80,68 +79,9 @@ public class CommonUtil {
         return matcher.matches();
     }
 
-    public static String getServerNameFromURL(String url) {
-        try {
-            int from = url.indexOf("//") + 2;
-            int to = url.indexOf("/", from);
-            if (to < 0) {
-                return url.substring(from);
-            }
-            return url.substring(from, to);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return url;
-        }
 
-    }
-
-    public static String getNodeNameFromURL(String url) {
-        try {
-            int firstIndex = url.indexOf("//");
-            int from = url.indexOf("/", firstIndex + 2);
-            if (url.charAt(from - 1) == '/') {
-                return "";
-            }
-            int to = url.length();
-            return url.substring(from, to);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return url;
-        }
-    }
-
-    public static String getPath(Activity activity, Uri uri) {
-        if (null != uri) {
-            String[] projection = {MediaStore.Images.Media.DATA};
-            Cursor cursor = activity.getContentResolver().query(uri, projection, null, null, null);
-            if (null != cursor && cursor.moveToFirst()) {
-                int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-                return cursor.getString(columnIndex);
-            }
-        }
-        return null;
-    }
-
-    public static String getCSV(List<String> stringList) {
-        String temp = "";
-        for (String s : stringList)
-            temp += s + ",";
-        if (temp.length() > 0)
-            return temp.substring(0, temp.length() - 1);
-        return "";
-    }
-
-    public static ProgressDialog getProgressDialog(Activity activity) {
-        ProgressDialog progressDialog = new ProgressDialog(activity);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setCancelable(false);
-        progressDialog.setCanceledOnTouchOutside(false);
-
-        return progressDialog;
-    }
-
-    public static String getValidLatitude(LumsticApp lumsticApp) {
-        String latitude = lumsticApp.getPreferences().getLatitude();
+    public static String getValidLatitude(AppController appController) {
+        String latitude = appController.getPreferences().getLatitude();
 
         if (latitude == null) {
             latitude = "18.54194666666656";
@@ -150,8 +90,8 @@ public class CommonUtil {
         return latitude;
     }
 
-    public static String getValidLongitude(LumsticApp lumsticApp) {
-        String longitude = lumsticApp.getPreferences().getLongitude();
+    public static String getValidLongitude(AppController appController) {
+        String longitude = appController.getPreferences().getLongitude();
 
         if (longitude == null) {
             longitude = "73.8291466666657";
@@ -160,10 +100,10 @@ public class CommonUtil {
         return longitude;
     }
 
-    public static Boolean isLoggedIn(LumsticApp lumsticApp) {
+    public static Boolean isLoggedIn(AppController appController) {
 
         try {
-            if (!lumsticApp.getPreferences().getAccessToken().equals("")) {
+            if (!appController.getPreferences().getAccessToken().equals("")) {
                 return true;
             }
         } catch (Exception e) {
@@ -172,16 +112,16 @@ public class CommonUtil {
         return false;
     }
 
-    public static void Logout(final Activity localActivity, final LumsticApp lumsticApp) {
+    public static void logout(final Activity localActivity, final AppController appController) {
         final Dialog dialog = new Dialog(localActivity);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); //before
         dialog.setContentView(R.layout.logout_dialog);
         dialog.show();
-        Button button = (Button) dialog.findViewById(R.id.okay);
+        RobotoRegularButton button = (RobotoRegularButton) dialog.findViewById(R.id.okay);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                lumsticApp.getPreferences().setAccessToken("");
+                appController.getPreferences().setAccessToken("");
                 Intent i = new Intent(localActivity, LoginActivity.class);
                 i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 localActivity.startActivity(i);
@@ -191,12 +131,12 @@ public class CommonUtil {
         });
     }
 
-    private static void expireCurrentSession(LumsticApp lumsticApp) {
-        lumsticApp.getPreferences().setAccess_token_created_at(null);
-        lumsticApp.getPreferences().setAccessToken(null);
+    private static void expireCurrentSession(AppController appController) {
+        appController.getPreferences().setAccessTokenCreatedAt(null);
+        appController.getPreferences().setAccessToken(null);
     }
 
-    public static void reValidateToken(LumsticApp lumsticApp, String url) {
+    public static void reValidateToken(AppController appController, String url) {
         Log.e("TAG", "Revalidating Token");
         UserModel userModel;
         String jsonLoginString = null;
@@ -206,8 +146,8 @@ public class CommonUtil {
             HttpPost httppost = new HttpPost(url);
 
             List nameValuePairs = new ArrayList();
-            nameValuePairs.add(new BasicNameValuePair("username", lumsticApp.getPreferences().getUsername()));
-            nameValuePairs.add(new BasicNameValuePair("password", lumsticApp.getPreferences().getPassword()));
+            nameValuePairs.add(new BasicNameValuePair("username", appController.getPreferences().getUsername()));
+            nameValuePairs.add(new BasicNameValuePair("password", appController.getPreferences().getPassword()));
             httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
             HttpResponse httpResponse = httpclient.execute(httppost);
             HttpEntity httpEntity = httpResponse.getEntity();
@@ -221,10 +161,10 @@ public class CommonUtil {
             jsonObjectLogin = new JSONObject(jsonLoginString);
             JSONParser jsonParser = new JSONParser();
             userModel = jsonParser.parseLogin(jsonObjectLogin);
-            lumsticApp.getPreferences().setAccessToken(userModel.getAccessToken());
-            lumsticApp.getPreferences().setUserId(String.valueOf(userModel.getUserId()));
-            lumsticApp.getPreferences().setOrganizationId(String.valueOf(userModel.getOrganisationId()));
-            lumsticApp.getPreferences().setAccess_token_created_at(String.valueOf(new Date().getTime()));
+            appController.getPreferences().setAccessToken(userModel.getAccessToken());
+            appController.getPreferences().setUserId(String.valueOf(userModel.getUserId()));
+            appController.getPreferences().setOrganizationId(String.valueOf(userModel.getOrganisationId()));
+            appController.getPreferences().setAccessTokenCreatedAt(String.valueOf(new Date().getTime()));
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (NullPointerException e) {
@@ -232,14 +172,14 @@ public class CommonUtil {
         }
     }
 
-    public static boolean isTokenExpired(LumsticApp lumsticApp) {
+    public static boolean isTokenExpired(AppController appController) {
         boolean isExpired = false;
-        if (lumsticApp.getPreferences().getAccessToken() != null) {
-            long diffInMs = new Date().getTime() - Long.valueOf(lumsticApp.getPreferences().getAccess_token_created_at());
+        if (appController.getPreferences().getAccessToken() != null) {
+            long diffInMs = new Date().getTime() - Long.valueOf(appController.getPreferences().getAccessTokenCreatedAt());
             long diffInSec = TimeUnit.MILLISECONDS.toSeconds(diffInMs);
             if (diffInSec > 35000) {
                 //expire current session
-                expireCurrentSession(lumsticApp);
+                expireCurrentSession(appController);
                 isExpired = true;
             }
         }
@@ -252,8 +192,8 @@ public class CommonUtil {
         for (int j = 0; j < answers.size(); j++) {
             JSONObject jsonObject = new JSONObject();
             try {
-                jsonObject.put("question_id", answers.get(j).getQuestion_id());
-                jsonObject.put("updated_at", answers.get(j).getUpdated_at());
+                jsonObject.put("question_id", answers.get(j).getQuestionId());
+                jsonObject.put("updated_at", answers.get(j).getUpdatedAt());
                 jsonObject.put("content", answers.get(j).getContent());
                 jsonObject.put("record_id", answers.get(j).getRecordId());
 
@@ -280,7 +220,7 @@ public class CommonUtil {
                             }
                             if (type.equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION)) {
                                 List<Integer> options = dbAdapter.getChoicesWhereAnswerCountIsMoreThanOne(answers.get(j).getId());
-                                if (options.size() > 0) {
+                                if (!options.isEmpty()) {
                                     JSONArray localJsonArray = new JSONArray();
                                     for (int i = 0; i < options.size(); i++) {
                                         localJsonArray.put(options.get(i));
@@ -296,17 +236,36 @@ public class CommonUtil {
                 }
                 try {
                     if (answers.get(j).getType().equals(CommonUtil.QUESTION_TYPE_PHOTO_QUESTION)) {
-                        String path = Environment.getExternalStorageDirectory().toString() + "/saved_images";
                         Bitmap b = null;
                         String fileName = answers.get(j).getImage();
+                        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                                Environment.DIRECTORY_PICTURES), APP_IMAGE_DIR);
                         try {
-                            File f = new File(path, fileName);
+
+                            File f = new File(mediaStorageDir, fileName);
+//                            BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
+//                            bitmapOptions.inJustDecodeBounds = true;
+//                            FileInputStream fis = new FileInputStream(f);
+//                            BitmapFactory.decodeStream(fis, null, bitmapOptions);
+//                            fis.close();
+//                            int REQUIRED_SIZE = 1000;
+//                            int scale = 2;
+//                            while (bitmapOptions.outWidth / scale / 2 >= REQUIRED_SIZE && bitmapOptions
+//                                    .outHeight / scale / 2 >= REQUIRED_SIZE) {
+//                                scale *= 2;
+//                            }
+//                            BitmapFactory.Options op = new BitmapFactory.Options();
+//                            op.inSampleSize = scale;
+//                            fis = new FileInputStream(f);
+//                            b = BitmapFactory.decodeStream(fis, null, op);
+//                            fis.close();
                             b = BitmapFactory.decodeStream(new FileInputStream(f));
+
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         }
                         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                        b.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+                        b.compress(Bitmap.CompressFormat.JPEG, 60, byteArrayOutputStream);
                         byte[] byteArray = byteArrayOutputStream.toByteArray();
                         String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
                         jsonObject.put("photo", encoded);
@@ -328,7 +287,7 @@ public class CommonUtil {
     }
 
     public static long getCurrentTimeStamp() {
-        return (System.currentTimeMillis() / 1000);
+        return System.currentTimeMillis() / 1000;
     }
 
 

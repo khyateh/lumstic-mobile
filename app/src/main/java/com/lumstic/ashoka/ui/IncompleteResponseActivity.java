@@ -13,7 +13,6 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.lumstic.ashoka.R;
 import com.lumstic.ashoka.adapters.DBAdapter;
@@ -22,6 +21,7 @@ import com.lumstic.ashoka.models.IncompleteResponse;
 import com.lumstic.ashoka.models.Questions;
 import com.lumstic.ashoka.models.Surveys;
 import com.lumstic.ashoka.utils.IntentConstants;
+import com.lumstic.ashoka.views.RobotoRegularTextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,9 +37,7 @@ public class IncompleteResponseActivity extends BaseActivity {
     private Questions identifierQuestion;
 
     private ListView listView;
-    private TextView responseCount;
-    private TextView surveyTitle;
-
+    private RobotoRegularTextView responseCount, surveyTitle;
     private int incompleteResponseCount = 0;
     private int identifierQuestionId = 0;
 
@@ -67,8 +65,8 @@ public class IncompleteResponseActivity extends BaseActivity {
         surveys = new Surveys();
 
         //defining views
-        responseCount = (TextView) findViewById(R.id.incomplete_response_count);
-        surveyTitle = (TextView) findViewById(R.id.survey_title_text);
+        responseCount = (RobotoRegularTextView) findViewById(R.id.incomplete_response_count);
+        surveyTitle = (RobotoRegularTextView) findViewById(R.id.survey_title_text);
 
 
         surveys = (Surveys) getIntent().getExtras().getSerializable(IntentConstants.SURVEY);
@@ -79,13 +77,13 @@ public class IncompleteResponseActivity extends BaseActivity {
 
         surveyTitle.setText(surveys.getName());
 
-        for (int j = 0; j < surveys.getQuestions().size(); j++) {
-            if (surveys.getQuestions().get(j).getIdentifier() == 1) {
-                identifierQuestion = surveys.getQuestions().get(j);
-                identifierQuestionId = surveys.getQuestions().get(j).getId();
+        for (int j = 0; j < surveys.getQuestionsList().size(); j++) {
+            if (surveys.getQuestionsList().get(j).getIdentifier() == 1) {
+                identifierQuestion = surveys.getQuestionsList().get(j);
+                identifierQuestionId = surveys.getQuestionsList().get(j).getId();
             } else {
-                identifierQuestion = surveys.getQuestions().get(0);
-                identifierQuestionId = surveys.getQuestions().get(0).getId();
+                identifierQuestion = surveys.getQuestionsList().get(0);
+                identifierQuestionId = surveys.getQuestionsList().get(0).getId();
             }
         }
 
@@ -111,7 +109,7 @@ public class IncompleteResponseActivity extends BaseActivity {
                         .getTag();
                 Intent intent = new Intent(getApplicationContext(), NewResponseActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra(IntentConstants.SURVEY, (java.io.Serializable) surveys);
+                intent.putExtra(IntentConstants.SURVEY, surveys);
                 intent.putExtra(IntentConstants.RESPONSE_ID, Integer.parseInt(responseNumber));
                 startActivity(intent);
             }
@@ -122,7 +120,7 @@ public class IncompleteResponseActivity extends BaseActivity {
     private void updateUI() {
         incompleteResponseCount = dbAdapter.getIncompleteResponse(surveys.getId());
         incompleteResponsesId = dbAdapter.getIncompleteResponsesIds(surveys.getId());
-        responseCount.setText(incompleteResponseCount + "");
+        responseCount.setText(Integer.toString(incompleteResponseCount));
     }
 
     @Override
@@ -150,7 +148,7 @@ public class IncompleteResponseActivity extends BaseActivity {
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        if (lumsticApp.getPreferences().getBack_pressed()) {
+        if (appController.getPreferences().getBackPressed()) {
             finish();
         }
     }
@@ -178,7 +176,7 @@ public class IncompleteResponseActivity extends BaseActivity {
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    lumsticApp.getPreferences().setAccessToken("");
+                    appController.getPreferences().setAccessToken("");
 
                     Intent i = new Intent(IncompleteResponseActivity.this, LoginActivity.class);
                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -191,5 +189,11 @@ public class IncompleteResponseActivity extends BaseActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        dbAdapter.close();
     }
 }

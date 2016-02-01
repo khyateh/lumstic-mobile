@@ -4,8 +4,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import com.lumstic.ashoka.utils.TypefaceLoader;
-
 public class RobotoRegularTextView extends TextView {
 
     public RobotoRegularTextView(Context context) {
@@ -25,7 +23,7 @@ public class RobotoRegularTextView extends TextView {
 
     private void init(Context context) {
         if (!isInEditMode())
-            setTypeface(TypefaceLoader.get(context, "Roboto-Regular.ttf"));
+            setTypeface(TypefaceLoader.getInstance(context, "Roboto-Regular.ttf").getTypeFace());
 
     }
 

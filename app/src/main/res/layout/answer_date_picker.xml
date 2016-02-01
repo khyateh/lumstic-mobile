@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<TextView
+<com.lumstic.ashoka.views.RobotoLightTextView
     android:id="@+id/answer_text_date"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:layout_margin="14dp"
     android:layout_marginBottom="30dp"
-    android:background="@drawable/edittext_modified_state"
+    android:background="@drawable/selector_edittext_modified_state"
     android:gravity="center"
     android:padding="14dp"
     android:text="dd/yy/mm"

@@ -8,7 +8,7 @@
     <View
         android:layout_width="fill_parent"
         android:layout_height="300dp"
-        android:background="@drawable/dashboard_bg_img"></View>
+        android:background="@drawable/dashboard_bg_img"/>
 
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -55,29 +55,16 @@
 
         </LinearLayout>
 
-        <Button
-            android:id="@+id/upload_response_button"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/total_survey_container"
-            android:layout_centerHorizontal="true"
-            android:layout_marginLeft="24dp"
-            android:layout_marginTop="9dp"
-            android:background="@drawable/selector_custom_button"
-            android:text="Upload Completed Responses"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            android:visibility="gone"/>
 
         <ListView
             android:id="@+id/listview"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
-            android:layout_below="@+id/upload_response_button"
+            android:layout_below="@+id/total_survey_container"
             android:layout_marginBottom="16dp"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
-            android:layout_marginTop="10dp"></ListView>
+            android:layout_marginTop="10dp"/>
 
 
     </RelativeLayout>

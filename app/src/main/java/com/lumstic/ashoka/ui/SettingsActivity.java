@@ -10,10 +10,7 @@ import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lumstic.ashoka.R;
@@ -21,6 +18,9 @@ import com.lumstic.ashoka.adapters.DBAdapter;
 import com.lumstic.ashoka.utils.CommonUtil;
 import com.lumstic.ashoka.utils.JSONParser;
 import com.lumstic.ashoka.utils.NetworkUtil;
+import com.lumstic.ashoka.views.RobotoLightEditText;
+import com.lumstic.ashoka.views.RobotoRegularButton;
+import com.lumstic.ashoka.views.RobotoRegularTextView;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -68,10 +68,11 @@ public class SettingsActivity extends BaseActivity {
                 forgotPasswordDialog.setContentView(R.layout.view_forgot_password_dialog);
                 forgotPasswordDialog.show();
 
-                final EditText etEmail = ((EditText) forgotPasswordDialog.findViewById(R.id.email_edit_text));
+                final RobotoLightEditText etEmail = (RobotoLightEditText) forgotPasswordDialog.findViewById(R.id
+                        .email_edit_text);
 
 
-                Button button = (Button) forgotPasswordDialog.findViewById(R.id.request_password);
+                RobotoRegularButton button = (RobotoRegularButton) forgotPasswordDialog.findViewById(R.id.request_password);
                 button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -82,10 +83,10 @@ public class SettingsActivity extends BaseActivity {
                                 progressDialog.show();
                                 new RequestPassword().execute(userBaseUrl + forgotPasswordURL, etEmail.getText().toString());
                             } else {
-                                lumsticApp.showToast("Enter Valid Email ");
+                                appController.showToast("Enter Valid Email ");
                             }
                         } else {
-                            lumsticApp.showToast("Please check your internet connection");
+                            appController.showToast("Please check your internet connection");
                         }
                     }
                 });
@@ -102,14 +103,14 @@ public class SettingsActivity extends BaseActivity {
                 mainDialog.setContentView(R.layout.view_remote_server_settings_dialog);
                 mainDialog.show();
 
-                final EditText etURL = (EditText) mainDialog.findViewById(R.id.server_address);
-                if (lumsticApp.getPreferences().getBaseUrl() != null) {
-                    etURL.setText(lumsticApp.getPreferences().getBaseUrl());
+                final RobotoLightEditText etURL = (RobotoLightEditText) mainDialog.findViewById(R.id.server_address);
+                if (appController.getPreferences().getBaseUrl() != null) {
+                    etURL.setText(appController.getPreferences().getBaseUrl());
                 } else {
                     etURL.setText(getResources().getString(R.string.server_url));
                 }
 
-                Button button = (Button) mainDialog.findViewById(R.id.save);
+                RobotoRegularButton button = (RobotoRegularButton) mainDialog.findViewById(R.id.save);
                 button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -122,7 +123,7 @@ public class SettingsActivity extends BaseActivity {
                                         new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog,
                                                                 int id) {
-                                                lumsticApp.getPreferences().setBaseUrl(etURL.getText().toString());
+                                                appController.getPreferences().setBaseUrl(etURL.getText().toString());
                                                 BaseActivity.baseUrl = etURL.getText().toString();
                                                 dialog.dismiss();
                                                 mainDialog.dismiss();
@@ -154,19 +155,19 @@ public class SettingsActivity extends BaseActivity {
                 mainDialog.requestWindowFeature(Window.FEATURE_NO_TITLE); //before
                 mainDialog.setContentView(R.layout.view_remote_server_settings_dialog);
                 mainDialog.show();
-                ((TextView) mainDialog.findViewById(R.id.tv_title)).setText("USER SERVER LOCATION ");
-                final EditText etURL = (EditText) mainDialog.findViewById(R.id.server_address);
-                if (lumsticApp.getPreferences().getUser_base_url() != null) {
-                    etURL.setText(lumsticApp.getPreferences().getUser_base_url());
+                ((RobotoRegularTextView) mainDialog.findViewById(R.id.tv_title)).setText("USER SERVER LOCATION ");
+                final RobotoLightEditText etURL = (RobotoLightEditText) mainDialog.findViewById(R.id.server_address);
+                if (appController.getPreferences().getUserBaseUrl() != null) {
+                    etURL.setText(appController.getPreferences().getUserBaseUrl());
                 } else {
                     etURL.setText(getResources().getString(R.string.user_server_url));
                 }
 
-                Button button = (Button) mainDialog.findViewById(R.id.save);
+                RobotoRegularButton button = (RobotoRegularButton) mainDialog.findViewById(R.id.save);
                 button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        lumsticApp.getPreferences().setUser_base_url(etURL.getText().toString());
+                        appController.getPreferences().setUserBaseUrl(etURL.getText().toString());
                         BaseActivity.userBaseUrl = etURL.getText().toString();
                         mainDialog.dismiss();
                     }

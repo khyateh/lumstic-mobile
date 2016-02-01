@@ -8,7 +8,7 @@
     <View
         android:layout_width="fill_parent"
         android:layout_height="300dp"
-        android:background="@drawable/dashboard_bg_img"></View>
+        android:background="@drawable/dashboard_bg_img"/>
 
     <RelativeLayout
         android:id="@+id/question_container"
@@ -39,7 +39,6 @@
                     android:id="@+id/field_container"
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
-                    android:layout_below="@+id/question_text"
                     android:clickable="true"
                     android:orientation="vertical">
 
@@ -64,7 +63,7 @@
         android:weightSum="3">
 
 
-        <com.lumstic.ashoka.views.RobotoBlackRegularButton
+        <com.lumstic.ashoka.views.RobotoRegularButton
             android:id="@+id/previous_question"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -91,7 +90,7 @@
             android:textColor="#7e7e7e"
             android:textSize="13sp"/>
 
-        <com.lumstic.ashoka.views.RobotoBlackRegularButton
+        <com.lumstic.ashoka.views.RobotoRegularButton
             android:id="@+id/next_queation"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"

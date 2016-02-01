@@ -1,8 +1,6 @@
 package com.lumstic.ashoka.models;
 
-/**
- * Created by work on 24/7/15.
- */
+
 public class DropDown {
     String tag, value;
 

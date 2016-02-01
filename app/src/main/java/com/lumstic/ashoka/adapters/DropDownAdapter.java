@@ -15,13 +15,13 @@ import java.util.List;
 public class DropDownAdapter extends BaseAdapter {
 
     List<DropDown> dropDownList;
-    LayoutInflater layoutInflater;
-    Context context;
+    LayoutInflater mInflater;
+    Context mContext;
 
-    public DropDownAdapter(Context context, List<DropDown> dropDownList) {
-        this.context = context;
+    public DropDownAdapter(Context mContext, List<DropDown> dropDownList) {
+        this.mContext = mContext;
         this.dropDownList = dropDownList;
-        layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
@@ -42,15 +42,30 @@ public class DropDownAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        ViewHolder viewHolder;
 
-        convertView = layoutInflater.inflate(R.layout.spinner_row_item, parent, false);
-        TextView textView = (TextView) convertView.findViewById(R.id.spinner_item);
-        textView.setText(dropDownList.get(position).getValue());
-        textView.setTag(dropDownList.get(position).getTag());
+        View localView = convertView;
 
-        return convertView;
+        if (localView == null) {
+            viewHolder = new ViewHolder();
+            localView = mInflater.inflate(R.layout.spinner_row_item, null);
+            viewHolder.tvSpinner = (TextView) localView.findViewById(R.id.spinner_item);
+            localView.setTag(R.string.app_name, viewHolder);
+        } else {
+            viewHolder = (ViewHolder) localView.getTag(R.string.app_name);
+        }
 
 
+        viewHolder.tvSpinner.setText(dropDownList.get(position).getValue());
+        viewHolder.tvSpinner.setTag(dropDownList.get(position).getTag());
+
+        return localView;
+
+
+    }
+
+    private static class ViewHolder {
+        TextView tvSpinner;
     }
 
 }

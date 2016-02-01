@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="AppTheme" parent="android:Theme.Material.Light"></style>
+    <style name="AppTheme" parent="android:Theme.Material.Light">
+        <item name="android:scrollbarStyle">insideOverlay</item>
+        <item name="android:scrollbarThumbVertical">@drawable/shape_scrollbar_vertical_thumb</item>
+        <item name="android:scrollbarSize">3dp</item>
+        <item name="android:ratingBarStyle">@style/RatingBarAppTheme</item>
+    </style>
 </resources>

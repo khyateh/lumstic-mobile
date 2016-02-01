@@ -31,7 +31,7 @@ import com.lumstic.ashoka.utils.IntentConstants;
 import com.lumstic.ashoka.utils.JSONParser;
 import com.lumstic.ashoka.utils.JsonHelper;
 import com.lumstic.ashoka.utils.NetworkUtil;
-import com.lumstic.ashoka.views.RobotoBlackButton;
+import com.lumstic.ashoka.views.RobotoMediumButton;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -69,7 +69,7 @@ public class DashBoardActivity extends BaseActivity {
     private ListView listView;
     private LinearLayout uploadContainer;
     private RelativeLayout dashboardContainer, activeSurveyContainer;
-    private RobotoBlackButton uploadButton;
+    private RobotoMediumButton uploadButton;
     private List<Integer> completedResponseIds;
     private List<Surveys> surveysList;
     private int surveyUploadCount = 0, surveyUploadFailedCount = 0;
@@ -121,7 +121,6 @@ public class DashBoardActivity extends BaseActivity {
         uploadContainer = (LinearLayout) findViewById(R.id.upload_container);
         listView = (ListView) findViewById(R.id.active_survey_list);
         uploadContainer = (LinearLayout) findViewById(R.id.upload_container);
-        uploadButton = (RobotoBlackButton) findViewById(R.id.upload_all);
 
 
         //setting up action bar
@@ -137,7 +136,7 @@ public class DashBoardActivity extends BaseActivity {
 
         jsonHelper = new JsonHelper();
         jsonParser = new JSONParser();
-        surveysList = jsonHelper.tryParsing(lumsticApp.getPreferences().getSurveyData());
+        surveysList = jsonHelper.tryParsing(appController.getPreferences().getSurveyData());
 
 
         progressDialog = new ProgressDialog(DashBoardActivity.this);
@@ -147,11 +146,12 @@ public class DashBoardActivity extends BaseActivity {
 
         initListView();
         checkForUploadUI();
-        uploadButton.setOnClickListener(new View.OnClickListener() {
+        uploadContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 surveyUploadCount = 0;
                 surveyUploadFailedCount = 0;
+                totalCompletedResponses = 0;
                 asynTaskCheck = false;
 
                 Long tsLong = System.currentTimeMillis() / 1000;
@@ -161,9 +161,9 @@ public class DashBoardActivity extends BaseActivity {
                     if (NetworkUtil.iSConnected(getApplicationContext()) == NetworkUtil.TYPE_CONNECTED) {
                         progressDialog.setMessage("Sync in Progress");
                         progressDialog.show();
-                        new uploadingMultiRecordResponse().execute();
+                        new UploadingMultiRecordResponse().execute();
                     } else {
-                        lumsticApp.showToast("Please check your internet connection");
+                        appController.showToast("Please check your internet connection");
                     }
 
 
@@ -183,7 +183,7 @@ public class DashBoardActivity extends BaseActivity {
     }
 
     private void initListView() {
-        if (!lumsticApp.getPreferences().getSurveyData().equals("")) {
+        if (!appController.getPreferences().getSurveyData().equals("")) {
 
             activeSurveyContainer.setVisibility(View.VISIBLE);
 
@@ -224,7 +224,7 @@ public class DashBoardActivity extends BaseActivity {
             Questions question = categories.getQuestionsList().get(m);
             dbAdapter.insertDataQuestionTable(question);
 
-            if (question.getOptions().size() > 0)
+            if (!question.getOptions().isEmpty())
                 addOptions(question);
         }
     }
@@ -233,46 +233,46 @@ public class DashBoardActivity extends BaseActivity {
         for (int k = 0; k < questions.getOptions().size(); k++) {
             Options options = questions.getOptions().get(k);
             dbAdapter.insertDataOptionsTable(options);
-            if (options.getQuestions().size() > 0)
+            if (!options.getQuestionsList().isEmpty())
                 addNestedQuestions(options);
-            if (options.getCategories().size() > 0)
+            if (!options.getCategoriesList().isEmpty())
                 addNestedCategories(options);
         }
     }
 
     public void addNestedCategories(Options options) {
-        for (int d = 0; d < options.getCategories().size(); d++) {
-            Categories categories = options.getCategories().get(d);
+        for (int d = 0; d < options.getCategoriesList().size(); d++) {
+            Categories categories = options.getCategoriesList().get(d);
             dbAdapter.insertDataCategoriesTable(categories);
-            if (categories.getQuestionsList().size() > 0)
+            if (!categories.getQuestionsList().isEmpty())
                 addQuestionFromCategories(categories);
         }
     }
 
     public void addNestedQuestions(Options options) {
-        for (int l = 0; l < options.getQuestions().size(); l++) {
-            Questions question = options.getQuestions().get(l);
+        for (int l = 0; l < options.getQuestionsList().size(); l++) {
+            Questions question = options.getQuestionsList().get(l);
             dbAdapter.insertDataQuestionTable(question);
-            if (question.getOptions().size() > 0)
+            if (!question.getOptions().isEmpty())
                 addOptions(question);
         }
     }
 
     public void addCategories(Surveys surveys) {
-        for (int h = 0; h < surveys.getCategories().size(); h++) {
-            Categories categories = surveys.getCategories().get(h);
+        for (int h = 0; h < surveys.getCategoriesList().size(); h++) {
+            Categories categories = surveys.getCategoriesList().get(h);
             dbAdapter.insertDataCategoriesTable(categories);
-            if (categories.getQuestionsList().size() > 0)
+            if (!categories.getQuestionsList().isEmpty())
                 addQuestionFromCategories(categories);
         }
     }
 
     public void addQuestions(Surveys surveys) {
 
-        for (int j = 0; j < surveys.getQuestions().size(); j++) {
-            Questions question = surveys.getQuestions().get(j);
+        for (int j = 0; j < surveys.getQuestionsList().size(); j++) {
+            Questions question = surveys.getQuestionsList().get(j);
             dbAdapter.insertDataQuestionTable(question);
-            if (question.getOptions().size() > 0)
+            if (!question.getOptions().isEmpty())
                 addOptions(question);
         }
     }
@@ -280,7 +280,7 @@ public class DashBoardActivity extends BaseActivity {
 
     private void doTaskResponseUploading() {
         if (asynTaskCheck) {
-            lumsticApp.showToast("Something went wrong , please try again");
+            appController.showToast("Something went wrong , please try again");
             progressDialog.dismiss();
         } else {
 
@@ -306,9 +306,9 @@ public class DashBoardActivity extends BaseActivity {
                         obj.put("updated_at", timestamp);
                         obj.put("longitude", lon);
                         obj.put("latitude", lat);
-                        obj.put("user_id", lumsticApp.getPreferences().getUserId());
-                        obj.put("organization_id", lumsticApp.getPreferences().getOrganizationId());
-                        obj.put("access_token", lumsticApp.getPreferences().getAccessToken());
+                        obj.put("user_id", appController.getPreferences().getUserId());
+                        obj.put("organization_id", appController.getPreferences().getOrganizationId());
+                        obj.put("access_token", appController.getPreferences().getAccessToken());
                         obj.put("mobile_id", mobilId);
                         obj.put("answers_attributes", localJsonObject);
 
@@ -317,7 +317,7 @@ public class DashBoardActivity extends BaseActivity {
                     }
 
 
-                    new uploadResponse().execute(localJsonObject.toString(), obj.toString(), surveysList.get(w).getId() + "", timestamp, lat + "", lon + "", mobilId, completedResponseIds.get(i) + "");
+                    new UploadResponse().execute(localJsonObject.toString(), obj.toString(), surveysList.get(w).getId() + "", timestamp, lat + "", lon + "", mobilId, completedResponseIds.get(i) + "");
                 }
 
             }
@@ -341,7 +341,7 @@ public class DashBoardActivity extends BaseActivity {
         HttpPost httppost = new HttpPost(recordUrl);
         //attributes for survey sync
         try {
-            httppost.addHeader("access_token", lumsticApp.getPreferences().getAccessToken());
+            httppost.addHeader("access_token", appController.getPreferences().getAccessToken());
             httppost.setEntity(createStringEntity(jsonObject));
             HttpResponse httpResponse = httpclient.execute(httppost);
             HttpEntity httpEntity = httpResponse.getEntity();
@@ -384,7 +384,7 @@ public class DashBoardActivity extends BaseActivity {
         HttpPut httppost = new HttpPut(baseUrl + "/api/records/" + webId + ".json");
         //attributes for survey sync
         try {
-            httppost.addHeader("access_token", lumsticApp.getPreferences().getAccessToken());
+            httppost.addHeader("access_token", appController.getPreferences().getAccessToken());
             httppost.setEntity(createStringEntity(jsonObject));
             HttpResponse httpResponse = httpclient.execute(httppost);
             HttpEntity httpEntity = httpResponse.getEntity();
@@ -435,7 +435,7 @@ public class DashBoardActivity extends BaseActivity {
                         localRecordCursor.moveToNext();
                     }
                 }
-
+                localRecordCursor.close();
             }
 
         }
@@ -480,8 +480,9 @@ public class DashBoardActivity extends BaseActivity {
                                             progressDialog.show();
                                             surveyUploadCount = 0;
                                             surveyUploadFailedCount = 0;
+                                            totalCompletedResponses = 0;
                                             asynTaskCheck = false;
-                                            new uploadingMultiRecordResponse().execute();
+                                            new UploadingMultiRecordResponse().execute();
                                         }
                                     });
                     alertDialogBuilder.setNegativeButton("No",
@@ -497,14 +498,20 @@ public class DashBoardActivity extends BaseActivity {
                 }
 
             } else {
-                lumsticApp.showToast("Please check your internet connection");
+                appController.showToast("Please check your internet connection");
             }
             return true;
         } else if (id == R.id.action_logout) {
-            CommonUtil.Logout(DashBoardActivity.this, lumsticApp);
+            CommonUtil.logout(DashBoardActivity.this, appController);
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        dbAdapter.close();
     }
 
     class FetchSurvey extends AsyncTask<Void, Void, String> {
@@ -522,13 +529,13 @@ public class DashBoardActivity extends BaseActivity {
         @Override
         protected String doInBackground(Void... voids) {
 
-            if (CommonUtil.isTokenExpired(lumsticApp)) {
-                CommonUtil.reValidateToken(lumsticApp, baseUrl + loginUrl);
+            if (CommonUtil.isTokenExpired(appController)) {
+                CommonUtil.reValidateToken(appController, baseUrl + loginUrl);
             }
 
             try {
                 HttpClient httpclient = new DefaultHttpClient();
-                HttpGet httpGet = new HttpGet(fetchUrl + lumsticApp.getPreferences().getAccessToken());
+                HttpGet httpGet = new HttpGet(fetchUrl + appController.getPreferences().getAccessToken());
                 HttpResponse httpResponse = httpclient.execute(httpGet);
                 HttpEntity httpEntity = httpResponse.getEntity();
                 jsonFetchString = EntityUtils.toString(httpEntity);
@@ -548,7 +555,7 @@ public class DashBoardActivity extends BaseActivity {
 
             try {
                 if (s != null && s.length() > 0) {
-                    lumsticApp.getPreferences().setSurveyData(s);
+                    appController.getPreferences().setSurveyData(s);
                     surveysList = jsonHelper.tryParsing(s);
                 }
 
@@ -579,9 +586,9 @@ public class DashBoardActivity extends BaseActivity {
                 for (int i = 0; i < surveysList.size(); i++) {
                     Surveys surveys = surveysList.get(i);
                     dbAdapter.insertDataSurveysTable(surveys);
-                    if (surveys.getCategories().size() > 0)
+                    if (!surveys.getCategoriesList().isEmpty())
                         addCategories(surveys);
-                    if (surveys.getQuestions().size() > 0)
+                    if (!surveys.getQuestionsList().isEmpty())
                         addQuestions(surveys);
                 }
             } catch (Exception e) {
@@ -592,12 +599,12 @@ public class DashBoardActivity extends BaseActivity {
 
     }
 
-    public class uploadingMultiRecordResponse extends AsyncTask<Void, Void, Void> {
+    public class UploadingMultiRecordResponse extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if (CommonUtil.isTokenExpired(lumsticApp)) {
-                CommonUtil.reValidateToken(lumsticApp, baseUrl + loginUrl);
+            if (CommonUtil.isTokenExpired(appController)) {
+                CommonUtil.reValidateToken(appController, baseUrl + loginUrl);
             }
             generateRecordId();
             return null;
@@ -609,7 +616,7 @@ public class DashBoardActivity extends BaseActivity {
         }
     }
 
-    public class uploadResponse extends AsyncTask<String, Void, String> {
+    public class UploadResponse extends AsyncTask<String, Void, String> {
         String localResponseID;
         String localSurveyID;
         private String syncString = null;
@@ -617,13 +624,13 @@ public class DashBoardActivity extends BaseActivity {
         protected String doInBackground(String... string) {
 
 
-            String answers_attributes = string[0];
+            String answersAttributes = string[0];
             String response = string[1];
             localSurveyID = string[2];
-            String updated_at = string[3];
+            String updatedAt = string[3];
             String lat = string[4];
             String lon = string[5];
-            String mob_id = string[6];
+            String mobId = string[6];
             localResponseID = string[7];
 
             HttpClient httpclient = new DefaultHttpClient();
@@ -631,17 +638,17 @@ public class DashBoardActivity extends BaseActivity {
 
             JSONObject finalJsonObject = new JSONObject();
             try {
-                finalJsonObject.put("answers_attributes", new JSONObject(answers_attributes));
+                finalJsonObject.put("answers_attributes", new JSONObject(answersAttributes));
                 finalJsonObject.put("response", new JSONObject(response));
                 finalJsonObject.put("status", "complete");
                 finalJsonObject.put("survey_id", localSurveyID);
-                finalJsonObject.put("updated_at", updated_at);
+                finalJsonObject.put("updated_at", updatedAt);
                 finalJsonObject.put("longitude", lon + "");
                 finalJsonObject.put("latitude", lat + "");
-                finalJsonObject.put("access_token", lumsticApp.getPreferences().getAccessToken());
-                finalJsonObject.put("user_id", lumsticApp.getPreferences().getUserId());
-                finalJsonObject.put("organization_id", lumsticApp.getPreferences().getOrganizationId());
-                finalJsonObject.put("mobile_id", mob_id);
+                finalJsonObject.put("access_token", appController.getPreferences().getAccessToken());
+                finalJsonObject.put("user_id", appController.getPreferences().getUserId());
+                finalJsonObject.put("organization_id", appController.getPreferences().getOrganizationId());
+                finalJsonObject.put("mobile_id", mobId);
                 finalJsonObject.put("format", "json");
                 finalJsonObject.put("action", "create");
                 finalJsonObject.put("controller", "api/v1/responses");
@@ -653,7 +660,7 @@ public class DashBoardActivity extends BaseActivity {
             Log.e("TAG", "FINAL->>" + finalJsonObject.toString());
 
             try {
-                httppost.addHeader("access_token", lumsticApp.getPreferences().getAccessToken());
+                httppost.addHeader("access_token", appController.getPreferences().getAccessToken());
 
                 StringEntity se = new StringEntity(finalJsonObject.toString());
                 se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
@@ -699,6 +706,4 @@ public class DashBoardActivity extends BaseActivity {
             }
         }
     }
-
-
 }

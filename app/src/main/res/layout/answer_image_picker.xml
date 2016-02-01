@@ -45,7 +45,7 @@
         android:layout_marginBottom="30dp"
         android:layout_marginLeft="20dp"
         android:layout_marginTop="20dp"
-        android:background="@drawable/selector_custom_button"
+        android:background="@drawable/selector_button"
         android:gravity="center"
         android:orientation="horizontal">
 

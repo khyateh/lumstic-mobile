@@ -10,8 +10,8 @@ public class Surveys implements Serializable {
     String name;
     String description;
     String expiryDate;
-    List<Questions> questions;
-    List<Categories> categories;
+    List<Questions> questionsList;
+    List<Categories> categoriesList;
     private int completedSurvey, incompleteSurvey, uploadedSurvey;
 
     public int getCompletedSurvey() {
@@ -38,20 +38,20 @@ public class Surveys implements Serializable {
         this.incompleteSurvey = incompleteSurvey;
     }
 
-    public List<Categories> getCategories() {
-        return categories;
+    public List<Categories> getCategoriesList() {
+        return categoriesList;
     }
 
-    public void setCategories(List<Categories> categories) {
-        this.categories = categories;
+    public void setCategoriesList(List<Categories> categoriesList) {
+        this.categoriesList = categoriesList;
     }
 
-    public List<Questions> getQuestions() {
-        return questions;
+    public List<Questions> getQuestionsList() {
+        return questionsList;
     }
 
-    public void setQuestions(List<Questions> questions) {
-        this.questions = questions;
+    public void setQuestionsList(List<Questions> questionsList) {
+        this.questionsList = questionsList;
     }
 
     public int getId() {

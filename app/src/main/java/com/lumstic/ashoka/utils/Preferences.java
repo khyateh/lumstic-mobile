@@ -6,26 +6,22 @@ import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
 
 public class Preferences {
-    private static final String SERVER_URL = "SERVER_URL";
-    private static final String ADD_AUTH_IN_HEADER = "ADD_AUTH_IN_HEADER";
-    private static final String access_token = "access_token";
-    private static final String user_id = "user_id";
-    private static final String organization_id = "organization_id";
-    private static final String base_url = "base_url";
-    private static final String user_base_url = "user_base_url";
-    private static final Boolean back_pressed = false;
-    private static final String SEARCH_LOG_ID = "SEARCH_LOG_ID";
+    private String accessToken = "access_token";
+    private String userId = "user_id";
+    private String organizationId = "organization_id";
+    private String baseUrl = "base_url";
+    private String userBaseUrl = "user_base_url";
     private String latitude = "latitude";
     private String longitude = "longitude";
     private String username = "username";
     private String password = "password";
-    private String access_token_created_at = "access_token_created_at";
-    private String SURVEY_DATA = "SURVEY_DATA";
+    private String accessTokenCreatedAt = "access_token_created_at";
+    private String surveyData = "SURVEY_DATA";
     private Context context;
 
-    public Preferences(Context context) {
+    public Preferences(Context mContext) {
         super();
-        this.context = context;
+        this.context = mContext;
     }
 
     protected SharedPreferences getSharedPreferences(String key) {
@@ -34,8 +30,7 @@ public class Preferences {
 
     private String getString(String key, String def) {
         SharedPreferences prefs = getSharedPreferences(key);
-        String s = prefs.getString(key, def);
-        return s;
+        return prefs.getString(key, def);
     }
 
     private void setString(String key, String val) {
@@ -47,8 +42,7 @@ public class Preferences {
 
     private boolean getBoolean(String key, boolean def) {
         SharedPreferences prefs = getSharedPreferences(key);
-        boolean b = prefs.getBoolean(key, def);
-        return b;
+        return prefs.getBoolean(key, def);
     }
 
     private void setBoolean(String key, boolean val) {
@@ -58,77 +52,57 @@ public class Preferences {
         e.commit();
     }
 
-    public boolean addAuthInHeader() {
-        return getBoolean(ADD_AUTH_IN_HEADER, false);
-    }
-
-    public void setAddAuthInHeader(boolean addAuthInHeader) {
-        setBoolean(ADD_AUTH_IN_HEADER, addAuthInHeader);
-    }
 
     public String getBaseUrl() {
-        return getString(base_url, null);
+        return getString(baseUrl, null);
     }
 
     public void setBaseUrl(String baseUrl) {
-        setString(base_url, baseUrl);
+        setString(this.baseUrl, baseUrl);
     }
 
-    public Boolean getBack_pressed() {
+    public Boolean getBackPressed() {
         return getBoolean("back_pressed", false);
     }
 
-    public void setBack_pressed(Boolean back_pressed) {
-        setBoolean("back_pressed", back_pressed);
+    public void setBackPressed(Boolean backPressed) {
+        setBoolean("back_pressed", backPressed);
     }
 
     public String getAccessToken() {
-        return getString(access_token, null);
+        return getString(accessToken, null);
     }
 
     public void setAccessToken(String authToken) {
-        setString(access_token, authToken);
+        setString(accessToken, authToken);
     }
 
     public String getUserId() {
-        return getString(user_id, null);
+        return getString(userId, null);
     }
 
     public void setUserId(String userId) {
-        setString(user_id, userId);
+        setString(this.userId, userId);
     }
 
     public String getOrganizationId() {
-        return getString(organization_id, null);
+        return getString(organizationId, null);
     }
 
 
     public void setOrganizationId(String organizationId) {
-        setString(organization_id, organizationId);
+        setString(this.organizationId, organizationId);
     }
 
 
     public String getSurveyData() {
-        return getString(SURVEY_DATA, null);
+        return getString(surveyData, null);
     }
 
     public void setSurveyData(String surveyData) {
-        setString(SURVEY_DATA, surveyData);
+        setString(this.surveyData, surveyData);
     }
 
-
-    public String getSearchLogId() {
-        return getString(SEARCH_LOG_ID, null);
-    }
-
-    public void setSearchLogId(String searchLogId) {
-        setString(SEARCH_LOG_ID, searchLogId);
-    }
-
-    public void logout() {
-        setAddAuthInHeader(false);
-        setSearchLogId(null);
-    }
 
     public String getLatitude() {
         return getString(latitude, null);
@@ -162,19 +136,19 @@ public class Preferences {
         setString(password, localPassword);
     }
 
-    public String getAccess_token_created_at() {
-        return getString(access_token_created_at, null);
+    public String getAccessTokenCreatedAt() {
+        return getString(accessTokenCreatedAt, null);
     }
 
-    public void setAccess_token_created_at(String localAccess_token_created_at) {
-        setString(access_token_created_at, localAccess_token_created_at);
+    public void setAccessTokenCreatedAt(String localAccessTokenCreatedAt) {
+        setString(accessTokenCreatedAt, localAccessTokenCreatedAt);
     }
 
-    public String getUser_base_url() {
-        return getString(user_base_url, null);
+    public String getUserBaseUrl() {
+        return getString(userBaseUrl, null);
     }
 
-    public void setUser_base_url(String baseUrl) {
-        setString(user_base_url, baseUrl);
+    public void setUserBaseUrl(String baseUrl) {
+        setString(userBaseUrl, baseUrl);
     }
 }

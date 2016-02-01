@@ -4,8 +4,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.Button;
 
-import com.lumstic.ashoka.utils.TypefaceLoader;
-
 
 public class RobotoLightButton extends Button {
     public RobotoLightButton(Context context) {
@@ -25,7 +23,7 @@ public class RobotoLightButton extends Button {
 
     private void init(Context context) {
         if (!isInEditMode())
-            setTypeface(TypefaceLoader.get(context, "Roboto-Light.ttf"));
+            setTypeface(TypefaceLoader.getInstance(context, "Roboto-Light.ttf").getTypeFace());
     }
 
 }

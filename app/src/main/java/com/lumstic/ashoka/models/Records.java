@@ -3,15 +3,14 @@ package com.lumstic.ashoka.models;
 
 public class Records {
     int id;
+    int responseId;
+    int categoryId;
+    int webId;
 
     public Records(int categoryId, int responseId) {
         this.categoryId = categoryId;
         this.responseId = responseId;
     }
-
-    int responseId;
-    int categoryId;
-    int webId;
 
     public int getId() {
         return id;

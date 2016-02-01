@@ -1,56 +1,45 @@
 package com.lumstic.ashoka.models;
 
-import java.util.ArrayList;
-
 public class Answers {
     int recordId;
-    int webId;
-    long updated_at;
+    long updatedAt;
     int id;
     int responseId;
-    int question_id;
+    int questionId;
     String image;
     String content;
     String type;
-    ArrayList<Integer> optionIds;
 
     public Answers() {
     }
 
-    public Answers(int recordId, int responseId, int question_id, String content, long updated_at) {
+    public Answers(int recordId, int responseId, int questionId, String content, long updatedAt) {
         this.recordId = recordId;
         this.responseId = responseId;
-        this.question_id = question_id;
+        this.questionId = questionId;
         this.content = content;
-        this.updated_at = updated_at;
+        this.updatedAt = updatedAt;
     }
 
-    public Answers(int recordId, int responseId, int question_id, String content, long updated_at, String type) {
+    public Answers(int recordId, int responseId, int questionId, String content, long updatedAt, String type) {
         this.recordId = recordId;
         this.responseId = responseId;
-        this.question_id = question_id;
+        this.questionId = questionId;
         this.content = content;
-        this.updated_at = updated_at;
+        this.updatedAt = updatedAt;
         this.type = type;
     }
 
-    public Answers(int recordId, int responseId, int question_id, String content, long updated_at, String type, String image) {
+    public Answers(int recordId, int responseId, int questionId, String content, long updatedAt, String type, String image) {
         this.recordId = recordId;
         this.responseId = responseId;
-        this.question_id = question_id;
+        this.questionId = questionId;
         this.content = content;
-        this.updated_at = updated_at;
+        this.updatedAt = updatedAt;
         this.type = type;
         this.image = image;
     }
 
-    public ArrayList<Integer> getOptionIds() {
-        return optionIds;
-    }
-
-    public void setOptionIds(ArrayList<Integer> optionIds) {
-        this.optionIds = optionIds;
-    }
 
     public int getRecordId() {
         return recordId;
@@ -60,20 +49,13 @@ public class Answers {
         this.recordId = recordId;
     }
 
-    public int getWebId() {
-        return webId;
+
+    public long getUpdatedAt() {
+        return updatedAt;
     }
 
-    public void setWebId(int webId) {
-        this.webId = webId;
-    }
-
-    public long getUpdated_at() {
-        return updated_at;
-    }
-
-    public void setUpdated_at(long updated_at) {
-        this.updated_at = updated_at;
+    public void setUpdatedAt(long updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public int getId() {
@@ -88,9 +70,6 @@ public class Answers {
         return responseId;
     }
 
-    public void setResponseId(int responseId) {
-        this.responseId = responseId;
-    }
 
     public String getType() {
         return type;
@@ -100,12 +79,12 @@ public class Answers {
         this.type = type;
     }
 
-    public int getQuestion_id() {
-        return question_id;
+    public int getQuestionId() {
+        return questionId;
     }
 
-    public void setQuestion_id(int question_id) {
-        this.question_id = question_id;
+    public void setQuestionId(int questionId) {
+        this.questionId = questionId;
     }
 
     public String getImage() {

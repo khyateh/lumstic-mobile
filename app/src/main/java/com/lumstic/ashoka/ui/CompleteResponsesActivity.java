@@ -15,7 +15,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lumstic.ashoka.R;
@@ -29,6 +28,7 @@ import com.lumstic.ashoka.utils.CommonUtil;
 import com.lumstic.ashoka.utils.IntentConstants;
 import com.lumstic.ashoka.utils.JSONParser;
 import com.lumstic.ashoka.utils.NetworkUtil;
+import com.lumstic.ashoka.views.RobotoRegularTextView;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -56,8 +56,7 @@ public class CompleteResponsesActivity extends BaseActivity {
     private ActionBar actionBar;
     private String timestamp = "";
     private ListView listView;
-    private TextView responseCount;
-    private TextView surveyTitle;
+    private RobotoRegularTextView responseCount, surveyTitle;
     private int surveyUploadCount = 0, surveyUploadFailedCount = 0;
     private LinearLayout uploadContainer;
     private ProgressDialog progressDialog;
@@ -94,7 +93,6 @@ public class CompleteResponsesActivity extends BaseActivity {
         actionBar = getActionBar();
         actionBar.setTitle("Completed Responses");
         actionBar.setDisplayHomeAsUpEnabled(true);
-//        actionBar.setHomeAsUpIndicator(R.drawable.ic_action_ic_back);
         actionBar.setDisplayShowTitleEnabled(true);
         //declaring adapter and array lists
         dbAdapter = new DBAdapter(CompleteResponsesActivity.this);
@@ -105,8 +103,8 @@ public class CompleteResponsesActivity extends BaseActivity {
         recordUrl = baseUrl + recordUrl;
         jsonParser = new JSONParser();
         //setting up views
-        responseCount = (TextView) findViewById(R.id.complete_response_count);
-        surveyTitle = (TextView) findViewById(R.id.survey_title_text);
+        responseCount = (RobotoRegularTextView) findViewById(R.id.complete_response_count);
+        surveyTitle = (RobotoRegularTextView) findViewById(R.id.survey_title_text);
         uploadContainer = (LinearLayout) findViewById(R.id.upload_container);
         surveys = new Surveys();
         //get survey object from previous activity
@@ -116,13 +114,13 @@ public class CompleteResponsesActivity extends BaseActivity {
 
         surveyTitle.setText(surveys.getName());
 
-        for (int j = 0; j < surveys.getQuestions().size(); j++) {
-            if (surveys.getQuestions().get(j).getIdentifier() == 1) {
-                identifierQuestion = surveys.getQuestions().get(j);
-                identifierQuestionId = surveys.getQuestions().get(j).getId();
+        for (int j = 0; j < surveys.getQuestionsList().size(); j++) {
+            if (surveys.getQuestionsList().get(j).getIdentifier() == 1) {
+                identifierQuestion = surveys.getQuestionsList().get(j);
+                identifierQuestionId = surveys.getQuestionsList().get(j).getId();
             } else {
-                identifierQuestion = surveys.getQuestions().get(0);
-                identifierQuestionId = surveys.getQuestions().get(0).getId();
+                identifierQuestion = surveys.getQuestionsList().get(0);
+                identifierQuestionId = surveys.getQuestionsList().get(0).getId();
             }
         }
 
@@ -139,7 +137,7 @@ public class CompleteResponsesActivity extends BaseActivity {
 
                 Intent intent = new Intent(getApplicationContext(), NewResponseActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra(IntentConstants.SURVEY, (java.io.Serializable) surveys);
+                intent.putExtra(IntentConstants.SURVEY, surveys);
                 intent.putExtra(IntentConstants.RESPONSE_ID, Integer.parseInt(responseNumber));
                 startActivity(intent);
             }
@@ -166,9 +164,9 @@ public class CompleteResponsesActivity extends BaseActivity {
 
                 if (NetworkUtil.iSConnected(getApplicationContext()) == NetworkUtil.TYPE_CONNECTED) {
                     progressDialog.show();
-                    new uploadingMultiRecordResponse().execute();
+                    new UploadingMultiRecordResponse().execute();
                 } else {
-                    lumsticApp.showToast("Please check your internet connection");
+                    appController.showToast("Please check your internet connection");
                 }
 
 
@@ -212,7 +210,7 @@ public class CompleteResponsesActivity extends BaseActivity {
 
     private void doTaskResponseUploading() {
         if (asynTaskCheck) {
-            lumsticApp.showToast("Something went wrong , please try again");
+            appController.showToast("Something went wrong , please try again");
             progressDialog.dismiss();
         } else {
             completedResponseIds = dbAdapter.getCompleteResponsesIds(surveys.getId());
@@ -232,9 +230,9 @@ public class CompleteResponsesActivity extends BaseActivity {
                     obj.put("updated_at", timestamp);
                     obj.put("longitude", lon);
                     obj.put("latitude", lat);
-                    obj.put("user_id", lumsticApp.getPreferences().getUserId());
-                    obj.put("organization_id", lumsticApp.getPreferences().getOrganizationId());
-                    obj.put("access_token", lumsticApp.getPreferences().getAccessToken());
+                    obj.put("user_id", appController.getPreferences().getUserId());
+                    obj.put("organization_id", appController.getPreferences().getOrganizationId());
+                    obj.put("access_token", appController.getPreferences().getAccessToken());
                     obj.put("mobile_id", mobilId);
                     obj.put("answers_attributes", localJsonObject);
 
@@ -242,7 +240,7 @@ public class CompleteResponsesActivity extends BaseActivity {
                     e.printStackTrace();
                 }
 
-                new uploadResponse().execute(localJsonObject.toString(), obj.toString(), surveys.getId() + "", timestamp, lat + "", lon + "", mobilId, completedResponseIds.get(i) + "");
+                new UploadResponse().execute(localJsonObject.toString(), obj.toString(), surveys.getId() + "", timestamp, lat + "", lon + "", mobilId, completedResponseIds.get(i) + "");
             }
         }
 
@@ -276,7 +274,7 @@ public class CompleteResponsesActivity extends BaseActivity {
                 }
             }
 
-
+            localRecordCursor.close();
         }
 
 
@@ -298,7 +296,7 @@ public class CompleteResponsesActivity extends BaseActivity {
         HttpPost httppost = new HttpPost(recordUrl);
         //attributes for survey sync
         try {
-            httppost.addHeader("access_token", lumsticApp.getPreferences().getAccessToken());
+            httppost.addHeader("access_token", appController.getPreferences().getAccessToken());
             httppost.setEntity(createStringEntity(jsonObject));
             HttpResponse httpResponse = httpclient.execute(httppost);
             HttpEntity httpEntity = httpResponse.getEntity();
@@ -341,7 +339,7 @@ public class CompleteResponsesActivity extends BaseActivity {
         HttpPut httppost = new HttpPut(baseUrl + "/api/records/" + webId + ".json");
         //attributes for survey sync
         try {
-            httppost.addHeader("access_token", lumsticApp.getPreferences().getAccessToken());
+            httppost.addHeader("access_token", appController.getPreferences().getAccessToken());
             httppost.setEntity(createStringEntity(jsonObject));
             HttpResponse httpResponse = httpclient.execute(httppost);
             HttpEntity httpEntity = httpResponse.getEntity();
@@ -375,19 +373,19 @@ public class CompleteResponsesActivity extends BaseActivity {
             finish();
             return true;
         } else if (id == R.id.action_logout) {
-            CommonUtil.Logout(CompleteResponsesActivity.this, lumsticApp);
+            CommonUtil.logout(CompleteResponsesActivity.this, appController);
             return true;
         }
         return super.onOptionsItemSelected(menuItem);
     }
 
-    public class uploadingMultiRecordResponse extends AsyncTask<Void, Void, Void> {
+    public class UploadingMultiRecordResponse extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {
 
-            if (CommonUtil.isTokenExpired(lumsticApp)) {
-                CommonUtil.reValidateToken(lumsticApp, baseUrl + loginUrl);
+            if (CommonUtil.isTokenExpired(appController)) {
+                CommonUtil.reValidateToken(appController, baseUrl + loginUrl);
             }
             generateRecordId();
             return null;
@@ -399,7 +397,7 @@ public class CompleteResponsesActivity extends BaseActivity {
         }
     }
 
-    public class uploadResponse extends AsyncTask<String, Void, String> {
+    public class UploadResponse extends AsyncTask<String, Void, String> {
 
         String localResponseID;
         private String syncString = null;
@@ -407,30 +405,30 @@ public class CompleteResponsesActivity extends BaseActivity {
         protected String doInBackground(String... string) {
 
 
-            String answers_attributes = string[0];
+            String answersAttributes = string[0];
             String response = string[1];
-            String survey_id = string[2];
-            String updated_at = string[3];
+            String surveyId = string[2];
+            String updatedAt = string[3];
             String lat = string[4];
             String lon = string[5];
-            String mob_id = string[6];
+            String mobId = string[6];
             localResponseID = string[7];
             HttpClient httpclient = new DefaultHttpClient();
             HttpPost httppost = new HttpPost(uploadUrl);
 
             JSONObject finalJsonObject = new JSONObject();
             try {
-                finalJsonObject.put("answers_attributes", new JSONObject(answers_attributes));
+                finalJsonObject.put("answers_attributes", new JSONObject(answersAttributes));
                 finalJsonObject.put("response", new JSONObject(response));
                 finalJsonObject.put("status", "complete");
-                finalJsonObject.put("survey_id", survey_id);
-                finalJsonObject.put("updated_at", updated_at);
+                finalJsonObject.put("survey_id", surveyId);
+                finalJsonObject.put("updated_at", updatedAt);
                 finalJsonObject.put("longitude", lon + "");
                 finalJsonObject.put("latitude", lat + "");
-                finalJsonObject.put("access_token", lumsticApp.getPreferences().getAccessToken());
-                finalJsonObject.put("user_id", lumsticApp.getPreferences().getUserId());
-                finalJsonObject.put("organization_id", lumsticApp.getPreferences().getOrganizationId());
-                finalJsonObject.put("mobile_id", mob_id);
+                finalJsonObject.put("access_token", appController.getPreferences().getAccessToken());
+                finalJsonObject.put("user_id", appController.getPreferences().getUserId());
+                finalJsonObject.put("organization_id", appController.getPreferences().getOrganizationId());
+                finalJsonObject.put("mobile_id", mobId);
                 finalJsonObject.put("format", "json");
                 finalJsonObject.put("action", "create");
                 finalJsonObject.put("controller", "api/v1/responses");
@@ -442,7 +440,7 @@ public class CompleteResponsesActivity extends BaseActivity {
             Log.e("TAG", "FINAL->>" + finalJsonObject.toString());
 
             try {
-                httppost.addHeader("access_token", lumsticApp.getPreferences().getAccessToken());
+                httppost.addHeader("access_token", appController.getPreferences().getAccessToken());
 
                 StringEntity se = new StringEntity(finalJsonObject.toString());
                 se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
@@ -482,5 +480,11 @@ public class CompleteResponsesActivity extends BaseActivity {
                 finish();
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        dbAdapter.close();
     }
 }

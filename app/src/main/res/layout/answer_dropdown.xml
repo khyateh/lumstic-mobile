@@ -10,5 +10,5 @@
     android:layout_margin="8dp"
     android:layout_marginBottom="30dp"
     android:padding="2dp"
-    android:prompt="@string/select_one"></Spinner>
+    android:prompt="@string/select_one"/>
 

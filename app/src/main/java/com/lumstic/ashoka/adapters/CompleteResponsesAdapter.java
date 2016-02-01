@@ -5,38 +5,38 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.TextView;
 
 import com.lumstic.ashoka.R;
 import com.lumstic.ashoka.models.CompleteResponse;
 import com.lumstic.ashoka.models.Surveys;
+import com.lumstic.ashoka.views.RobotoLightTextView;
+import com.lumstic.ashoka.views.RobotoRegularTextView;
 
 import java.util.List;
 
 
 public class CompleteResponsesAdapter extends BaseAdapter {
 
-    Context context;
-
-    List<CompleteResponse> completeResponse;
+    Context mContext;
+    List<CompleteResponse> completeResponseList;
     Surveys surveys;
-    LayoutInflater inflater;
+    LayoutInflater mInflater;
 
-    public CompleteResponsesAdapter(Context context, List<CompleteResponse> completeResponse, Surveys surveys) {
-        this.context = context;
+    public CompleteResponsesAdapter(Context mContext, List<CompleteResponse> completeResponseList, Surveys surveys) {
+        this.mContext = mContext;
         this.surveys = surveys;
-        this.completeResponse = completeResponse;
-        inflater = (LayoutInflater) context
+        this.completeResponseList = completeResponseList;
+        mInflater = (LayoutInflater) mContext
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     public int getCount() {
-        return completeResponse.size();
+        return completeResponseList.size();
     }
 
     @Override
     public Object getItem(int i) {
-        return completeResponse.get(i);
+        return completeResponseList.get(i);
     }
 
     public long getItemId(int i) {
@@ -45,26 +45,28 @@ public class CompleteResponsesAdapter extends BaseAdapter {
 
     public View getView(int i, View view, ViewGroup viewGroup) {
         ViewHolder viewHolder;
-        if (view == null) {
-            view = inflater.inflate(R.layout.item_complete_responses, null);
+        View localView = view;
+        if (localView == null) {
+            localView = mInflater.inflate(R.layout.item_complete_responses, null);
             viewHolder = new ViewHolder();
-            viewHolder.responseNumber = (TextView) view.findViewById(R.id.response_number_text);
-            viewHolder.responseText = (TextView) view.findViewById(R.id.response_description_text);
-            view.setTag(viewHolder);
+            viewHolder.responseNumber = (RobotoRegularTextView) localView.findViewById(R.id.response_number_text);
+            viewHolder.responseText = (RobotoLightTextView) localView.findViewById(R.id.response_description_text);
+            localView.setTag(viewHolder);
         } else {
-            viewHolder = (ViewHolder) view.getTag();
+            viewHolder = (ViewHolder) localView.getTag();
         }
 
-        final CompleteResponse completeResponse = (CompleteResponse) getItem(i);
+        CompleteResponse completeResponse = (CompleteResponse) getItem(i);
         if (completeResponse != null) {
             viewHolder.responseNumber.setText("Response: " + completeResponse.getResponseNumber());
             viewHolder.responseText.setText(completeResponse.getResponseText());
             viewHolder.responseNumber.setTag(completeResponse.getResponseNumber());
         }
-        return view;
+        return localView;
     }
 
     private static class ViewHolder {
-        TextView responseNumber, responseText;
+        RobotoRegularTextView responseNumber;
+        RobotoLightTextView responseText;
     }
 }

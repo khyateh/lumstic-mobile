@@ -54,64 +54,49 @@ public class JSONParser {
 
     public Categories parseCategories(JSONObject jsonObjectCategories) {
         Categories categories = new Categories();
-        List<Questions> questionsList = new ArrayList<>();
         try {
-            try {
-                categories.setId(jsonObjectCategories.getInt("id"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            try {
-                categories.setSurveyId(jsonObjectCategories.getInt("survey_id"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            try {
-                categories.setOrderNumber(jsonObjectCategories.getInt("order_number"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            try {
-                categories.setCategoryId(jsonObjectCategories.getInt("category_id"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            try {
-                categories.setContent(jsonObjectCategories.getString("content"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            try {
-                categories.setType(jsonObjectCategories.getString("type"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            try {
-                categories.setParentId(jsonObjectCategories.getInt("parent_id"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            try {
-
-                for (int i = 0; i < jsonObjectCategories.getJSONArray("questions").length(); i++) {
-                    questionsList.add(parseQuestions(jsonObjectCategories.getJSONArray("questions").getJSONObject(i)));
-                }
-                categories.setQuestionsList(questionsList);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            categories.setId(jsonObjectCategories.getInt("id"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        try {
+            categories.setSurveyId(jsonObjectCategories.getInt("survey_id"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        try {
+            categories.setOrderNumber(jsonObjectCategories.getInt("order_number"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        try {
+            categories.setCategoryId(jsonObjectCategories.getInt("category_id"));
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        try {
+            categories.setContent(jsonObjectCategories.getString("content"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            categories.setType(jsonObjectCategories.getString("type"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            categories.setParentId(jsonObjectCategories.getInt("parent_id"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
         return categories;
     }
 
     public Options parseOptions(JSONObject jsonObjectOptions) {
         Options options = new Options();
-        List<Questions> questionsList = new ArrayList<>();
-        List<Categories> categoriesList = new ArrayList<>();
         try {
             options.setId(jsonObjectOptions.getInt("id"));
         } catch (JSONException e) {
@@ -133,26 +118,6 @@ public class JSONParser {
             e.printStackTrace();
         }
 
-        try {
-
-            for (int i = 0; i < jsonObjectOptions.getJSONArray("questions").length(); i++) {
-                questionsList.add(parseQuestions(jsonObjectOptions.getJSONArray("questions").getJSONObject(i)));
-            }
-            options.setQuestions(questionsList);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        try {
-
-            for (int i = 0; i < jsonObjectOptions.getJSONArray("categories").length(); i++) {
-                categoriesList.add(parseCategories(jsonObjectOptions.getJSONArray("categories").getJSONObject(i)));
-            }
-            options.setCategories(categoriesList);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
 
         return options;
 
@@ -163,76 +128,83 @@ public class JSONParser {
         List<Options> optionses;
         optionses = new ArrayList<>();
         try {
-            try {
-                questions.setId(jsonObjectQuestions.getInt("id"));
+            questions.setId(jsonObjectQuestions.getInt("id"));
 
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            try {
-                if (jsonObjectQuestions.getBoolean("identifier"))
-                    questions.setIdentifier(1);
-                else
-                    questions.setIdentifier(0);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            try {
-                questions.setParentId(jsonObjectQuestions.getInt("parent_id"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            try {
-                questions.setMinValue(jsonObjectQuestions.getInt("min_value"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            try {
-                questions.setMaxValue(jsonObjectQuestions.getInt("max_value"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            try {
-                questions.setMaxLength(jsonObjectQuestions.getInt("max_length"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            try {
-                questions.setImageUrl(jsonObjectQuestions.getString("image_url"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            questions.setType(jsonObjectQuestions.getString("type"));
-            questions.setContent(jsonObjectQuestions.getString("content"));
-            try {
-                questions.setSurveyId(jsonObjectQuestions.getInt("survey_id"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            try {
-                questions.setOrderNumber(jsonObjectQuestions.getInt("order_number"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            try {
-                questions.setCategoryId(jsonObjectQuestions.getInt("category_id"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            try {
-                if (jsonObjectQuestions.getBoolean("mandatory"))
-                    questions.setMandatory(1);
-                else
-                    questions.setMandatory(0);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
+        try {
+            if (jsonObjectQuestions.getBoolean("identifier")) {
+                questions.setIdentifier(1);
+            } else {
+                questions.setIdentifier(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            questions.setParentId(jsonObjectQuestions.getInt("parent_id"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            questions.setMinValue(jsonObjectQuestions.getInt("min_value"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            questions.setMaxValue(jsonObjectQuestions.getInt("max_value"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            questions.setMaxLength(jsonObjectQuestions.getInt("max_length"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            questions.setImageUrl(jsonObjectQuestions.getString("image_url"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            questions.setType(jsonObjectQuestions.getString("type"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            questions.setContent(jsonObjectQuestions.getString("content"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            questions.setSurveyId(jsonObjectQuestions.getInt("survey_id"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            questions.setOrderNumber(jsonObjectQuestions.getInt("order_number"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            questions.setCategoryId(jsonObjectQuestions.getInt("category_id"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            if (jsonObjectQuestions.getBoolean("mandatory")) {
+                questions.setMandatory(1);
+            } else {
+                questions.setMandatory(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         if (jsonObjectQuestions.has("options")) {
             try {
 
@@ -328,7 +300,7 @@ public class JSONParser {
                         questionsList.add(j, questions);
                     }
                 }
-                surveys.setQuestions(questionsList);
+                surveys.setQuestionsList(questionsList);
 
 
                 JSONArray jsonArrayCategories = jsonObject.getJSONArray("categories");
@@ -339,7 +311,7 @@ public class JSONParser {
                     categoriesList.add(l, categories);
 
                 }
-                surveys.setCategories(categoriesList);
+                surveys.setCategoriesList(categoriesList);
 
             } catch (JSONException e) {
                 e.printStackTrace();

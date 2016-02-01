@@ -12,15 +12,15 @@ public class Categories implements Serializable {
     int categoryId;
     String type;
     String content;
-    Categories categories;
+    List<Categories> categoriesList = new ArrayList<>();
     List<Questions> questionsList = new ArrayList<>();
 
-    public Categories getCategories() {
-        return categories;
+    public List<Categories> getCategoriesList() {
+        return categoriesList;
     }
 
-    public void setCategories(Categories categories) {
-        this.categories = categories;
+    public void setCategoriesList(List<Categories> categoriesList) {
+        this.categoriesList = categoriesList;
     }
 
     public List<Questions> getQuestionsList() {

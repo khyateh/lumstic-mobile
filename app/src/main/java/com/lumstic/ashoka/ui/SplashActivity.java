@@ -3,8 +3,6 @@ package com.lumstic.ashoka.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.Menu;
-import android.view.MenuItem;
 
 import com.lumstic.ashoka.R;
 import com.lumstic.ashoka.utils.CommonUtil;
@@ -24,7 +22,7 @@ public class SplashActivity extends BaseActivity {
 
             @Override
             public void run() {
-                if (CommonUtil.isLoggedIn(lumsticApp)) {
+                if (CommonUtil.isLoggedIn(appController)) {
                     Intent i = new Intent(SplashActivity.this, DashBoardActivity.class);
                     startActivity(i);
                 } else {
@@ -36,22 +34,6 @@ public class SplashActivity extends BaseActivity {
         }, splashScreenDelay);
 
 
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_splash, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
 }

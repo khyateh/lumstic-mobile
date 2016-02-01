@@ -8,3 +8,4 @@
 *.iml
 /sonar-project.properties
 .sonar/**
+app/fabric.properties

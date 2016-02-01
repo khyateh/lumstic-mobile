@@ -4,8 +4,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import com.lumstic.ashoka.utils.TypefaceLoader;
-
 public class RobotoLightTextView extends TextView {
 
     public RobotoLightTextView(Context context) {
@@ -25,7 +23,7 @@ public class RobotoLightTextView extends TextView {
 
     private void init(Context context) {
         if (!isInEditMode())
-            setTypeface(TypefaceLoader.get(context, "Roboto-Light.ttf"));
+            setTypeface(TypefaceLoader.getInstance(context, "Roboto-Light.ttf").getTypeFace());
 
     }
 

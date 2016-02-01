@@ -10,7 +10,7 @@
         android:layout_margin="10dp"
         android:background="#f1f1f1">
 
-        <TextView
+        <com.lumstic.ashoka.views.RobotoRegularTextView
             android:id="@+id/tv_server_setting"
             android:layout_width="match_parent"
             android:layout_height="50dp"
@@ -31,7 +31,7 @@
             android:background="@drawable/bg_card_layer_list">
 
 
-            <TextView
+            <com.lumstic.ashoka.views.RobotoLightTextView
                 android:id="@+id/tv_remote_server"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
@@ -53,7 +53,7 @@
                 android:background="#e6e6e6"
                 android:visibility="visible"/>
 
-            <TextView
+            <com.lumstic.ashoka.views.RobotoLightTextView
                 android:id="@+id/tv_user_server"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
@@ -72,7 +72,7 @@
         </RelativeLayout>
 
 
-        <TextView
+        <com.lumstic.ashoka.views.RobotoRegularTextView
             android:id="@+id/tv_password_setting"
             android:layout_width="match_parent"
             android:layout_height="50dp"
@@ -94,7 +94,7 @@
             android:background="@drawable/bg_card_layer_list">
 
 
-            <TextView
+            <com.lumstic.ashoka.views.RobotoLightTextView
                 android:id="@+id/tv_forgot_password"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"

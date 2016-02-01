@@ -9,8 +9,6 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.lumstic.ashoka.R;
@@ -18,6 +16,8 @@ import com.lumstic.ashoka.models.UserModel;
 import com.lumstic.ashoka.utils.CommonUtil;
 import com.lumstic.ashoka.utils.JSONParser;
 import com.lumstic.ashoka.utils.NetworkUtil;
+import com.lumstic.ashoka.views.RobotoLightEditText;
+import com.lumstic.ashoka.views.RobotoRegularButton;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -43,8 +43,8 @@ public class LoginActivity extends BaseActivity {
     private UserModel userModel;
     private ProgressDialog progressDialog;
     private ActionBar actionBar;
-    private Button loginButton;
-    private EditText emailEditText, passwordEditText;
+    private RobotoRegularButton loginButton;
+    private RobotoLightEditText emailEditText, passwordEditText;
     private String jsonLoginString = "";
     private String email = null, password = null;
 
@@ -63,9 +63,9 @@ public class LoginActivity extends BaseActivity {
 
 
         //initialize views and variables
-        emailEditText = (EditText) findViewById(R.id.email_edit_text);
-        passwordEditText = (EditText) findViewById(R.id.password_edit_text);
-        loginButton = (Button) findViewById(R.id.login_button);
+        emailEditText = (RobotoLightEditText) findViewById(R.id.email_edit_text);
+        passwordEditText = (RobotoLightEditText) findViewById(R.id.password_edit_text);
+        loginButton = (RobotoRegularButton) findViewById(R.id.login_button);
 
         //on login button click
         loginButton.setOnClickListener(new View.OnClickListener() {
@@ -77,7 +77,7 @@ public class LoginActivity extends BaseActivity {
 
                 //validation of email
                 if (!TextUtils.isEmpty(email) && CommonUtil.validateEmail(email)) {
-                    lumsticApp.getPreferences().setSurveyData("");
+                    appController.getPreferences().setSurveyData("");
 
                     if (NetworkUtil.iSConnected(getApplicationContext()) == NetworkUtil.TYPE_CONNECTED) {
                         progressDialog = new ProgressDialog(LoginActivity.this);
@@ -86,18 +86,18 @@ public class LoginActivity extends BaseActivity {
                         progressDialog.setMessage("Logging in");
                         progressDialog.show();
 
-                        lumsticApp.getPreferences().setUsername(email);
-                        lumsticApp.getPreferences().setPassword(password);
+                        appController.getPreferences().setUsername(email);
+                        appController.getPreferences().setPassword(password);
 
 
                         new Login().execute();
                     } else {
-                        lumsticApp.showToast("Please check your internet connection");
+                        appController.showToast("Please check your internet connection");
                     }
 
 
                 } else {
-                    lumsticApp.showToast("Enter Valid Email ");
+                    appController.showToast("Enter Valid Email ");
                 }
             }
         });
@@ -165,10 +165,10 @@ public class LoginActivity extends BaseActivity {
                 JSONObject jsonObjectLogin = new JSONObject(jsonLoginString);
                 JSONParser jsonParser = new JSONParser();
                 userModel = jsonParser.parseLogin(jsonObjectLogin);
-                lumsticApp.getPreferences().setAccessToken(userModel.getAccessToken());
-                lumsticApp.getPreferences().setUserId(String.valueOf(userModel.getUserId()));
-                lumsticApp.getPreferences().setOrganizationId(String.valueOf(userModel.getOrganisationId()));
-                lumsticApp.getPreferences().setAccess_token_created_at(String.valueOf(new Date().getTime()));
+                appController.getPreferences().setAccessToken(userModel.getAccessToken());
+                appController.getPreferences().setUserId(String.valueOf(userModel.getUserId()));
+                appController.getPreferences().setOrganizationId(String.valueOf(userModel.getOrganisationId()));
+                appController.getPreferences().setAccessTokenCreatedAt(String.valueOf(new Date().getTime()));
             } catch (JSONException e) {
                 e.printStackTrace();
             } catch (NullPointerException e) {

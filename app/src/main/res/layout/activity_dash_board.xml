@@ -13,13 +13,13 @@
         <View
             android:layout_width="fill_parent"
             android:layout_height="300dp"
-            android:background="@drawable/dashboard_bg_img"></View>
+            android:background="@drawable/dashboard_bg_img"/>
 
         <View
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_margin="10dp"
-            android:background="@color/dash_board_foreground"></View>
+            android:background="@color/dash_board_foreground"/>
 
         <ImageView
             android:id="@+id/vendor_icon"
@@ -29,7 +29,7 @@
             android:layout_marginTop="60dp"
             android:background="@drawable/ic_logo_splash"/>
 
-        <TextView
+        <com.lumstic.ashoka.views.RobotoLightTextView
             android:id="@+id/text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -73,7 +73,7 @@
         <View
             android:layout_width="fill_parent"
             android:layout_height="300dp"
-            android:background="@drawable/dashboard_bg_img"></View>
+            android:background="@drawable/dashboard_bg_img"/>
 
         <RelativeLayout
             android:layout_width="fill_parent"
@@ -99,11 +99,12 @@
                 android:layout_gravity="center"
                 android:layout_marginLeft="30dp"
                 android:layout_marginTop="19dp"
-                android:background="@drawable/selector_custom_button"
+                android:background="@drawable/selector_button"
                 android:gravity="center"
                 android:orientation="horizontal"
                 android:padding="8dp"
-                android:visibility="gone">
+                android:visibility="gone"
+                android:clickable="true">
 
                 <ImageView
                     android:layout_width="24dp"
@@ -111,14 +112,15 @@
                     android:layout_marginRight="14dp"
                     android:background="@drawable/ic_upload"/>
 
-                <com.lumstic.ashoka.views.RobotoBlackButton
+                <com.lumstic.ashoka.views.RobotoMediumButton
                     android:id="@+id/upload_all"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@android:color/transparent"
                     android:text="UPLOAD COMPLETED RESPONSES"
                     android:textColor="@color/white"
-                    android:textSize="15sp"/>
+                    android:textSize="15sp"
+                    android:clickable="false"/>
             </LinearLayout>
 
             <View
@@ -128,7 +130,7 @@
                 android:layout_marginLeft="22dp"
                 android:layout_marginTop="60dp"
                 android:alpha=".4"
-                android:background="#999999"></View>
+                android:background="#999999"/>
 
             <ListView
                 android:id="@+id/active_survey_list"
