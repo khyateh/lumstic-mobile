@@ -113,17 +113,20 @@ public class CompleteResponsesActivity extends BaseActivity {
         updateUI();
 
         surveyTitle.setText(surveys.getName());
-
-        for (int j = 0; j < surveys.getQuestionsList().size(); j++) {
-            if (surveys.getQuestionsList().get(j).getIdentifier() == 1) {
-                identifierQuestion = surveys.getQuestionsList().get(j);
-                identifierQuestionId = surveys.getQuestionsList().get(j).getId();
-            } else {
-                identifierQuestion = surveys.getQuestionsList().get(0);
-                identifierQuestionId = surveys.getQuestionsList().get(0).getId();
-            }
+try {
+    for (int j = 0; j < surveys.getQuestionsList().size(); j++) {
+        if (surveys.getQuestionsList().get(j).getIdentifier() == 1) {
+            identifierQuestion = surveys.getQuestionsList().get(j);
+            identifierQuestionId = surveys.getQuestionsList().get(j).getId();
+        } else {
+            identifierQuestion = surveys.getQuestionsList().get(0);
+            identifierQuestionId = surveys.getQuestionsList().get(0).getId();
         }
-
+    }
+}
+catch(Exception e){
+    String m = e.getMessage();
+}
         for (int i = 0; i < completeResponseCount; i++) {
             identifierQuestionAnswers.add(dbAdapter.getAnswer(completedResponseIds.get(i), identifierQuestionId, 0));
             completeResponseList.add(i, new CompleteResponse(String.valueOf(completedResponseIds.get(i)), identifierQuestion.getContent() + " :" + "  " + identifierQuestionAnswers.get(i)));

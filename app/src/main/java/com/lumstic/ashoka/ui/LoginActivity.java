@@ -28,10 +28,17 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -46,8 +53,7 @@ public class LoginActivity extends BaseActivity {
     private RobotoRegularButton loginButton;
     private RobotoLightEditText emailEditText, passwordEditText;
     private String jsonLoginString = "";
-    private String email = null, password = null;
-
+    private String email = "", password = null;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,6 +97,8 @@ public class LoginActivity extends BaseActivity {
 
 
                         new Login().execute();
+
+
                     } else {
                         appController.showToast("Please check your internet connection");
                     }
@@ -130,31 +138,48 @@ public class LoginActivity extends BaseActivity {
         protected String doInBackground(Void... voids) {
 
             //sends email and password to the server as name value pairs
+
+            //JSONArray jsonArray = null;
+            HttpURLConnection conn = null;
+            String jsString = null;
             try {
-                HttpClient httpclient = new DefaultHttpClient();
-                HttpPost httppost = new HttpPost(baseUrl + loginUrl);
 
-                List nameValuePairs = new ArrayList();
-                nameValuePairs.add(new BasicNameValuePair("username", email));
-                nameValuePairs.add(new BasicNameValuePair("password", password));
-                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-                HttpResponse httpResponse = httpclient.execute(httppost);
+                String urlString = String.format("%s%s?username=%s&password=%s", baseUrl, loginUrl, email, password);
 
-                if (httpResponse.getStatusLine().getStatusCode() == 401) {
-                    isAuthorized = false;
-                } else {
-                    HttpEntity httpEntity = httpResponse.getEntity();
-                    jsonLoginString = EntityUtils.toString(httpEntity);
-                    isAuthorized = true;
+                URL url = new URL(urlString);
+                isAuthorized = false;
+
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setDoOutput(true);
+                conn.setRequestMethod("POST");
+
+                //workaround for no auth challenges found
+                try{
+                    int resp = conn.getResponseCode();
+                }
+                catch(Exception e){
+                    int resp = conn.getResponseCode();
                 }
 
+                InputStream is = new BufferedInputStream(conn.getInputStream());
+                BufferedReader br = new BufferedReader(new InputStreamReader(is,"UTF-8"));
+                StringBuilder responseBuilder = new StringBuilder();
 
-            } catch (ClientProtocolException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+                String inputStr;
+                while ((inputStr = br.readLine()) != null) responseBuilder.append(inputStr);
+
+                jsString = responseBuilder.toString();
+                isAuthorized = true;
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-            return jsonLoginString;
+            finally {
+                conn.disconnect();
+            }
+
+            return jsString;
+
+
         }
 
         // response back from server
@@ -162,7 +187,7 @@ public class LoginActivity extends BaseActivity {
         protected void onPostExecute(String result) {
 
             try {
-                JSONObject jsonObjectLogin = new JSONObject(jsonLoginString);
+                JSONObject jsonObjectLogin = new JSONObject(result);
                 JSONParser jsonParser = new JSONParser();
                 userModel = jsonParser.parseLogin(jsonObjectLogin);
                 appController.getPreferences().setAccessToken(userModel.getAccessToken());
@@ -180,11 +205,15 @@ public class LoginActivity extends BaseActivity {
                 Intent intent = new Intent(LoginActivity.this, DashBoardActivity.class);
                 startActivity(intent);
                 finish();
-            }
-
-            if (!isAuthorized) {
-                Toast.makeText(LoginActivity.this, "Invalid Username or Password", Toast.LENGTH_LONG).show();
-                progressDialog.dismiss();
+            }else {
+                if (!isAuthorized){
+                    Toast.makeText(LoginActivity.this, "Invalid Username or Password", Toast.LENGTH_LONG).show();
+                    progressDialog.dismiss();
+                }
+                else{
+                    Toast.makeText(LoginActivity.this, "An error occurred during login", Toast.LENGTH_LONG).show();
+                    progressDialog.dismiss();
+                }
             }
         }
     }

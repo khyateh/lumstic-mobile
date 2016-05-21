@@ -42,19 +42,29 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.protocol.HTTP;
+
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import io.fabric.sdk.android.services.network.HttpRequest;
 
 
 public class DashBoardActivity extends BaseActivity {
@@ -79,7 +89,7 @@ public class DashBoardActivity extends BaseActivity {
     private String loginUrl = "/api/login";
     private String recordUrl = "/api/records";
     private String fetchUrl = "/api/deep_surveys?access_token=";
-    private String uploadUrl = "/api/responses.json?";
+    private String uploadUrl = "/api/responses?access_token=";
 
     private List<Answers> answers;
 
@@ -533,21 +543,34 @@ public class DashBoardActivity extends BaseActivity {
                 CommonUtil.reValidateToken(appController, baseUrl + loginUrl);
             }
 
+            HttpURLConnection conn = null;
+            String jsString = null;
             try {
-                HttpClient httpclient = new DefaultHttpClient();
-                HttpGet httpGet = new HttpGet(fetchUrl + appController.getPreferences().getAccessToken());
-                HttpResponse httpResponse = httpclient.execute(httpGet);
-                HttpEntity httpEntity = httpResponse.getEntity();
-                jsonFetchString = EntityUtils.toString(httpEntity);
+                String urlString = String.format("%s%s", fetchUrl,  appController.getPreferences().getAccessToken() );
+                URL url = new URL(urlString);
+                conn = (HttpURLConnection) url.openConnection();
 
+                InputStream is = new BufferedInputStream(conn.getInputStream());
+                BufferedReader br = new BufferedReader(new InputStreamReader(is,"UTF-8"));
+                StringBuilder responseBuilder = new StringBuilder();
 
-            } catch (ClientProtocolException e) {
-                e.printStackTrace();
+                String inputStr;
+                while ((inputStr = br.readLine()) != null) responseBuilder.append(inputStr);
+                jsonFetchString = responseBuilder.toString();
+
             } catch (IOException e) {
                 e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+            conn.disconnect();
             }
 
             return jsonFetchString;
+        }
+
+        boolean validateSurvey(Surveys surveyToValidate){
+            return surveyToValidate.getQuestionsList() != null && !surveyToValidate.getQuestionsList().isEmpty() ;
         }
 
         @Override
@@ -585,11 +608,13 @@ public class DashBoardActivity extends BaseActivity {
             try {
                 for (int i = 0; i < surveysList.size(); i++) {
                     Surveys surveys = surveysList.get(i);
-                    dbAdapter.insertDataSurveysTable(surveys);
-                    if (!surveys.getCategoriesList().isEmpty())
-                        addCategories(surveys);
-                    if (!surveys.getQuestionsList().isEmpty())
-                        addQuestions(surveys);
+                    if(validateSurvey(surveys)) {
+                        dbAdapter.insertDataSurveysTable(surveys);
+                        if (!surveys.getCategoriesList().isEmpty())
+                            addCategories(surveys);
+                        if (!surveys.getQuestionsList().isEmpty())
+                            addQuestions(surveys);
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -633,8 +658,6 @@ public class DashBoardActivity extends BaseActivity {
             String mobId = string[6];
             localResponseID = string[7];
 
-            HttpClient httpclient = new DefaultHttpClient();
-            HttpPost httppost = new HttpPost(uploadUrl);
 
             JSONObject finalJsonObject = new JSONObject();
             try {
@@ -651,33 +674,75 @@ public class DashBoardActivity extends BaseActivity {
                 finalJsonObject.put("mobile_id", mobId);
                 finalJsonObject.put("format", "json");
                 finalJsonObject.put("action", "create");
-                finalJsonObject.put("controller", "api/v1/responses");
+                finalJsonObject.put("controller", "api/responses");
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-
             Log.e("TAG", "FINAL->>" + finalJsonObject.toString());
 
+
+            HttpURLConnection conn = null;
+            int res;
+            String resMess =null;
             try {
-                httppost.addHeader("access_token", appController.getPreferences().getAccessToken());
 
-                StringEntity se = new StringEntity(finalJsonObject.toString());
-                se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-                httppost.setEntity(se);
+                String urlString = String.format("%s%s", uploadUrl, appController.getPreferences().getAccessToken());
+                URL url = new URL(urlString);
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("CONTENT_TYPE", "application/json");
+//                conn.setRequestProperty("access_token", appController.getPreferences().getAccessToken());
+                conn.setDoOutput(true);
+                conn.setDoInput(true);
 
-                HttpResponse httpResponse = httpclient.execute(httppost);
-                if (httpResponse.getStatusLine().getStatusCode() == 200) {
-                    HttpEntity httpEntity = httpResponse.getEntity();
-                    syncString = EntityUtils.toString(httpEntity);
+                //testing if needed to handle non standard ports
+                conn.setRequestProperty("User-Agent", "Mozilla/5.0 ( compatible ) ");
+                conn.setRequestProperty("Accept", "*/*");
+
+                conn.setChunkedStreamingMode(0);
+                OutputStream out = new BufferedOutputStream(conn.getOutputStream());
+                out.write(finalJsonObject.toString().getBytes());
+                out.flush();
+                out.close();
+
+                try {
+                    res = conn.getResponseCode();
+                    resMess = conn.getResponseMessage();
+                }
+                catch (Exception e) {
+                    res = conn.getResponseCode();
+                    resMess = conn.getResponseMessage();
                 }
 
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (ClientProtocolException e) {
-                e.printStackTrace();
+                if( res == 200 ) {
+                    BufferedInputStream is = new BufferedInputStream(conn.getInputStream());
+                    BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                    StringBuilder responseBuilder = new StringBuilder();
+                    String inputStr;
+
+                    while ((inputStr = br.readLine()) != null) responseBuilder.append(inputStr);
+                    syncString = responseBuilder.toString();
+                    br.close();
+                }
+                else {
+                    BufferedInputStream is = new BufferedInputStream(conn.getErrorStream());
+                    BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                    StringBuilder responseBuilder = new StringBuilder();
+                    String inputStr;
+
+                    while ((inputStr = br.readLine()) != null) responseBuilder.append(inputStr);
+                    String errString = responseBuilder.toString();
+                    br.close();
+
+
+                }
+
             } catch (IOException e) {
                 e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                conn.disconnect();
             }
 
             return syncString;

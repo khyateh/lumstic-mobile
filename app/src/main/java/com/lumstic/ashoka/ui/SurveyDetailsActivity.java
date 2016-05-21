@@ -133,6 +133,11 @@ public class SurveyDetailsActivity extends BaseActivity {
         if (dbAdapter.getCompleteResponse(surveys.getId()) == 0) {
             uploadButton.setVisibility(View.GONE);
         }
+
+        //##
+        uploadButton.setEnabled(false);
+        //##
+
         if (getIntent().hasExtra(IntentConstants.SURVEY)) {
 
             surveyTitleText.setText(surveys.getName());
