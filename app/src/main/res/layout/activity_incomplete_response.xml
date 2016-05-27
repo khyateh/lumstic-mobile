@@ -29,20 +29,41 @@
             android:textColor="@color/black"
             android:textSize="20sp"/>
 
-        <LinearLayout
-            android:id="@+id/total_survey_container"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:id="@+id/total_survey_header"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/survey_title_text"
             android:layout_marginLeft="16dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingRight="30px">
+
+            <com.lumstic.ashoka.views.RobotoLightEditText
+                android:id="@+id/inputFilter"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_color_total"
+                android:textSize="16sp"
+                android:textStyle="italic"
+                android:singleLine="true"
+                android:layout_toLeftOf="@+id/total_survey_container"/>
+
+
+            <LinearLayout
+                android:id="@+id/total_survey_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:paddingTop="15px"
+                android:paddingLeft="20px"
+                >
 
             <com.lumstic.ashoka.views.RobotoRegularTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Total:"
                 android:textColor="@color/text_color_total"
-                android:textSize="16sp"/>
+                android:textSize="16sp" />
 
             <com.lumstic.ashoka.views.RobotoRegularTextView
                 android:id="@+id/incomplete_response_count"
@@ -51,16 +72,17 @@
                 android:layout_height="wrap_content"
                 android:text="20"
                 android:textColor="@color/text_color_total"
-                android:textSize="16sp"/>
+                android:textSize="16sp" />
+            </LinearLayout>
 
-        </LinearLayout>
+        </RelativeLayout>
 
 
         <ListView
             android:id="@+id/listview"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
-            android:layout_below="@+id/total_survey_container"
+            android:layout_below="@+id/total_survey_header"
             android:layout_marginBottom="16dp"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"

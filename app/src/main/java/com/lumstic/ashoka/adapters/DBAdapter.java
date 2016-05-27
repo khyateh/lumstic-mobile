@@ -46,9 +46,6 @@ public class DBAdapter {
         return id;
     }
 
-
-
-
     public String getAnswer(int responseId, int questionId, int recordId) {
         String answer = "";
         String[] coloumns = {DBhelper.CONTENT};
@@ -175,6 +172,16 @@ public class DBAdapter {
                 .QUESTION_ID + " =? AND " + DBhelper.RECORD_ID + " =?", selectionArgs);
     }
 
+    public int getCompletedRespondents(int surveyId) {
+        int value = 0;
+        String[] coloumns = {DBhelper.RESPONDENT_ID};
+        String[] selectionArgs = {String.valueOf(surveyId)};
+        Cursor cursor = getSQLiteDB().query(DBhelper.TABLE_RESPONDENTS, coloumns, DBhelper.SURVEY_ID + " =?",
+                selectionArgs, null, null, null);
+        value = cursor.getCount();
+        cursor.close();
+        return value;
+    }
 
     public int updateCompleteResponse(int responseId, int surveyId) {
 
@@ -489,6 +496,41 @@ public class DBAdapter {
         return count > 0;
     }
 
+    public boolean doesResponseExist(int respondentid, int surveyid) {
+        int count = 0;
+        String[] coloums = {DBhelper.RESPONDENT_ID};
+        String[] selectionArgs = {String.valueOf(surveyid),String.valueOf(respondentid) };
+        Cursor cursor = getSQLiteDB().query(DBhelper.TABLE_RESPONDENTS, coloums, DBhelper.SURVEY_ID + " =? " +
+                "AND " + DBhelper.RESPONDENT_ID + " =?", selectionArgs, null, null, null);
+        while (cursor.moveToNext()) {
+            count++;
+        }
+        cursor.close();
+        return count > 0;
+    }
+
+    public int getResponseIdFromRespondent(int respondentid, int surveyid){
+        int id = 0;
+        String[] coloums = {DBhelper.RESPONSE_ID};
+        String[] selectionArgs = {String.valueOf(respondentid), String.valueOf(surveyid) };
+        Cursor cursor = getSQLiteDB().query(DBhelper.TABLE_RESPONDENTS, coloums, DBhelper.SURVEY_ID + " =? " +
+                "AND " + DBhelper.RESPONDENT_ID + " =?", selectionArgs, null, null, null);
+        while (cursor.moveToNext()) {
+            id = cursor.getInt(cursor.getColumnIndex(DBhelper.RESPONSE_ID));
+        }
+        cursor.close();
+        return id;
+    }
+
+    public long insertDataRespondentsTable(int responseid, int respondentid, int surveyid) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBhelper.RESPONDENT_ID, respondentid);
+        contentValues.put(DBhelper.SURVEY_ID, surveyid);
+        contentValues.put(DBhelper.RESPONSE_ID, responseid);
+
+        return getSQLiteDB().insert(DBhelper.TABLE_RESPONDENTS, null, contentValues);
+    }
+
     public int deleteRatingAnswer(int id, int responseId, int recordId) {
         String[] selectionArgs = {String.valueOf(id), String.valueOf(responseId), String.valueOf(recordId)};
         return getSQLiteDB().delete(DBhelper.TABLE_ANSWERS, DBhelper.QUESTION_ID + " =? AND " + DBhelper
@@ -733,6 +775,7 @@ public class DBAdapter {
         private static final String TABLE_CATEGORIES = "categories";
         private static final String TABLE_RECORDS = "records";
         private static final String TABLE_RESPONSES = "responses";
+        private static final String TABLE_RESPONDENTS = "respondents";
         private static final String OPTION = "option";
         private static final String OPTION_ID = "option_id";
         private static final String IDENTIFIER = "identifier";
@@ -759,6 +802,8 @@ public class DBAdapter {
         private static final String LONGITUDE = "longitude";
         private static final String LATITUDE = "latitude";
         private static final String STATUS = "status";
+        private static final String RESPONDENT_ID = "respondent_id";
+
 
         private static final String ORGANISATION_ID = "organisation_id";
         private static final String CREATE_TABLE_CHOICES = "CREATE TABLE "
@@ -787,6 +832,9 @@ public class DBAdapter {
                 + TABLE_RESPONSES + "(" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + MOBILE_ID + " VARCHAR(255)," + USER_ID + " INTEGER," + LONGITUDE + " VARCHAR(255)," + LATITUDE + " VARCHAR(255)," + UPDATED_AT + " INTEGER," + SURVEY_ID + " INTEGER," + WEB_ID + " INTEGER," + STATUS + " VARCHAR(255)," + ORGANISATION_ID + " INTEGER" + ")";
 
+        private static final String CREATE_TABLE_RESPONDENTS = "CREATE TABLE " + TABLE_RESPONDENTS + "(" + RESPONDENT_ID + " INTEGER PRIMARY KEY," + SURVEY_ID + " INTEGER," + RESPONSE_ID + " INTEGER )";
+
+
         public DBhelper(Context mContext) {
             super(mContext, DATABASE_NAME, null, DATABASE_VERSION);
         }
@@ -801,6 +849,7 @@ public class DBAdapter {
             sqLiteDatabase.execSQL(CREATE_TABLE_RECORDS);
             sqLiteDatabase.execSQL(CREATE_TABLE_RESPONSES);
             sqLiteDatabase.execSQL(CREATE_TABLE_ANSWERS);
+            sqLiteDatabase.execSQL(CREATE_TABLE_RESPONDENTS);
         }
 
         @Override

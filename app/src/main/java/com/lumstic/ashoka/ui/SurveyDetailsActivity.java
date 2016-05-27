@@ -199,10 +199,7 @@ public class SurveyDetailsActivity extends BaseActivity {
             }
         });
 
-        incompleteCount = dbAdapter.getIncompleteResponse(surveys.getId());
-        completeCount = dbAdapter.getCompleteResponse(surveys.getId());
-        incompleteTv.setText(incompleteCount + "");
-        completeTv.setText(completeCount + "");
+        SetCounts();
         addResponsesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -251,6 +248,15 @@ public class SurveyDetailsActivity extends BaseActivity {
 
     }
 
+    private void SetCounts() {
+        int numRespondents = surveys.getRespondentList().size();
+        int completedRespondents = dbAdapter.getCompletedRespondents(surveys.getId());
+        incompleteCount = dbAdapter.getIncompleteResponse(surveys.getId());
+        completeCount = dbAdapter.getCompleteResponse(surveys.getId());
+        incompleteTv.setText(Integer.toString(incompleteCount + numRespondents - completedRespondents) );
+        completeTv.setText( Integer.toString(completeCount));
+    }
+
     public Boolean isGPSEnable() {
         return ((LocationManager) getSystemService(LOCATION_SERVICE)).isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
@@ -258,10 +264,7 @@ public class SurveyDetailsActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        incompleteCount = dbAdapter.getIncompleteResponse(surveys.getId());
-        completeCount = dbAdapter.getCompleteResponse(surveys.getId());
-        incompleteTv.setText(Integer.toString(incompleteCount));
-        completeTv.setText(Integer.toString(completeCount));
+        SetCounts();
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {

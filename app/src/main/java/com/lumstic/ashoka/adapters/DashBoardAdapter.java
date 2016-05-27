@@ -59,11 +59,13 @@ public class DashBoardAdapter extends BaseAdapter {
             viewHolder = (ViewHolder) localView.getTag();
         }
 
-
         Surveys survey = (Surveys) getItem(i);
         if (survey != null) {
+            int numRespondents = survey.getRespondentList().size();
+            int completedRespondents = dbAdapter.getCompletedRespondents(survey.getId());
+            int incompleteResponseCount = dbAdapter.getIncompleteResponse(survey.getId());
             viewHolder.completedSurvey.setText("Complete   " + dbAdapter.getCompleteResponse(survey.getId()));
-            viewHolder.incompleteSurvey.setText("Incomplete   " + dbAdapter.getIncompleteResponse(survey.getId()));
+            viewHolder.incompleteSurvey.setText("Incomplete   " + Integer.toString(incompleteResponseCount + numRespondents - completedRespondents));
             viewHolder.surveyName.setText(survey.getName());
             viewHolder.endDate.setText(survey.getExpiryDate());
         }

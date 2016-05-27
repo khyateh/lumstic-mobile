@@ -12,6 +12,16 @@ public class Surveys implements Serializable {
     String expiryDate;
     List<Questions> questionsList;
     List<Categories> categoriesList;
+    List<Respondent> respondentList;
+
+    public List<Respondent> getRespondentList() {
+        return respondentList;
+    }
+
+    public void setRespondentList(List<Respondent> respondentList) {
+        this.respondentList = respondentList;
+    }
+
     private int completedSurvey, incompleteSurvey, uploadedSurvey;
 
     public int getCompletedSurvey() {

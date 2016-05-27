@@ -1,8 +1,10 @@
 package com.lumstic.ashoka.utils;
 
 import com.lumstic.ashoka.models.Categories;
+import com.lumstic.ashoka.models.Identifiers;
 import com.lumstic.ashoka.models.Options;
 import com.lumstic.ashoka.models.Questions;
+import com.lumstic.ashoka.models.Respondent;
 import com.lumstic.ashoka.models.Surveys;
 import com.lumstic.ashoka.models.UserModel;
 
@@ -20,6 +22,7 @@ public class JSONParser {
 
     List<Questions> questionsList;
     List<Surveys> surveysList;
+    List<Respondent> respondentsList;
     UserModel userModel;
     List<Categories> categoriesList;
 
@@ -228,6 +231,100 @@ public class JSONParser {
         return questions;
     }
 
+    public Respondent parseRespondent(JSONObject jsonObjectRespondent)
+    {
+        Respondent respondent = new Respondent();
+        List<Identifiers> identifiers = new ArrayList<>();
+
+        try {
+            respondent.setId(jsonObjectRespondent.getInt("id"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            respondent.setOrganisationId(jsonObjectRespondent.getInt("organization_id"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            respondent.setTag(jsonObjectRespondent.getString("tag"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            respondent.setStatus("incomplete");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (jsonObjectRespondent.has("identifiers")) {
+            try {
+                String tag ="";
+                JSONArray jsonArrayIdentifiers = jsonObjectRespondent.getJSONArray("identifiers");
+                for (int k = 0; k < jsonArrayIdentifiers.length(); k++) {
+
+                    JSONObject jsonObjectIdentifier = jsonArrayIdentifiers.getJSONObject(k);
+                    Identifiers identifier = parseIdentifier(jsonObjectIdentifier);
+                    identifiers.add(k, identifier);
+                    tag += (tag.isEmpty()?tag:", ") + identifier.getContent();
+                }
+
+                respondent.setTag(tag);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        respondent.setIdentifiers(identifiers);
+
+        return respondent;
+    }
+
+    public Identifiers parseIdentifier(JSONObject jsonObjectIdentifier)
+    {
+        Identifiers identifier = new Identifiers();
+        List<Integer> choices = new ArrayList<>();
+
+
+        try {
+            identifier.setQuestionId(jsonObjectIdentifier.getInt("question_id"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            identifier.setType(jsonObjectIdentifier.getString("question_type"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            identifier.setContent(jsonObjectIdentifier.getString("answer_content"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        if (jsonObjectIdentifier.has("choices")) {
+            try {
+
+                JSONArray jsonArrayChoices = jsonObjectIdentifier.getJSONArray("choices");
+                for (int k = 0; k < jsonArrayChoices.length(); k++) {
+                    int choiceid = jsonArrayChoices.getInt(k);
+                    choices.add(k, choiceid);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        identifier.setChoices(choices);
+
+        return identifier;
+    }
+
     JSONArray jsonParse(JSONArray jsonArray) throws JSONException {
         List<JSONObject> jsonValues = new ArrayList<>();
         for (int i = 0; i < jsonArray.length(); i++) {
@@ -283,6 +380,8 @@ public class JSONParser {
                 JSONObject jsonObject = jsonArrayMain.getJSONObject(i);
                 questionsList = new ArrayList<>();
                 categoriesList = new ArrayList<>();
+                respondentsList = new ArrayList<>();
+
                 surveys.setId(Integer.parseInt(jsonObject.getString("id")));
                 surveys.setExpiryDate(jsonObject.getString("expiry_date"));
                 surveys.setDescription(jsonObject.getString("description"));
@@ -291,8 +390,6 @@ public class JSONParser {
 
                 JSONArray jsonArray = jsonObject.getJSONArray("questions");
                 JSONArray sortedArrayForQuestion = jsonParse(jsonArray);
-
-
                 for (int j = 0; j < sortedArrayForQuestion.length(); j++) {
                     JSONObject jsonObjectQuestion = sortedArrayForQuestion.getJSONObject(j);
                     Questions questions = parseQuestions(jsonObjectQuestion);
@@ -312,6 +409,18 @@ public class JSONParser {
 
                 }
                 surveys.setCategoriesList(categoriesList);
+
+
+                JSONArray jsonArrayRespondent = jsonObject.getJSONArray("respondents");
+                //JSONArray sortedArrayForQuestion = jsonParse(jsonArray);
+                for (int j = 0; j < jsonArrayRespondent.length(); j++) {
+                    JSONObject jsonObjectRespondent = jsonArrayRespondent.getJSONObject(j);
+                    Respondent respondent = parseRespondent(jsonObjectRespondent);
+                    if (respondent != null) {
+                        respondentsList.add(j, respondent);
+                    }
+                }
+                surveys.setRespondentList(respondentsList);
 
             } catch (JSONException e) {
                 e.printStackTrace();

@@ -3,6 +3,7 @@ package com.lumstic.ashoka.models;
 public class IncompleteResponse {
     String responseNumber;
     String responseText;
+    Respondent respondent;
 
     public IncompleteResponse(String responseNumber, String responseText) {
         this.responseNumber = responseNumber;
@@ -23,5 +24,13 @@ public class IncompleteResponse {
 
     public void setResponseText(String responseText) {
         this.responseText = responseText;
+    }
+
+    public Respondent getRespondent() {
+        return respondent;
+    }
+
+    public void setRespondent(Respondent respondent) {
+        this.respondent = respondent;
     }
 }

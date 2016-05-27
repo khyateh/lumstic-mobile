@@ -1,6 +1,8 @@
 package com.lumstic.ashoka.models;
 
-public class Answers {
+import java.io.Serializable;
+
+public class Answers implements Serializable {
     int recordId;
     long updatedAt;
     int id;
@@ -40,6 +42,9 @@ public class Answers {
         this.image = image;
     }
 
+    public void setResponseId(int responseId) {
+        this.responseId = responseId;
+    }
 
     public int getRecordId() {
         return recordId;

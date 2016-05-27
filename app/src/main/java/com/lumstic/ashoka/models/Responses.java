@@ -1,7 +1,9 @@
 package com.lumstic.ashoka.models;
 
 
-public class Responses {
+import java.io.Serializable;
+
+public class Responses implements Serializable {
     int userId;
     int updatedAt;
     int id;
