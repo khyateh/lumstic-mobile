@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.ContextMenu;
@@ -263,6 +264,8 @@ public class IncompleteResponseActivity extends BaseActivity {
 
         if (id == android.R.id.home) {
             finish();
+            appController.getPreferences().setBackPressed(true);
+           // NavUtils.navigateUpFromSameTask(this);
             return true;
         } else if (id == R.id.action_logout) {
             final Dialog dialog = new Dialog(IncompleteResponseActivity.this);
