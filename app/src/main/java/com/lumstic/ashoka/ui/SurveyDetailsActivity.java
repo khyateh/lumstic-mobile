@@ -94,6 +94,7 @@ public class SurveyDetailsActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        enableLocation = true; //<- must be before super.onCreate
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_survey_details);
         actionBar = getActionBar();
@@ -203,49 +204,27 @@ public class SurveyDetailsActivity extends BaseActivity {
         addResponsesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                if (true) {
-                    if (getIntent().hasExtra(IntentConstants.SURVEY)) {
-                        responses.setSurveyId(surveys.getId());
-                        responses.setStatus("incomplete");
-                        responses.setMobileId(UUID.randomUUID().toString());
-                        responses.setLatitude(CommonUtil.getValidLatitude(appController));
-                        responses.setLongitude(CommonUtil.getValidLongitude(appController));
-                        Intent intent = new Intent(SurveyDetailsActivity.this, NewResponseActivity.class);
-                        intent.putExtra(IntentConstants.SURVEY, surveys);
-                        startActivity(intent);
-                    }
-                    dbAdapter.insertDataResponsesTable(responses);
-                    finish();
-                } else {
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SurveyDetailsActivity.this);
-                    alertDialogBuilder
-                            .setMessage("GPS is disabled in your device. Enable it?")
-                            .setCancelable(false)
-                            .setPositiveButton("Enable GPS",
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog,
-                                                            int id) {
-                                            Intent callGPSSettingIntent = new Intent(
-                                                    android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                            startActivity(callGPSSettingIntent);
-                                        }
-                                    });
-                    alertDialogBuilder.setNegativeButton("Cancel",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
-                    AlertDialog alert = alertDialogBuilder.create();
-                    alert.show();
-
-                }
-
+                requestLocation(null,0);
             }
         });
 
 
+    }
+
+    @Override
+    protected void onLocationReceived(String s, int i) {
+        if (getIntent().hasExtra(IntentConstants.SURVEY)) {
+            responses.setSurveyId(surveys.getId());
+            responses.setStatus("incomplete");
+            responses.setMobileId(UUID.randomUUID().toString());
+            responses.setLatitude(CommonUtil.getValidLatitude(appController));
+            responses.setLongitude(CommonUtil.getValidLongitude(appController));
+            Intent intent = new Intent(SurveyDetailsActivity.this, NewResponseActivity.class);
+            intent.putExtra(IntentConstants.SURVEY, surveys);
+            startActivity(intent);
+        }
+        dbAdapter.insertDataResponsesTable(responses);
+        finish();
     }
 
     private void SetCounts() {

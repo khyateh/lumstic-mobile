@@ -37,12 +37,10 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -55,7 +53,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.ParseException;
@@ -63,8 +60,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import io.fabric.sdk.android.services.network.HttpRequest;
 
 
 public class DashBoardActivity extends BaseActivity {
@@ -123,6 +118,7 @@ public class DashBoardActivity extends BaseActivity {
     }
 
     protected void onCreate(Bundle savedInstanceState) {
+        enableLocation = true; //<- must be before super.onCreate
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dash_board);
 

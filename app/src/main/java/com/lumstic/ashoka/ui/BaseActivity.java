@@ -1,39 +1,45 @@
 package com.lumstic.ashoka.ui;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
-
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.lumstic.ashoka.R;
 import com.lumstic.ashoka.utils.AppController;
 
 
-public class BaseActivity extends Activity implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
+public class BaseActivity extends Activity implements LocationListener {
     // boolean flag to toggle periodic location updates
     public static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private static final String TAG = BaseActivity.class.getSimpleName();
     public static String baseUrl, userBaseUrl;
     // Location updates intervals in sec
-    private static int UPDATE_INTERVAL = 60000; // 60 sec
-    private static int FASTEST_INTERVAL = 30000; // 30 sec
-    private static int DISPLACEMENT = 100; // 100 meters
+    private static int UPDATE_INTERVAL = 5000; // 5 sec
+    private static int FASTEST_INTERVAL = 2000; // 2 sec
+    private static int REQUEST_DURATION = 60000; // 60 sec
     boolean mIsInForegroundMode;
     Context mContext;
     AppController appController;
     private double latitude = 0, longitude = 0;
-    // Google client to interact with Google API
-    private GoogleApiClient mGoogleApiClient;
-    private Location mLastLocation;
-    private LocationRequest mLocationRequest;
+    LocationManager locationManager;
+
+    // Request code to use when launching the resolution activity
+    private static final int REQUEST_RESOLVE_ERROR = 1001;
+    // Unique tag for the error dialog fragment
+    private static final String DIALOG_ERROR = "dialog_error";
+    // Bool to track whether the app is already resolving an error
+    private boolean mResolvingError = false;
+
+    protected boolean enableLocation = false;
+    protected boolean locationReceived = false;
+    private boolean locationRequested = false;
 
     /**
      * on start
@@ -42,9 +48,6 @@ public class BaseActivity extends Activity implements GoogleApiClient.Connection
     protected void onStart() {
         Log.d(TAG, "BASE ACTIVITY START CALLED");
         super.onStart();
-        if (mGoogleApiClient != null) {
-            mGoogleApiClient.connect();
-        }
     }
 
 
@@ -53,60 +56,31 @@ public class BaseActivity extends Activity implements GoogleApiClient.Connection
         super.onCreate(savedInstanceState);
         mContext = getApplicationContext();
         appController = AppController.getInstance();
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-        if (appController.getPreferences().getBaseUrl() == null) {
-            baseUrl = getResources().getString(R.string.server_url);
-        } else
-            baseUrl = appController.getPreferences().getBaseUrl();
+        //create location objects if enabled
+        if (enableLocation) {
+            startLocationUpdates();
 
-        if (appController.getPreferences().getUserBaseUrl() == null) {
-            userBaseUrl = getResources().getString(R.string.user_server_url);
-        } else
-            userBaseUrl = appController.getPreferences().getUserBaseUrl();
-
-
-        if (checkPlayServices()) {
-
-            // Building the GoogleApi client
-            buildGoogleApiClient();
-            createLocationRequest();
-
-        } else {
-            Log.i(TAG, "No valid Google Play Services APK found.");
-            return;
+            //clear previous location
+            appController.getPreferences().setLatitude(String.valueOf(latitude));
+            appController.getPreferences().setLongitude(String.valueOf(longitude));
         }
-    }
 
-    /**
-     * checking Google play services is available or not
-     *
-     * @return boolean
-     */
-    private boolean checkPlayServices() {
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        if (resultCode != ConnectionResult.SUCCESS) {
- //           if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
- //               GooglePlayServicesUtil.getErrorDialog(resultCode, this, PLAY_SERVICES_RESOLUTION_REQUEST)
- //                       .show();
- //           int a=0;
- //           } else {
- //               Log.i(TAG, "This device is not supported.");
- //               finish();
- //           }
- //           return false;
-        }
-        return true;
-    }
+        //set base urls
+        com.lumstic.ashoka.utils.Preferences prefs = appController.getPreferences();
+        baseUrl = (prefs.getBaseUrl() == null) ? getResources().getString(R.string.server_url) : prefs.getBaseUrl();
+        userBaseUrl = (prefs.getUserBaseUrl() == null) ? getResources().getString(R.string.user_server_url) : prefs.getUserBaseUrl();
 
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-
         mIsInForegroundMode = true;
         // Resuming the periodic location updates.
-        if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && mIsInForegroundMode) {
+        if (enableLocation && mIsInForegroundMode) {
             startLocationUpdates();
             Log.d(TAG, "Location update resumed .....................");
         }
@@ -117,7 +91,7 @@ public class BaseActivity extends Activity implements GoogleApiClient.Connection
     protected void onPause() {
         super.onPause();
         mIsInForegroundMode = false;
-        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+        if (enableLocation) {
             stopLocationUpdates();
         }
     }
@@ -125,11 +99,7 @@ public class BaseActivity extends Activity implements GoogleApiClient.Connection
     @Override
     protected void onStop() {
         super.onStop();
-        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-            mGoogleApiClient.disconnect();
-        }
     }
-
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
@@ -142,90 +112,22 @@ public class BaseActivity extends Activity implements GoogleApiClient.Connection
     }
 
     /**
-     * Creating google api client object
-     */
-    protected synchronized void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API).build();
-    }
-
-    /**
-     * Creating location request object
-     */
-    protected void createLocationRequest() {
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(UPDATE_INTERVAL);
-        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setSmallestDisplacement(DISPLACEMENT);
-    }
-
-    /**
-     * Starting the location updates
-     */
-    protected void startLocationUpdates() {
-
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        Log.d(TAG, "Location update started .....................");
-    }
-
-    /**
-     * Stopping location updates
-     */
-    protected void stopLocationUpdates() {
-        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-        Log.d(TAG, "Location update stopped .....................");
-    }
-
-
-    /**
-     * Google api callback methods
-     */
-    @Override
-    public void onConnectionFailed(ConnectionResult result) {
-        Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = "
-                + result.getErrorCode());
-    }
-
-    @Override
-    public void onConnected(Bundle arg0) {
-
-        // Once connected with google api, get the location
-        displayLocation();
-
-        if (mIsInForegroundMode) {
-            startLocationUpdates();
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int arg0) {
-        mGoogleApiClient.connect();
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        // Assign the new location
-        mLastLocation = location;
-        // Displaying the new location on UI
-        displayLocation();
-    }
-
-    /**
      * Method to display the location on UI
      */
-    private void displayLocation() {
+    private void saveLocation(Location location) {
 
-        mLastLocation = LocationServices.FusedLocationApi
-                .getLastLocation(mGoogleApiClient);
-
-        if (mLastLocation != null) {
-            latitude = mLastLocation.getLatitude();
-            longitude = mLastLocation.getLongitude();
+        if (location != null) {
+            latitude = location.getLatitude();
+            longitude = location.getLongitude();
             appController.getPreferences().setLatitude(String.valueOf(latitude));
             appController.getPreferences().setLongitude(String.valueOf(longitude));
+            locationReceived = true;
+            if(locationRequested) {
+                //appController.showToast(location.toString());
+                appController.showToast("Location saved");
+                locationRequested=false;
+                onLocationReceived("",0);
+            }
         } else {
             latitude = 0;
             longitude = 0;
@@ -234,4 +136,85 @@ public class BaseActivity extends Activity implements GoogleApiClient.Connection
         Log.e("TAG", "Latitude -->>>" + latitude + "/ Longitude -->>>" + longitude);
     }
 
+    protected void onLocationReceived(String s, int i) {
+    }
+
+    protected void requestLocation(String s, int i) {
+        if(locationReceived) {
+            locationRequested=false;
+            onLocationReceived(s,i);
+        }else{
+            locationRequested=true;
+            appController.showToast("Waiting for location ...");
+            stopLocationUpdates();
+            startLocationUpdates();
+        }
+    }
+
+    /**
+     * Starting the location updates
+     */
+    protected void startLocationUpdates() {
+        Log.d(TAG, "Location update started .....................");
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 50, 0, this);
+    }
+
+    /**
+     * Stopping location updates
+     */
+    protected void stopLocationUpdates() {
+        Log.d(TAG, "Location update stopped .....................");
+        locationManager.removeUpdates(this);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        stopLocationUpdates();
+        saveLocation(location);
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+    }
+
+    @Override
+    public void onProviderEnabled(String s){
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+        if(LocationManager.GPS_PROVIDER.equals(provider)){
+            stopLocationUpdates();
+            showEnableGPSDialog();
+        }
+    }
+
+
+    private void showEnableGPSDialog() {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder
+                .setMessage("GPS is disabled in your device.\nWithout GPS you will not be able to create a survey response.")
+                .setCancelable(false)
+                .setPositiveButton("Enable GPS",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,
+                                                int id) {
+                                Intent callGPSSettingIntent = new Intent(
+                                        android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                startActivity(callGPSSettingIntent);
+                            }
+                        });
+        alertDialogBuilder.setNegativeButton("Cancel",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alert = alertDialogBuilder.create();
+        alert.show();
+    }
+
+
 }
+

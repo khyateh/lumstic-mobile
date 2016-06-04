@@ -4,7 +4,6 @@ import android.app.ActionBar;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.ContextMenu;
@@ -14,7 +13,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
@@ -24,7 +22,6 @@ import com.lumstic.ashoka.adapters.IncompleteResponsesAdapter;
 import com.lumstic.ashoka.models.Answers;
 import com.lumstic.ashoka.models.IncompleteResponse;
 import com.lumstic.ashoka.models.Questions;
-import com.lumstic.ashoka.models.Records;
 import com.lumstic.ashoka.models.Respondent;
 import com.lumstic.ashoka.models.Responses;
 import com.lumstic.ashoka.models.Surveys;
@@ -60,6 +57,7 @@ public class IncompleteResponseActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        enableLocation = true; //<- must be before super.onCreate
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_incomplete_response);
 
@@ -119,21 +117,29 @@ public class IncompleteResponseActivity extends BaseActivity {
 
                 String responseNumber = (String) view.findViewById(R.id.response_number_text)
                         .getTag();
-                Intent intent = new Intent(getApplicationContext(), NewResponseActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra(IntentConstants.SURVEY, surveys);
-                intent.putExtra(IntentConstants.RESPONSE_ID, Integer.parseInt(responseNumber));
 
-                //get the incomplete response object
-                IncompleteResponse ir = ((IncompleteResponse) incompleteResponsesAdapter.getItem(i));
+                requestLocation(responseNumber,i);
 
-                //check if it has a respondent
-                if (ir.getRespondent() != null) {
-                    createRespondentBlankResponse(intent, ir);
-                }
-                startActivity(intent);
             }
         });
+
+    }
+
+    @Override
+    protected void onLocationReceived(String responseNumber, int i) {
+        Intent intent = new Intent(getApplicationContext(), NewResponseActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(IntentConstants.SURVEY, surveys);
+        intent.putExtra(IntentConstants.RESPONSE_ID, Integer.parseInt(responseNumber));
+
+        //get the incomplete response object
+        IncompleteResponse ir = ((IncompleteResponse) incompleteResponsesAdapter.getItem(i));
+
+        //check if it has a respondent
+        if (ir.getRespondent() != null) {
+            createRespondentBlankResponse(intent, ir);
+        }
+        startActivity(intent);
 
     }
 
