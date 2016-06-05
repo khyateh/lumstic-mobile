@@ -204,7 +204,7 @@ public class SurveyDetailsActivity extends BaseActivity {
         addResponsesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                requestLocation(null,0);
+                requestLocation(null);
             }
         });
 
@@ -212,7 +212,7 @@ public class SurveyDetailsActivity extends BaseActivity {
     }
 
     @Override
-    protected void onLocationReceived(String s, int i) {
+    protected void onLocationReceived(Object parm) {
         if (getIntent().hasExtra(IntentConstants.SURVEY)) {
             responses.setSurveyId(surveys.getId());
             responses.setStatus("incomplete");

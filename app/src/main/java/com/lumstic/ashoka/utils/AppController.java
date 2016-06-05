@@ -35,6 +35,11 @@ public class AppController extends Application {
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
+    public void showToastLong(String message) {
+        if (null != message)
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
     public synchronized Preferences getPreferences() {
         return preferences;
     }

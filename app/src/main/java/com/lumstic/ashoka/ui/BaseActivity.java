@@ -40,6 +40,7 @@ public class BaseActivity extends Activity implements LocationListener {
     protected boolean enableLocation = false;
     protected boolean locationReceived = false;
     private boolean locationRequested = false;
+    private Object locationRequestedParm = null;
 
     /**
      * on start
@@ -126,7 +127,7 @@ public class BaseActivity extends Activity implements LocationListener {
                 //appController.showToast(location.toString());
                 appController.showToast("Location saved");
                 locationRequested=false;
-                onLocationReceived("",0);
+                onLocationReceived(locationRequestedParm);
             }
         } else {
             latitude = 0;
@@ -136,16 +137,17 @@ public class BaseActivity extends Activity implements LocationListener {
         Log.e("TAG", "Latitude -->>>" + latitude + "/ Longitude -->>>" + longitude);
     }
 
-    protected void onLocationReceived(String s, int i) {
+    protected void onLocationReceived(Object parm) {
     }
 
-    protected void requestLocation(String s, int i) {
+    protected void requestLocation(Object parm) {
         if(locationReceived) {
             locationRequested=false;
-            onLocationReceived(s,i);
+            onLocationReceived(parm);
         }else{
             locationRequested=true;
-            appController.showToast("Waiting for location ...");
+            locationRequestedParm = parm;
+            appController.showToastLong("Waiting for location ...");
             stopLocationUpdates();
             startLocationUpdates();
         }

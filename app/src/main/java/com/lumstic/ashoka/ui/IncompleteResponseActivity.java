@@ -117,30 +117,29 @@ public class IncompleteResponseActivity extends BaseActivity {
 
                 String responseNumber = (String) view.findViewById(R.id.response_number_text)
                         .getTag();
+                Intent intent = new Intent(getApplicationContext(), NewResponseActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra(IntentConstants.SURVEY, surveys);
+                intent.putExtra(IntentConstants.RESPONSE_ID, Integer.parseInt(responseNumber));
 
-                requestLocation(responseNumber,i);
+                //get the incomplete response object
+                IncompleteResponse ir = ((IncompleteResponse) incompleteResponsesAdapter.getItem(i));
 
+                //check if it has a respondent
+                if (ir.getRespondent() != null) {
+                    createRespondentBlankResponse(intent, ir);
+                    requestLocation(intent);
+                }else{
+                    startActivity(intent);
+                }
             }
         });
 
     }
 
     @Override
-    protected void onLocationReceived(String responseNumber, int i) {
-        Intent intent = new Intent(getApplicationContext(), NewResponseActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(IntentConstants.SURVEY, surveys);
-        intent.putExtra(IntentConstants.RESPONSE_ID, Integer.parseInt(responseNumber));
-
-        //get the incomplete response object
-        IncompleteResponse ir = ((IncompleteResponse) incompleteResponsesAdapter.getItem(i));
-
-        //check if it has a respondent
-        if (ir.getRespondent() != null) {
-            createRespondentBlankResponse(intent, ir);
-        }
-        startActivity(intent);
-
+    protected void onLocationReceived(Object parm) {
+        startActivity((Intent) parm);
     }
 
     private void refreshList(boolean notify) {
