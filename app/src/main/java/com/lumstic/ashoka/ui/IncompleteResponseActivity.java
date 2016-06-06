@@ -127,8 +127,10 @@ public class IncompleteResponseActivity extends BaseActivity {
 
                 //check if it has a respondent
                 if (ir.getRespondent() != null) {
-                    createRespondentBlankResponse(intent, ir);
-                    requestLocation(intent);
+                    List<Object> parms = new ArrayList<Object>();
+                    parms.add(intent);
+                    parms.add(ir);
+                    requestLocation(parms);
                 }else{
                     startActivity(intent);
                 }
@@ -139,7 +141,12 @@ public class IncompleteResponseActivity extends BaseActivity {
 
     @Override
     protected void onLocationReceived(Object parm) {
-        startActivity((Intent) parm);
+        List<Object> parms = (ArrayList<Object>) parm;
+        Intent intent = (Intent) parms.get(0);
+        IncompleteResponse ir = (IncompleteResponse) parms.get(1);
+
+        createRespondentBlankResponse(intent,ir);
+        startActivity(intent);
     }
 
     private void refreshList(boolean notify) {
