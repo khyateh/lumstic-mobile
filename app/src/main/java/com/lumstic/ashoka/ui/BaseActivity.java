@@ -51,7 +51,6 @@ public class BaseActivity extends Activity implements LocationListener {
         super.onStart();
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,6 +93,7 @@ public class BaseActivity extends Activity implements LocationListener {
         mIsInForegroundMode = false;
         if (enableLocation) {
             stopLocationUpdates();
+            appController.cancelToast();
         }
     }
 
@@ -125,6 +125,7 @@ public class BaseActivity extends Activity implements LocationListener {
             locationReceived = true;
             if(locationRequested) {
                 //appController.showToast(location.toString());
+                appController.cancelToast();
                 appController.showToast("Location saved");
                 locationRequested=false;
                 onLocationReceived(locationRequestedParm);
@@ -147,7 +148,7 @@ public class BaseActivity extends Activity implements LocationListener {
         }else{
             locationRequested=true;
             locationRequestedParm = parm;
-            appController.showToastLong("Waiting for location ...");
+            appController.showToast("Waiting for location ...",60);
             stopLocationUpdates();
             startLocationUpdates();
         }
