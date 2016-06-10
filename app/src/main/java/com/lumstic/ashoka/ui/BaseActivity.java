@@ -60,8 +60,6 @@ public class BaseActivity extends Activity implements LocationListener {
 
         //create location objects if enabled
         if (enableLocation) {
-            startLocationUpdates();
-
             //clear previous location
             appController.getPreferences().setLatitude(String.valueOf(latitude));
             appController.getPreferences().setLongitude(String.valueOf(longitude));
@@ -144,6 +142,7 @@ public class BaseActivity extends Activity implements LocationListener {
     protected void requestLocation(Object parm) {
         if(locationReceived) {
             locationRequested=false;
+            locationReceived=false;
             onLocationReceived(parm);
         }else{
             locationRequested=true;

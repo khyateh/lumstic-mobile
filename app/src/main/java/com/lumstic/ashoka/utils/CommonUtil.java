@@ -267,7 +267,7 @@ public class CommonUtil {
                         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                         b.compress(Bitmap.CompressFormat.JPEG, 60, byteArrayOutputStream);
                         byte[] byteArray = byteArrayOutputStream.toByteArray();
-                        String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
+                        String encoded = Base64.encodeToString(byteArray, Base64.NO_WRAP);
                         jsonObject.put("photo", encoded);
                         jsonObject.put("content", "");
                     }
