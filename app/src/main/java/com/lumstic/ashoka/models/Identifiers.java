@@ -9,13 +9,13 @@ import java.util.List;
  */
 public class Identifiers extends Answers implements Serializable {
 
-    List<Integer> choices = new ArrayList<>();
+    List<Choices> choices = new ArrayList<>();
 
-    public List<Integer> getChoices() {
+    public List<Choices> getChoices() {
         return choices;
     }
 
-    public void setChoices(List<Integer> choices) {
+    public void setChoices(List<Choices> choices) {
         this.choices = choices;
     }
 

@@ -20,6 +20,8 @@ import com.lumstic.ashoka.R;
 import com.lumstic.ashoka.adapters.DBAdapter;
 import com.lumstic.ashoka.adapters.IncompleteResponsesAdapter;
 import com.lumstic.ashoka.models.Answers;
+import com.lumstic.ashoka.models.Choices;
+import com.lumstic.ashoka.models.Identifiers;
 import com.lumstic.ashoka.models.IncompleteResponse;
 import com.lumstic.ashoka.models.Questions;
 import com.lumstic.ashoka.models.Respondent;
@@ -213,11 +215,24 @@ public class IncompleteResponseActivity extends BaseActivity {
             responseId = ((int)dbAdapter.insertDataResponsesTable(((Responses) respondent)));
             //insert tracking record
             dbAdapter.insertDataRespondentsTable(responseId, respondent.getId(), surveys.getId());
-            for(Answers a: respondent.getIdentifiers())
+            for(Identifiers a: respondent.getIdentifiers())
             {
                 a.setResponseId(((int) responseId));
-                dbAdapter.insertDataAnswersTable(a);
+                int answerid = (int) dbAdapter.insertDataAnswersTable(a);
+
+                for(Choices choice: a.getChoices())
+                {
+                    choice.setAnswerId(answerid);
+                    String content = dbAdapter.getOptionContentFromID(choice.getOptionId());
+                    choice.setOption(content);
+                    choice.setType(a.getType());
+                    dbAdapter.insertDataChoicesTable(choice);
+                }
+
+
             }
+
+
         }
         intent.putExtra(IntentConstants.RESPONSE_ID, ((int) responseId));
     }

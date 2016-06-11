@@ -19,6 +19,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -100,7 +101,19 @@ public class NewResponseActivity extends BaseActivity {
     private ArrayList<MasterSurveyQuestionModel> sortedSurveyQuestionsList = new ArrayList();
     private ArrayList<MasterSurveyQuestionModel> surveyQuestionsList = new ArrayList();
     private String categoryTitleString = "";
+    private boolean isMidlineSurvey = false;
 
+
+    private static void setViewAndChildrenEnabled(View view, boolean enabled) {
+        view.setEnabled(enabled);
+        if (view instanceof ViewGroup) {
+            ViewGroup viewGroup = (ViewGroup) view;
+            for (int i = 0; i < viewGroup.getChildCount(); i++) {
+                View child = viewGroup.getChildAt(i);
+                setViewAndChildrenEnabled(child, enabled);
+            }
+        }
+    }
 
     public static ArrayList<View> getViewsByTag(ViewGroup root, TagModel tag) {
         ArrayList<View> views = new ArrayList<>();
@@ -242,6 +255,7 @@ public class NewResponseActivity extends BaseActivity {
         previousQuestion.setText("BACK");
         //surveys from previous activity
         surveys = (Surveys) getIntent().getExtras().getSerializable(IntentConstants.SURVEY);
+        isMidlineSurvey = surveys.getRespondentList().size()>0?true:false;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         addRootLevelQuestionsTOList(questionsList, nonRootedQuestionsList);
@@ -513,9 +527,11 @@ public class NewResponseActivity extends BaseActivity {
 
     public void buildLayout(final Questions ques, final boolean isChild, final int parentRecordId, int parentViewPosition) {
 
+        final LinearLayout nestedContainer = createNestedContainer();
+
         //if question is single line question
         if (ques.getType().equals(CommonUtil.QUESTION_TYPE_SINGLE_LINE_QUESTION)) {
-            LinearLayout nestedContainer = createNestedContainer();
+            //LinearLayout nestedContainer = createNestedContainer();
             RobotoRegularTextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
             if (isChild) {
@@ -567,7 +583,7 @@ public class NewResponseActivity extends BaseActivity {
 
 
         } else if (ques.getType().contains(CommonUtil.QUESTION_TYPE_MULTI_LINE_QUESTION)) {
-            LinearLayout nestedContainer = createNestedContainer();
+            //LinearLayout nestedContainer = createNestedContainer();
             RobotoRegularTextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
 
@@ -616,7 +632,7 @@ public class NewResponseActivity extends BaseActivity {
         } else if (ques.getType().contains(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION)) {
 
 
-            final LinearLayout nestedContainer = createNestedContainer();
+            //final LinearLayout nestedContainer = createNestedContainer();
             RobotoRegularTextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
             if (isChild) {
@@ -716,7 +732,7 @@ public class NewResponseActivity extends BaseActivity {
         } else if (ques.getType().contains(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION)) {
 
 
-            final LinearLayout nestedContainer = createNestedContainer();
+            //final LinearLayout nestedContainer = createNestedContainer();
             RobotoRegularTextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
             if (isChild) {
@@ -810,7 +826,7 @@ public class NewResponseActivity extends BaseActivity {
 
 
         } else if (ques.getType().contains(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION)) {
-            LinearLayout nestedContainer = createNestedContainer();
+            //LinearLayout nestedContainer = createNestedContainer();
             RobotoRegularTextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
             nestedContainer.addView(inflater.inflate(R.layout.answer_numeric, null));
@@ -855,7 +871,7 @@ public class NewResponseActivity extends BaseActivity {
 
 
         } else if (ques.getType().contains(CommonUtil.QUESTION_TYPE_DATE_QUESTION)) {
-            final LinearLayout nestedContainer = createNestedContainer();
+            //final LinearLayout nestedContainer = createNestedContainer();
             RobotoRegularTextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
             nestedContainer.addView(inflater.inflate(R.layout.answer_date_picker, null));
@@ -902,7 +918,7 @@ public class NewResponseActivity extends BaseActivity {
         } else if (ques.getType().contains(CommonUtil.QUESTION_TYPE_RADIO_QUESTION)) {
 
 
-            final LinearLayout nestedContainer = createNestedContainer();
+            //final LinearLayout nestedContainer = createNestedContainer();
             RobotoRegularTextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
             if (isChild) {
@@ -1013,7 +1029,7 @@ public class NewResponseActivity extends BaseActivity {
 
         } else if (ques.getType().equals(CommonUtil.QUESTION_TYPE_RATING_QUESTION)) {
 
-            final LinearLayout nestedContainer = createNestedContainer();
+            //final LinearLayout nestedContainer = createNestedContainer();
             RobotoRegularTextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
 
             nestedContainer.addView(questionTextSingleLine);
@@ -1067,7 +1083,7 @@ public class NewResponseActivity extends BaseActivity {
 
         } else if (ques.getType().equals(CommonUtil.QUESTION_TYPE_PHOTO_QUESTION)) {
 
-            final LinearLayout nestedContainer = createNestedContainer();
+            //final LinearLayout nestedContainer = createNestedContainer();
             RobotoRegularTextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
             if (isChild) {
@@ -1504,7 +1520,10 @@ public class NewResponseActivity extends BaseActivity {
             actionBar.setDisplayShowHomeEnabled(false);
             actionBar.setDisplayUseLogoEnabled(false);
         }
+    }
 
+    public boolean interceptTouchEvent(MotionEvent ev){
+        return true;
     }
 
     public void onAddRecordClick(int localRecordID, Categories currentCategory) {
@@ -2199,6 +2218,18 @@ public class NewResponseActivity extends BaseActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+
+        if(isMidlineSurvey && qu.getIdentifier()>0){
+            int id;
+            if (qu.getParentId()>0) {
+                id=qu.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + qu.getParentId();
+            } else {
+                id = qu.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + recordId;
+            }
+            LinearLayout nestedContainer = (LinearLayout) findViewById(id);
+
+            setViewAndChildrenEnabled(nestedContainer,false);
         }
 
     }

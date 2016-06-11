@@ -1,7 +1,9 @@
 package com.lumstic.ashoka.models;
 
 
-public class Choices {
+import java.io.Serializable;
+
+public class Choices implements Serializable {
     int id;
     int optionId;
     int answerId;

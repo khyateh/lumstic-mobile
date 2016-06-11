@@ -138,6 +138,18 @@ public class DBAdapter {
 
     }
 
+    public String getOptionContentFromID(int id) {
+        String content = "";
+        String[] coloums = {DBhelper.CONTENT};
+            String[] selectionArgs = {String.valueOf(id)};
+            Cursor cursor = getSQLiteDB().query(DBhelper.TABLE_OPTIONS, coloums, DBhelper.ID + " =? ",
+                    selectionArgs, null, null, null);
+            while (cursor.moveToNext()) {
+                content = cursor.getString(cursor.getColumnIndex(DBhelper.CONTENT));
+            }
+            cursor.close();
+        return content;
+    }
 
     public int getOptionIdFromPrimaryId(int id) {
         int value = 0;
@@ -767,45 +779,45 @@ public class DBAdapter {
         public static final String RECORD_ID = "record_id";
         public static final String WEB_ID = "web_id";
         public static final String CATEGORY_ID = "category_id";
-        private static final int DATABASE_VERSION = 1;
-        private static final String TABLE_CHOICES = "choices";
-        private static final String TABLE_QUESTIONS = "questions";
-        private static final String TABLE_OPTIONS = "options";
-        private static final String TABLE_SURVEYS = "surveys";
-        private static final String TABLE_CATEGORIES = "categories";
-        private static final String TABLE_RECORDS = "records";
-        private static final String TABLE_RESPONSES = "responses";
-        private static final String TABLE_RESPONDENTS = "respondents";
-        private static final String OPTION = "option";
-        private static final String OPTION_ID = "option_id";
-        private static final String IDENTIFIER = "identifier";
-        private static final String PARENT_ID = "parent_id";
-        private static final String MIN_VALUE = "min_value";
-        private static final String MAX_VALUE = "max_value";
-        private static final String TYPE = "type";
-        private static final String CONTENT = "content";
-        private static final String SURVEY_ID = "survey_id";
-        private static final String MAX_LENGTH = "max_length";
-        private static final String IMAGE_URL = "image_url";
-        private static final String MANDATORY = "mandatory";
-        private static final String ORDER_NUMBER = "order_number";
-        private static final String QUESTION_ID = "question_id";
-        private static final String PUBLISHED_ON = "published_on";
-        private static final String NAME = "name";
-        private static final String DESCRIPTION = "description";
-        private static final String EXPIRY_DATE = "expiry_date";
-        private static final String IMAGE = "image";
-        private static final String UPDATED_AT = "updated_at";
-        private static final String RESPONSE_ID = "response_id";
-        private static final String MOBILE_ID = "mobile_id";
-        private static final String USER_ID = "user_id";
-        private static final String LONGITUDE = "longitude";
-        private static final String LATITUDE = "latitude";
-        private static final String STATUS = "status";
-        private static final String RESPONDENT_ID = "respondent_id";
+        public static final int DATABASE_VERSION = 1;
+        public static final String TABLE_CHOICES = "choices";
+        public static final String TABLE_QUESTIONS = "questions";
+        public static final String TABLE_OPTIONS = "options";
+        public static final String TABLE_SURVEYS = "surveys";
+        public static final String TABLE_CATEGORIES = "categories";
+        public static final String TABLE_RECORDS = "records";
+        public static final String TABLE_RESPONSES = "responses";
+        public static final String TABLE_RESPONDENTS = "respondents";
+        public static final String OPTION = "option";
+        public static final String OPTION_ID = "option_id";
+        public static final String IDENTIFIER = "identifier";
+        public static final String PARENT_ID = "parent_id";
+        public static final String MIN_VALUE = "min_value";
+        public static final String MAX_VALUE = "max_value";
+        public static final String TYPE = "type";
+        public static final String CONTENT = "content";
+        public static final String SURVEY_ID = "survey_id";
+        public static final String MAX_LENGTH = "max_length";
+        public static final String IMAGE_URL = "image_url";
+        public static final String MANDATORY = "mandatory";
+        public static final String ORDER_NUMBER = "order_number";
+        public static final String QUESTION_ID = "question_id";
+        public static final String PUBLISHED_ON = "published_on";
+        public static final String NAME = "name";
+        public static final String DESCRIPTION = "description";
+        public static final String EXPIRY_DATE = "expiry_date";
+        public static final String IMAGE = "image";
+        public static final String UPDATED_AT = "updated_at";
+        public static final String RESPONSE_ID = "response_id";
+        public static final String MOBILE_ID = "mobile_id";
+        public static final String USER_ID = "user_id";
+        public static final String LONGITUDE = "longitude";
+        public static final String LATITUDE = "latitude";
+        public static final String STATUS = "status";
+        public static final String RESPONDENT_ID = "respondent_id";
+        public static final String ORGANISATION_ID = "organisation_id";
 
 
-        private static final String ORGANISATION_ID = "organisation_id";
         private static final String CREATE_TABLE_CHOICES = "CREATE TABLE "
                 + TABLE_CHOICES + "(" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + OPTION_ID + " INTEGER," + OPTION + " VARCHAR(255)," + TYPE + " VARCHAR(255)," +
