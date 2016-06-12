@@ -181,9 +181,11 @@ public class DashBoardActivity extends BaseActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Surveys surveys = surveysList.get(i);
-                Intent intent = new Intent(DashBoardActivity.this, SurveyDetailsActivity.class);
-                intent.putExtra(IntentConstants.SURVEY, surveys);
-                startActivity(intent);
+                if (!surveys.getName().equals(CommonUtil.SURVEY_MIDLINE_SEPARATOR_TEXT)) {
+                    Intent intent = new Intent(DashBoardActivity.this, SurveyDetailsActivity.class);
+                    intent.putExtra(IntentConstants.SURVEY, surveys);
+                    startActivity(intent);
+                }
             }
         });
     }

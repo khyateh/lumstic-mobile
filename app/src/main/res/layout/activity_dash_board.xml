@@ -139,7 +139,7 @@
                 android:layout_below="@+id/upload_container"
                 android:choiceMode="none"
                 android:divider="#c5c5c5"
-                android:dividerHeight="1dp"
+                android:dividerHeight="0.75dp"
                 android:fadeScrollbars="false"
                 android:focusable="true"
                 android:paddingBottom="10dp"

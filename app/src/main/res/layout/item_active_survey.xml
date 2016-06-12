@@ -55,6 +55,7 @@
         android:orientation="horizontal">
 
         <com.lumstic.ashoka.views.RobotoLightTextView
+            android:id="@+id/end_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Ends on:"
@@ -73,6 +74,5 @@
 
 
     </LinearLayout>
-
 
 </LinearLayout>

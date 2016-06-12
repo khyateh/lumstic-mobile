@@ -60,6 +60,7 @@ public class CommonUtil {
     public static final String QUESTION_TYPE_RADIO_QUESTION = "RadioQuestion";
     public static final String QUESTION_TYPE_DROPDOWN_QUESTION = "DropDownQuestion";
     public static final String QUESTION_TYPE_MULTI_LINE_QUESTION = "MultilineQuestion";
+    public static final String SURVEY_MIDLINE_SEPARATOR_TEXT = "Midline Surveys";
     //category type
     public static final String CATEGORY_TYPE_MULTI_RECORD = "MultiRecordCategory";
 
