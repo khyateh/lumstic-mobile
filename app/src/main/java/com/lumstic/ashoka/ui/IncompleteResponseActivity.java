@@ -223,6 +223,17 @@ public class IncompleteResponseActivity extends BaseActivity {
 
                 IdentifierChoices identChoices = a.getIdentifierChoices();
 
+                if(a.getType().equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION)){
+                    Choices rbChoice = new Choices();
+                    rbChoice.setAnswerId(answerid);
+                    String content = a.getContent();
+                    rbChoice.setOption(content);
+                    rbChoice.setType(a.getType());
+                    rbChoice.setOptionId(dbAdapter.getOptionIDFromContent(a.getQuestionId(), a.getContent()));
+                    dbAdapter.insertDataChoicesTable(rbChoice);
+                }
+
+
                 for(Choices choice: identChoices.getChoices())
                 {
                     choice.setAnswerId(answerid);

@@ -166,6 +166,20 @@ public class DBAdapter {
         return value;
     }
 
+    public int getOptionIDFromContent(int qid, String content) {
+        int value = 0;
+        String[] coloums = {DBhelper.ID};
+        String[] selectionArgs = {String.valueOf(qid), content};
+        Cursor cursor = getSQLiteDB().query(DBhelper.TABLE_OPTIONS, coloums, DBhelper.QUESTION_ID + " =? AND " + DBhelper.CONTENT + " =?",
+                selectionArgs, null, null, null);
+
+        while (cursor.moveToNext()) {
+            value = cursor.getInt(cursor.getColumnIndex(DBhelper.ID));
+        }
+        cursor.close();
+
+        return value;
+    }
 
     public int deleteFromChoicesTableWhereAnswerId(int localAnswerID) {
         String[] selectionArgs = {String.valueOf(localAnswerID)};
