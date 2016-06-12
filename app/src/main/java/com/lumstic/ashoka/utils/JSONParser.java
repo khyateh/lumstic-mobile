@@ -2,6 +2,7 @@ package com.lumstic.ashoka.utils;
 
 import com.lumstic.ashoka.models.Categories;
 import com.lumstic.ashoka.models.Choices;
+import com.lumstic.ashoka.models.IdentifierChoices;
 import com.lumstic.ashoka.models.Identifiers;
 import com.lumstic.ashoka.models.Options;
 import com.lumstic.ashoka.models.Questions;
@@ -286,6 +287,7 @@ public class JSONParser {
     public Identifiers parseIdentifier(JSONObject jsonObjectIdentifier)
     {
         Identifiers identifier = new Identifiers();
+        IdentifierChoices identifierChoices = new IdentifierChoices();
         List<Choices> choices = new ArrayList<>();
 
 
@@ -307,23 +309,24 @@ public class JSONParser {
         }
 
 
-        if (jsonObjectIdentifier.has("choices")) {
+        if (jsonObjectIdentifier.has("option")) {
             try {
-
-                JSONArray jsonArrayChoices = jsonObjectIdentifier.getJSONArray("choices");
+                JSONObject identChoices = jsonObjectIdentifier.getJSONObject("option");
+                JSONArray jsonArrayChoices = identChoices.getJSONArray("choices");
                 for (int k = 0; k < jsonArrayChoices.length(); k++) {
                     JSONObject jsonchoice = jsonArrayChoices.getJSONObject(k);
                     Choices choice = new Choices();
                     choice.setOptionId(jsonchoice.getInt("option_id"));
                     choices.add(k, choice);
                 }
+                identifierChoices.setChoices(choices);
+                identifier.setIdentifierChoices(identifierChoices);
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
 
         }
-
-        identifier.setChoices(choices);
 
         return identifier;
     }

@@ -21,6 +21,7 @@ import com.lumstic.ashoka.adapters.DBAdapter;
 import com.lumstic.ashoka.adapters.IncompleteResponsesAdapter;
 import com.lumstic.ashoka.models.Answers;
 import com.lumstic.ashoka.models.Choices;
+import com.lumstic.ashoka.models.IdentifierChoices;
 import com.lumstic.ashoka.models.Identifiers;
 import com.lumstic.ashoka.models.IncompleteResponse;
 import com.lumstic.ashoka.models.Questions;
@@ -220,7 +221,9 @@ public class IncompleteResponseActivity extends BaseActivity {
                 a.setResponseId(((int) responseId));
                 int answerid = (int) dbAdapter.insertDataAnswersTable(a);
 
-                for(Choices choice: a.getChoices())
+                IdentifierChoices identChoices = a.getIdentifierChoices();
+
+                for(Choices choice: identChoices.getChoices())
                 {
                     choice.setAnswerId(answerid);
                     String content = dbAdapter.getOptionContentFromID(choice.getOptionId());
