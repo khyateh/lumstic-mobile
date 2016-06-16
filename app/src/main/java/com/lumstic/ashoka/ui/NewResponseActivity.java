@@ -496,7 +496,8 @@ public class NewResponseActivity extends BaseActivity {
         return nestedContainer;
     }
 
-    public RobotoRegularTextView createQuestionTitle(Questions ques, boolean isChild, int parentRecordId) {
+    public View createQuestionTitle(Questions ques, boolean isChild, int parentRecordId) {
+        View view;
         RobotoRegularTextView questionTextSingleLine = new RobotoRegularTextView(this);
         questionTextSingleLine.setTextSize(20);
         questionTextSingleLine.setTextColor(getResources().getColor(R.color.text_color));
@@ -513,9 +514,26 @@ public class NewResponseActivity extends BaseActivity {
             questionTextSingleLine.setText(getCategoryTitleString() + " " + ques.getContent());
         }
 
+        view = questionTextSingleLine;
 
-        return questionTextSingleLine;
+        if(ques.getIdentifier()>0){
+            RelativeLayout nestedContainer = new RelativeLayout(this);
+            //nestedContainer.setOrientation(LinearLayout.HORIZONTAL);
 
+            ImageView identifierIcon = new ImageView(this);
+            identifierIcon.setTop(-6);
+            identifierIcon.setImageResource(R.drawable.ic_identifier);
+
+            RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams (RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+            lp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+
+            nestedContainer.addView(questionTextSingleLine);
+            nestedContainer.addView(identifierIcon, lp);
+
+            view = nestedContainer;
+        }
+
+        return view;
     }
 
     //hide keypad on next click and various events
@@ -532,7 +550,7 @@ public class NewResponseActivity extends BaseActivity {
         //if question is single line question
         if (ques.getType().equals(CommonUtil.QUESTION_TYPE_SINGLE_LINE_QUESTION)) {
             //LinearLayout nestedContainer = createNestedContainer();
-            RobotoRegularTextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
+            View questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
             if (isChild) {
                 nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + parentRecordId);
@@ -584,7 +602,7 @@ public class NewResponseActivity extends BaseActivity {
 
         } else if (ques.getType().contains(CommonUtil.QUESTION_TYPE_MULTI_LINE_QUESTION)) {
             //LinearLayout nestedContainer = createNestedContainer();
-            RobotoRegularTextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
+            View questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
 
             if (isChild) {
@@ -633,7 +651,7 @@ public class NewResponseActivity extends BaseActivity {
 
 
             //final LinearLayout nestedContainer = createNestedContainer();
-            RobotoRegularTextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
+            View questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
             if (isChild) {
                 nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + parentRecordId);
@@ -733,7 +751,7 @@ public class NewResponseActivity extends BaseActivity {
 
 
             //final LinearLayout nestedContainer = createNestedContainer();
-            RobotoRegularTextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
+            View questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
             if (isChild) {
                 nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + parentRecordId);
@@ -827,7 +845,7 @@ public class NewResponseActivity extends BaseActivity {
 
         } else if (ques.getType().contains(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION)) {
             //LinearLayout nestedContainer = createNestedContainer();
-            RobotoRegularTextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
+            View questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
             nestedContainer.addView(inflater.inflate(R.layout.answer_numeric, null));
             if (isChild) {
@@ -872,7 +890,7 @@ public class NewResponseActivity extends BaseActivity {
 
         } else if (ques.getType().contains(CommonUtil.QUESTION_TYPE_DATE_QUESTION)) {
             //final LinearLayout nestedContainer = createNestedContainer();
-            RobotoRegularTextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
+            View questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
             nestedContainer.addView(inflater.inflate(R.layout.answer_date_picker, null));
             if (isChild) {
@@ -919,7 +937,7 @@ public class NewResponseActivity extends BaseActivity {
 
 
             //final LinearLayout nestedContainer = createNestedContainer();
-            RobotoRegularTextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
+            View questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
             if (isChild) {
                 nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + parentRecordId);
@@ -1030,7 +1048,7 @@ public class NewResponseActivity extends BaseActivity {
         } else if (ques.getType().equals(CommonUtil.QUESTION_TYPE_RATING_QUESTION)) {
 
             //final LinearLayout nestedContainer = createNestedContainer();
-            RobotoRegularTextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
+            View questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
 
             nestedContainer.addView(questionTextSingleLine);
             nestedContainer.addView(inflater.inflate(R.layout.answer_rating, null));
@@ -1084,7 +1102,7 @@ public class NewResponseActivity extends BaseActivity {
         } else if (ques.getType().equals(CommonUtil.QUESTION_TYPE_PHOTO_QUESTION)) {
 
             //final LinearLayout nestedContainer = createNestedContainer();
-            RobotoRegularTextView questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
+            View questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
             if (isChild) {
                 nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + parentRecordId);
