@@ -452,7 +452,14 @@ public class DashBoardActivity extends BaseActivity {
 
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_dash_board, menu);
-        return true;
+        try {
+            MenuItem mi = menu.getItem(0).getSubMenu().getItem(1);
+            mi.setTitle(mi.getTitle() + " " + appController.getPreferences().getUsername());
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+            return true;
     }
 
     private boolean checkForExpiredSurveys() {

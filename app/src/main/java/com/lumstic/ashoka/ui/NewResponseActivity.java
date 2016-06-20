@@ -719,7 +719,7 @@ public class NewResponseActivity extends BaseActivity {
                         addOptionToDataBase(options, ques, ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID());
                         removeOthersFromDataBase(options, ques, ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID());
 
-                        RobotoRegularTextView spinerQuestionTitleText = (RobotoRegularTextView) nestedContainer.getChildAt(0);
+                        RobotoRegularTextView spinerQuestionTitleText = getQuestionTextView(nestedContainer);
                         String questionNumber = getQuestionNumber(spinerQuestionTitleText.getText().toString());
                         setCategoryTitleString(questionNumber);
 
@@ -816,7 +816,7 @@ public class NewResponseActivity extends BaseActivity {
                             order = character + ".";
                             addOptionToDataBase(options, ques, ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID());
 
-                            RobotoRegularTextView checkBoxQuestionTitleText = (RobotoRegularTextView) nestedContainer.getChildAt(0);
+                            RobotoRegularTextView checkBoxQuestionTitleText = getQuestionTextView(nestedContainer);
                             String questionNumber = getQuestionNumber(checkBoxQuestionTitleText.getText().toString());
                             setCategoryTitleString(questionNumber);
 
@@ -1020,8 +1020,7 @@ public class NewResponseActivity extends BaseActivity {
 
 
                         removeOthersFromDataBase(options, ques, ((TagModel) nestedContainer.getTag(R.string.multirecord_tag)).getRecordID());
-
-                        RobotoRegularTextView radioQuestionTitleText = (RobotoRegularTextView) nestedContainer.getChildAt(0);
+                        RobotoRegularTextView radioQuestionTitleText = getQuestionTextView(nestedContainer);
                         String questionNumber = getQuestionNumber(radioQuestionTitleText.getText().toString());
                         setCategoryTitleString(questionNumber);
 
@@ -1188,6 +1187,19 @@ public class NewResponseActivity extends BaseActivity {
         }
         ///////////////////////////////////////
 
+    }
+
+    private RobotoRegularTextView getQuestionTextView(LinearLayout nestedContainer) {
+        RobotoRegularTextView radioQuestionTitleText;
+        try {
+            radioQuestionTitleText = (RobotoRegularTextView) nestedContainer.getChildAt(0);
+        }
+        catch(ClassCastException ex){
+            RelativeLayout layout = (RelativeLayout) nestedContainer.getChildAt(0);
+            radioQuestionTitleText = (RobotoRegularTextView) layout.getChildAt(0);
+        }
+
+        return radioQuestionTitleText;
     }
 
     private String getQuestionNumber(String title) {
@@ -1523,6 +1535,8 @@ public class NewResponseActivity extends BaseActivity {
                 }
             }
 
+            //scroll to top of page
+            findViewById(R.id.scrollView).scrollTo(0,0);
 
             //////////////////////////////////////////////////////////////////////////////
 
@@ -1792,6 +1806,10 @@ public class NewResponseActivity extends BaseActivity {
                 nextQuestion.setBackgroundColor(getResources().getColor(R.color.login_button_color));
             }
         }
+
+        //scroll to top of page
+        findViewById(R.id.scrollView).scrollTo(0,0);
+
         //check if its the first question
         if (questionCounter == 0) {
             setActionBarTrue();
