@@ -44,6 +44,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -75,7 +76,7 @@ public class DashBoardActivity extends BaseActivity {
     private LinearLayout uploadContainer;
     private RelativeLayout dashboardContainer, activeSurveyContainer;
     private RobotoMediumButton uploadButton;
-    private List<Integer> completedResponseIds;
+    private List<Integer> completedResponseIds, incompletedResponseIds;
     private List<Surveys> surveysList;
     private int surveyUploadCount = 0, surveyUploadFailedCount = 0;
     private int completeCount = 0;
@@ -84,7 +85,7 @@ public class DashBoardActivity extends BaseActivity {
     private String loginUrl = "/api/login";
     private String recordUrl = "/api/records";
     private String fetchUrl = "/api/deep_surveys?access_token=";
-    private String uploadUrl = "/api/responses?access_token=";
+    private String uploadUrl = "/api/responses%s?access_token=%s";
 
     private List<Answers> answers;
 
@@ -205,7 +206,7 @@ public class DashBoardActivity extends BaseActivity {
     }
 
     private void checkForUploadUI() {
-        completeCount = dbAdapter.getCompleteResponseFull();
+        completeCount = dbAdapter.getCompleteResponseFull() + dbAdapter.getIncompleteAnswersToUploadCount(appController.getPreferences().getLastSucessfulUpload());
         try {
             dashBoardAdapter.notifyDataSetChanged();
         } catch (Exception e) {
@@ -293,44 +294,55 @@ public class DashBoardActivity extends BaseActivity {
         } else {
 
             for (int w = 0; w < surveysList.size(); w++) {
-                completedResponseIds = dbAdapter.getCompleteResponsesIds(surveysList.get(w).getId());
+                int surveyId = surveysList.get(w).getId();
+                completedResponseIds = dbAdapter.getCompleteResponsesIds(surveyId);
+                incompletedResponseIds = dbAdapter.getIncompleteAndUnsyncdResponsesIds(surveyId,appController.getPreferences().getLastSucessfulUpload());
+                totalCompletedResponses = totalCompletedResponses + completedResponseIds.size() + incompletedResponseIds.size();
 
-                totalCompletedResponses = totalCompletedResponses + completedResponseIds.size();
-
+                //upload completed responses
                 for (int i = 0; i < completedResponseIds.size(); i++) {
-                    answers = new ArrayList<>();
-                    completedResponseIds.get(i);
-                    answers = null;
-                    answers = dbAdapter.getAnswerByResponseId(completedResponseIds.get(i));
-                    String lat = dbAdapter.getLatitudeFromResponseIDAndSurveyID(completedResponseIds.get(i), surveysList.get(w).getId());
-                    String lon = dbAdapter.getLongitudeFromResponseIDAndSurveyID(completedResponseIds.get(i), surveysList.get(w).getId());
-                    JSONObject obj = new JSONObject();
-
-                    JSONObject localJsonObject = CommonUtil.getAnswerJsonObject(answers, dbAdapter);
-                    String mobilId = dbAdapter.getMobileIDFromResponseIDAndSurveyID(completedResponseIds.get(i), surveysList.get(w).getId());
-                    try {
-                        obj.put("status", "complete");
-                        obj.put("survey_id", surveysList.get(w).getId());
-                        obj.put("updated_at", timestamp);
-                        obj.put("longitude", lon);
-                        obj.put("latitude", lat);
-                        obj.put("user_id", appController.getPreferences().getUserId());
-                        obj.put("organization_id", appController.getPreferences().getOrganizationId());
-                        obj.put("access_token", appController.getPreferences().getAccessToken());
-                        obj.put("mobile_id", mobilId);
-                        obj.put("answers_attributes", localJsonObject);
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-
-                    new UploadResponse().execute(localJsonObject.toString(), obj.toString(), surveysList.get(w).getId() + "", timestamp, lat + "", lon + "", mobilId, completedResponseIds.get(i) + "");
+                    uploadSingleResponse(surveyId, completedResponseIds.get(i), CommonUtil.SURVEY_STATUS_COMPLETE);
                 }
 
+                //upload incomplete responses
+                for (int i = 0; i < incompletedResponseIds.size(); i++) {
+                    uploadSingleResponse(surveyId, incompletedResponseIds.get(i), CommonUtil.SURVEY_STATUS_INCOMPLETE);
+                }
             }
         }
 
+    }
+
+    private void uploadSingleResponse(int surveyId, int responseId, String status ) {
+        answers = dbAdapter.getAnswerByResponseId(responseId);
+        String lat = dbAdapter.getLatitudeFromResponseIDAndSurveyID(responseId, surveyId);
+        String lon = dbAdapter.getLongitudeFromResponseIDAndSurveyID(responseId, surveyId);
+        JSONObject obj = new JSONObject();
+        JSONObject localJsonObject = CommonUtil.getAnswerJsonObject(answers, dbAdapter);
+        String mobilId = dbAdapter.getMobileIDFromResponseIDAndSurveyID(responseId, surveyId);
+        int serverId = dbAdapter.getServerIDFromResponseID(responseId);
+        String action = serverId>0?CommonUtil.VERB_PUT:CommonUtil.VERB_POST;
+        try {
+
+            //TODO add response_id and Server_id fields here, on server update the create to be an upsert that returns the is mapping
+            obj.put("response_id", responseId);
+            obj.put("server_id", serverId);
+            obj.put("status", status);
+            obj.put("survey_id", surveyId);
+            obj.put("updated_at", timestamp);
+            obj.put("longitude", lon);
+            obj.put("latitude", lat);
+            obj.put("user_id", appController.getPreferences().getUserId());
+            obj.put("organization_id", appController.getPreferences().getOrganizationId());
+            obj.put("access_token", appController.getPreferences().getAccessToken());
+            obj.put("mobile_id", mobilId);
+            obj.put("answers_attributes", localJsonObject);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        new UploadResponse(action).execute(localJsonObject.toString(), obj.toString(), surveyId + "", timestamp, lat + "", lon + "", mobilId, responseId + "", serverId + "");
     }
 
 
@@ -649,7 +661,12 @@ public class DashBoardActivity extends BaseActivity {
     public class UploadResponse extends AsyncTask<String, Void, String> {
         String localResponseID;
         String localSurveyID;
+        String verb = CommonUtil.VERB_POST;
         private String syncString = null;
+
+        public UploadResponse(String action){
+            verb = action;
+        }
 
         protected String doInBackground(String... string) {
 
@@ -662,7 +679,7 @@ public class DashBoardActivity extends BaseActivity {
             String lon = string[5];
             String mobId = string[6];
             localResponseID = string[7];
-
+            String server_id = string[8];
 
             JSONObject finalJsonObject = new JSONObject();
             try {
@@ -691,10 +708,11 @@ public class DashBoardActivity extends BaseActivity {
             String resMess =null;
             try {
 
-                String urlString = String.format("%s%s", uploadUrl, appController.getPreferences().getAccessToken());
+                String urlString = String.format(uploadUrl, CommonUtil.VERB_POST.equals(verb)? "":"/"+server_id , appController.getPreferences().getAccessToken());
                 URL url = new URL(urlString);
                 conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
+
+                conn.setRequestMethod(verb);
                 conn.setRequestProperty("CONTENT_TYPE", "application/json");
 //                conn.setRequestProperty("access_token", appController.getPreferences().getAccessToken());
                 conn.setDoOutput(true);
@@ -755,12 +773,33 @@ public class DashBoardActivity extends BaseActivity {
 
         @Override
         protected void onPostExecute(String s) {
-            if (jsonParser.parseSyncResult(s)) {
-                surveyUploadCount++;
-                dbAdapter.deleteFromResponseTableOnUpload(Integer.parseInt(localSurveyID), localResponseID);
-                dbAdapter.deleteFromAnswerTableWithResponseID(localResponseID);
-            } else {
+
+            JSONObject result;
+            try {
+                result = new JSONObject(s);
+                if( CommonUtil.SURVEY_STATUS_COMPLETE.equals(result.get("status"))) {
+                    //handle complete response results
+                    if (jsonParser.parseSyncResult(s)) {
+                        surveyUploadCount++;
+                        int ret = dbAdapter.deleteFromResponseTableOnUpload(Integer.parseInt(localSurveyID), localResponseID);
+                        if(ret>0){
+                            dbAdapter.deleteFromAnswerTableWithResponseID(localResponseID);
+                        }
+
+                    } else {
+                        surveyUploadFailedCount++;
+                    }
+                }else{
+                    //handle incomplete response results
+
+                    //set the Server ID in the response record
+                    String server_id = result.getString("id");
+                    dbAdapter.updateResponse_ServerId(localResponseID, server_id);
+                    surveyUploadCount++;
+                }
+            } catch (JSONException e) {
                 surveyUploadFailedCount++;
+                e.printStackTrace();
             }
 
             completeCount = dbAdapter.getCompleteResponseFull();
@@ -771,6 +810,12 @@ public class DashBoardActivity extends BaseActivity {
                     uploadContainer.setVisibility(View.VISIBLE);
                 else
                     uploadContainer.setVisibility(View.GONE);
+
+
+                //TODO clean up the respondents table
+
+                //set lastupload date here
+                appController.getPreferences().setLastSucessfulUpload(CommonUtil.getCurrentTimeStamp());
 
                 progressDialog.dismiss();
             }

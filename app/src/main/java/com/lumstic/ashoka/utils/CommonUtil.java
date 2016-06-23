@@ -47,6 +47,12 @@ import java.util.regex.Pattern;
 public class CommonUtil {
 
     public static final String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+    //Http Verbs
+    public static final String VERB_PUT = "PUT";
+    public static final String VERB_POST = "POST";
+    public static final String VERB_GET = "GET";
+    public static final String VERB_PATCH = "PATCH";
+    public static final String VERB_DELETE = "DELETE";
     //Question Type isCategory OR NOT
     public static final int TYPE_QUESTION = 0;
     public static final int TYPE_CATEGORY = 1;
@@ -197,6 +203,7 @@ public class CommonUtil {
                 jsonObject.put("updated_at", answers.get(j).getUpdatedAt());
                 jsonObject.put("content", answers.get(j).getContent());
                 jsonObject.put("record_id", answers.get(j).getRecordId());
+                jsonObject.put("localId", answers.get(j).getId());
 
 
                 try {

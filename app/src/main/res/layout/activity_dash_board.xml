@@ -117,7 +117,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@android:color/transparent"
-                    android:text="UPLOAD COMPLETED RESPONSES"
+                    android:text="UPLOAD RESPONSES"
                     android:textColor="@color/white"
                     android:textSize="15sp"
                     android:clickable="false"/>

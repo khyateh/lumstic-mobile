@@ -10,10 +10,19 @@ public class Responses implements Serializable {
     int surveyId;
     int webId;
     int organisationId;
+    int server_id;
     String mobileId;
     String longitude;
     String latitude;
     String status;
+
+    public int getServer_id() {
+        return server_id;
+    }
+
+    public void setServer_id(int server_id) {
+        this.server_id = server_id;
+    }
 
     public int getUserId() {
         return userId;

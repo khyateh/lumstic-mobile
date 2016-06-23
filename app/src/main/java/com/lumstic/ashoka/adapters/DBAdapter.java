@@ -255,6 +255,17 @@ public class DBAdapter {
         return value;
     }
 
+    public int getIncompleteAnswersToUploadCount(long lastuploaddate) {
+        int value = 0;
+        String[] coloums = {DBhelper.UPDATED_AT,DBhelper.STATUS};
+        String[] selectionArgs = {CommonUtil.SURVEY_STATUS_INCOMPLETE, String.valueOf(lastuploaddate)};
+        Cursor cursor = getSQLiteDB().query(DBhelper.TABLE_RESPONSES, coloums, DBhelper.STATUS + " =? AND " + DBhelper.UPDATED_AT + " >?", selectionArgs, null, null, null);
+        value = cursor.getCount();
+        cursor.close();
+        return value;
+    }
+
+
     public int getCompleteResponseFull() {
         int value = 0;
         String[] coloums = {DBhelper.STATUS};
@@ -269,6 +280,19 @@ public class DBAdapter {
         }
         cursor.close();
         return value;
+    }
+
+    public int getServerIDFromResponseID(int responseID){
+        int server_id=0;
+        String[] coloums = {DBhelper.SERVER_ID};
+        String[] selectionArgs = {String.valueOf(responseID)};
+        Cursor cursor = getSQLiteDB().query(DBhelper.TABLE_RESPONSES, coloums, DBhelper.ID + " =?", selectionArgs, null, null, null);
+        if (cursor != null & cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            server_id = cursor.getInt(cursor.getColumnIndex(DBhelper.SERVER_ID));
+        }
+        cursor.close();
+        return server_id;
     }
 
     public String getMobileIDFromResponseIDAndSurveyID(int localResponseID, int localSurveyID) {
@@ -330,6 +354,20 @@ public class DBAdapter {
                 ids.add(cursor.getInt(cursor.getColumnIndex(DBhelper.ID)));
             }
 
+        }
+        cursor.close();
+        return ids;
+    }
+
+
+    public List<Integer> getIncompleteAndUnsyncdResponsesIds(int surveyId, long lastuploaddate) {
+        List<Integer> ids;
+        ids = new ArrayList<>();
+        String[] coloums = {DBhelper.UPDATED_AT,DBhelper.ID,DBhelper.STATUS};
+        String[] selectionArgs = {String.valueOf(surveyId), CommonUtil.SURVEY_STATUS_INCOMPLETE, String.valueOf(lastuploaddate)};
+        Cursor cursor = getSQLiteDB().query(DBhelper.TABLE_RESPONSES, coloums, DBhelper.SURVEY_ID + " =? AND " + DBhelper.STATUS + " =? AND " + DBhelper.UPDATED_AT + " >?", selectionArgs, null, null, null);
+        while (cursor.moveToNext()) {
+            ids.add(cursor.getInt(cursor.getColumnIndex(DBhelper.ID)));
         }
         cursor.close();
         return ids;
@@ -704,6 +742,7 @@ public class DBAdapter {
     }
 
     public long insertDataAnswersTable(Answers answers) {
+        answers.setUpdatedAt(CommonUtil.getCurrentTimeStamp());
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBhelper.RECORD_ID, answers.getRecordId());
         contentValues.put(DBhelper.IMAGE, answers.getImage());
@@ -713,7 +752,11 @@ public class DBAdapter {
         contentValues.put(DBhelper.QUESTION_ID, answers.getQuestionId());
         contentValues.put(DBhelper.TYPE, answers.getType());
 
-        return getSQLiteDB().insert(DBhelper.TABLE_ANSWERS, null, contentValues);
+        long ret = getSQLiteDB().insert(DBhelper.TABLE_ANSWERS, null, contentValues);
+        if(ret>0) {
+            updateResponse_UpdatedAt(answers.getResponseId(), answers.getUpdatedAt());
+        }
+        return ret;
     }
 
     public long insertDataRecordsTable(Records records) {
@@ -757,6 +800,20 @@ public class DBAdapter {
         String[] args = {String.valueOf(responseId), String.valueOf(oldRecordId)};
         return getSQLiteDB().update(DBhelper.TABLE_ANSWERS, contentValues, DBhelper.RESPONSE_ID + " =? " +
                 "AND " + DBhelper.RECORD_ID + " =?", args);
+    }
+
+    public int updateResponse_UpdatedAt(int responseId, long datestamp) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBhelper.UPDATED_AT, datestamp);
+        String[] args = {String.valueOf(responseId)};
+        return getSQLiteDB().update(DBhelper.TABLE_RESPONSES, contentValues, DBhelper.ID + " =?", args);
+    }
+
+    public int updateResponse_ServerId(String responseId, String serverId) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBhelper.SERVER_ID, serverId);
+        String[] args = {responseId};
+        return getSQLiteDB().update(DBhelper.TABLE_RESPONSES, contentValues, DBhelper.ID + " =?", args);
     }
 
     public long insertDataResponsesTable(Responses responses) {
@@ -830,6 +887,7 @@ public class DBAdapter {
         public static final String STATUS = "status";
         public static final String RESPONDENT_ID = "respondent_id";
         public static final String ORGANISATION_ID = "organisation_id";
+        public static final String SERVER_ID = "server_id";
 
 
         private static final String CREATE_TABLE_CHOICES = "CREATE TABLE "
@@ -856,7 +914,7 @@ public class DBAdapter {
                 + RESPONSE_ID + " INTEGER," + WEB_ID + "  INTEGER DEFAULT 0," + CATEGORY_ID + " INTEGER" + ")";
         private static final String CREATE_TABLE_RESPONSES = "CREATE TABLE "
                 + TABLE_RESPONSES + "(" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + MOBILE_ID + " VARCHAR(255)," + USER_ID + " INTEGER," + LONGITUDE + " VARCHAR(255)," + LATITUDE + " VARCHAR(255)," + UPDATED_AT + " INTEGER," + SURVEY_ID + " INTEGER," + WEB_ID + " INTEGER," + STATUS + " VARCHAR(255)," + ORGANISATION_ID + " INTEGER" + ")";
+                + MOBILE_ID + " VARCHAR(255)," + USER_ID + " INTEGER," + LONGITUDE + " VARCHAR(255)," + LATITUDE + " VARCHAR(255)," + UPDATED_AT + " INTEGER," + SURVEY_ID + " INTEGER," + WEB_ID + " INTEGER," + STATUS + " VARCHAR(255)," + ORGANISATION_ID + " INTEGER," + SERVER_ID + " INTEGER )";
 
         private static final String CREATE_TABLE_RESPONDENTS = "CREATE TABLE " + TABLE_RESPONDENTS + "(" + RESPONDENT_ID + " INTEGER PRIMARY KEY," + SURVEY_ID + " INTEGER," + RESPONSE_ID + " INTEGER )";
 

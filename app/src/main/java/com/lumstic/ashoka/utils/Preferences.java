@@ -18,6 +18,15 @@ public class Preferences {
     private String accessTokenCreatedAt = "access_token_created_at";
     private String surveyData = "SURVEY_DATA";
     private Context context;
+    private long lastSucessfulUpload;
+
+    public long getLastSucessfulUpload() {
+        return lastSucessfulUpload;
+    }
+
+    public void setLastSucessfulUpload(long lastSucessfulUpload) {
+        this.lastSucessfulUpload = lastSucessfulUpload;
+    }
 
     public Preferences(Context mContext) {
         super();
