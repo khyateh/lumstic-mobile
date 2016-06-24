@@ -6,6 +6,8 @@ import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 
+import java.util.concurrent.Callable;
+
 import io.fabric.sdk.android.Fabric;
 
 
@@ -55,7 +57,11 @@ public class AppController extends Application {
         }
     }
 
-    public void showToast(String message, int seconds){
+    public void showToast(final String message, int seconds){
+        showToast(message, seconds, false, null);
+    }
+
+    public void showToast(final String message, int seconds, final boolean countDown, final Callable<Integer> func){
 
         lastToast = Toast.makeText(this, message,Toast.LENGTH_SHORT);
         lastToast.show();
@@ -63,13 +69,19 @@ public class AppController extends Application {
         cancelToastTimer();
         lastToastTimer = new CountDownTimer(seconds*1000, 1000)
         {
-
-            public void onTick(long millisUntilFinished) {lastToast.show();}
-            public void onFinish() {lastToast.show();}
-
+            public void onTick(long millisUntilFinished) {
+                if(countDown) lastToast.setText(message + millisUntilFinished/1000);
+                lastToast.show();
+            }
+            public void onFinish() {
+                try {
+                    func.call();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         };
         lastToastTimer.start();
-
     }
 
     public synchronized Preferences getPreferences() {

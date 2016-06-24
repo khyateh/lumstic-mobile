@@ -14,6 +14,8 @@ import android.view.KeyEvent;
 import com.lumstic.ashoka.R;
 import com.lumstic.ashoka.utils.AppController;
 
+import java.util.concurrent.Callable;
+
 
 public class BaseActivity extends Activity implements LocationListener {
     // boolean flag to toggle periodic location updates
@@ -36,6 +38,12 @@ public class BaseActivity extends Activity implements LocationListener {
     private static final String DIALOG_ERROR = "dialog_error";
     // Bool to track whether the app is already resolving an error
     private boolean mResolvingError = false;
+
+    private static final String LOCATION_SAVED = "Location Saved";
+    private static final String LOCATION_WAITING = "Waiting for location ... ";
+    private static final String LOCATION_ENABLE_GPS_MESSAGE = "GPS is disabled in your device.\nWithout GPS you will not be able to create a survey response.";
+    private static final String LOCATION_ENABLE_GPS_OK = "Enable GPS";
+    private static final String LOCATION_ENABLE_GPS_CANCEL = "Cancel";
 
     protected boolean enableLocation = false;
     protected boolean locationReceived = false;
@@ -124,7 +132,7 @@ public class BaseActivity extends Activity implements LocationListener {
             if(locationRequested) {
                 //appController.showToast(location.toString());
                 appController.cancelToast();
-                appController.showToast("Location saved");
+                appController.showToast(LOCATION_SAVED);
                 locationRequested=false;
                 onLocationReceived(locationRequestedParm);
             }
@@ -139,7 +147,7 @@ public class BaseActivity extends Activity implements LocationListener {
     protected void onLocationReceived(Object parm) {
     }
 
-    protected void requestLocation(Object parm) {
+    protected void requestLocation(final Object parm) {
         if(locationReceived) {
             locationRequested=false;
             locationReceived=false;
@@ -147,7 +155,14 @@ public class BaseActivity extends Activity implements LocationListener {
         }else{
             locationRequested=true;
             locationRequestedParm = parm;
-            appController.showToast("Waiting for location ...",60);
+            appController.showToast(LOCATION_WAITING, 20, true, new Callable<Integer>() {
+                @Override
+                public Integer call() throws Exception {
+                    stopLocationUpdates();
+                    onLocationReceived(parm);
+                    return 1;
+                }
+            });
             stopLocationUpdates();
             startLocationUpdates();
         }
@@ -196,9 +211,9 @@ public class BaseActivity extends Activity implements LocationListener {
     private void showEnableGPSDialog() {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder
-                .setMessage("GPS is disabled in your device.\nWithout GPS you will not be able to create a survey response.")
+                .setMessage(LOCATION_ENABLE_GPS_MESSAGE)
                 .setCancelable(false)
-                .setPositiveButton("Enable GPS",
+                .setPositiveButton(LOCATION_ENABLE_GPS_OK,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,
                                                 int id) {
@@ -207,7 +222,7 @@ public class BaseActivity extends Activity implements LocationListener {
                                 startActivity(callGPSSettingIntent);
                             }
                         });
-        alertDialogBuilder.setNegativeButton("Cancel",
+        alertDialogBuilder.setNegativeButton(LOCATION_ENABLE_GPS_CANCEL,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
