@@ -104,6 +104,7 @@ public class NewResponseActivity extends BaseActivity {
     private boolean isMidlineSurvey = false;
 
 
+
     private static void setViewAndChildrenEnabled(View view, boolean enabled) {
         view.setEnabled(enabled);
         if (view instanceof ViewGroup) {
@@ -114,6 +115,7 @@ public class NewResponseActivity extends BaseActivity {
             }
         }
     }
+
 
     public static ArrayList<View> getViewsByTag(ViewGroup root, TagModel tag) {
         ArrayList<View> views = new ArrayList<>();
@@ -353,6 +355,7 @@ public class NewResponseActivity extends BaseActivity {
         nextQuestion.setBackgroundColor(getResources().getColor(R.color.login_button_color));
         previousQuestion = (RobotoRegularButton) findViewById(R.id.previous_question);
         previousQuestion.setBackgroundColor(getResources().getColor(R.color.back_button_background));
+
     }
 
     public void createMarkAsComplete() {
@@ -390,12 +393,20 @@ public class NewResponseActivity extends BaseActivity {
 
     public void onMarkComplete() {
 
-        if (storeDataToDB() == 0) {
+        //validate this page
+        if (storeDataToDB(true) == 0) {
             return;
         }
+        //validate prev pages
+        while(questionCounter != 0){
+            onBackClicked();
+            if (storeDataToDB(true) == 0) {
+                return;
+            }
+        }
+
         addRecordCounter = 0;
         recordId = 0;
-
 
         if (sortedSurveyQuestionsList.get(questionCounter).getType() == CommonUtil.TYPE_QUESTION) {
             int surveyID = ((Questions) sortedSurveyQuestionsList.get(questionCounter).getObject()).getSurveyId();
@@ -404,7 +415,6 @@ public class NewResponseActivity extends BaseActivity {
             int surveyID = ((Categories) sortedSurveyQuestionsList.get(questionCounter).getObject()).getSurveyId();
             dbAdapter.updateCompleteResponse(currentResponseId, surveyID);
         }
-
 
         Intent intent = new Intent(NewResponseActivity.this, SurveyDetailsActivity.class);
         intent.putExtra(IntentConstants.SURVEY, surveys);
@@ -1384,8 +1394,9 @@ public class NewResponseActivity extends BaseActivity {
         }
     }
 
-    private int storeDataToDB() {
+    private int storeDataToDB(boolean validate) {
         int success = 0;
+        boolean addAnswer=false;
 
         try {
             answer.clearFocus();
@@ -1397,63 +1408,72 @@ public class NewResponseActivity extends BaseActivity {
         int masterListSize = masterQuestionList.size();
         for (int i = 0; i < masterListSize; i++) {
 
-//Check For validation for these types of Questions
-            if (masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_SINGLE_LINE_QUESTION) || masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_MULTI_LINE_QUESTION)) {
-                int localMaxLength = masterQuestionList.get(i).getQuestions().getMaxLength();
-                if (localMaxLength != 0)
-                    if (((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString().trim().length() > localMaxLength) {
-                        showValidationDialog((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID()), ((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString().length());
-                        return success;
-                    }
-            }
-            if (masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION)) {
-                int localMaxValue = masterQuestionList.get(i).getQuestions().getMaxValue();
-                int localMinValue = masterQuestionList.get(i).getQuestions().getMinValue();
-                if (localMaxValue != localMinValue) {
-                    String localData = ((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString();
-                    int localValue;
-                    if (localData != null) {
-                        try {
-                            localValue = Integer.parseInt(localData);
-                            if (localValue > localMaxValue || localValue < localMinValue) {
-                                showValidationDialog((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID()), ((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString().length());
-                                return success;
+            if (validate) {
+
+                //Check For validation for these types of Questions
+                if (masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_SINGLE_LINE_QUESTION) || masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_MULTI_LINE_QUESTION)) {
+                    int localMaxLength = masterQuestionList.get(i).getQuestions().getMaxLength();
+                    if (localMaxLength != 0)
+                        if (((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString().trim().length() > localMaxLength) {
+                            showValidationDialog((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID()), ((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString().length());
+                            return success;
+                        }
+                }
+                if (masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION)) {
+                    int localMaxValue = masterQuestionList.get(i).getQuestions().getMaxValue();
+                    int localMinValue = masterQuestionList.get(i).getQuestions().getMinValue();
+                    if (localMaxValue != localMinValue) {
+                        String localData = ((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString();
+                        int localValue;
+                        if (localData != null) {
+                            try {
+                                localValue = Integer.parseInt(localData);
+                                if (localValue > localMaxValue || localValue < localMinValue) {
+                                    showValidationDialog((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID()), ((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString().length());
+                                    return success;
+                                }
+                            } catch (NumberFormatException e) {
+
                             }
-                        } catch (NumberFormatException e) {
 
                         }
-
                     }
                 }
-            }
 
-            if (masterQuestionList.get(i).getQuestions().getMandatory() == 1) {
+                if (masterQuestionList.get(i).getQuestions().getMandatory() == 1) {
 
-                if (checkMandatoryQuestion(masterQuestionList.get(i).getQuestions().getType(), masterQuestionList.get(i).getRecordID(), masterQuestionList.get(i).getQuestions().getId())) {
-                    if (!masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION)) {
-                        addAnswerNextClick(masterQuestionList.get(i).getQuestions(), masterQuestionList.get(i).getRecordID());
-                    }
-                } else {
-                    if (!masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil
-                            .QUESTION_TYPE_MULTI_CHOICE_QUESTION) && !masterQuestionList.get(i)
-                            .getQuestions().getType().equals(CommonUtil
-                                    .QUESTION_TYPE_DROPDOWN_QUESTION) && !masterQuestionList.get
-                            (i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RATING_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_PHOTO_QUESTION)) {
-
-                        showMandatoryDialog((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID()));
+                    if (checkMandatoryQuestion(masterQuestionList.get(i).getQuestions().getType(), masterQuestionList.get(i).getRecordID(), masterQuestionList.get(i).getQuestions().getId())) {
+                        if (!masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION)) {
+                            addAnswer=true;
+                        }
                     } else {
-                        showMandatoryDialogGeneric();
+                        if (!masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil
+                                .QUESTION_TYPE_MULTI_CHOICE_QUESTION) && !masterQuestionList.get(i)
+                                .getQuestions().getType().equals(CommonUtil
+                                        .QUESTION_TYPE_DROPDOWN_QUESTION) && !masterQuestionList.get
+                                (i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RATING_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_PHOTO_QUESTION)) {
+
+                            showMandatoryDialog((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID()));
+                        } else {
+                            showMandatoryDialogGeneric();
+                        }
+                        return success;
                     }
-                    return success;
-                }
 
+                } else {
+
+                    if (!masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION)) {
+                        addAnswer=true;
+                    }
+                }
             } else {
-
-                if (!masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION)) {
-                    addAnswerNextClick(masterQuestionList.get(i).getQuestions(), masterQuestionList.get(i).getRecordID());
-                }
+                addAnswer=true;
             }
 
+            if(addAnswer){
+                addAnswerNextClick(masterQuestionList.get(i).getQuestions(), masterQuestionList.get(i).getRecordID());
+                addAnswer=false;
+            }
 
         }
 
@@ -1462,6 +1482,7 @@ public class NewResponseActivity extends BaseActivity {
         success = 1;
         masterQuestionList.clear();
         //////////////////////////////
+
         return success;
     }
 
@@ -1491,7 +1512,7 @@ public class NewResponseActivity extends BaseActivity {
     public void onNextClick() {
 
 
-        if (storeDataToDB() == 0) {
+        if (storeDataToDB(false) == 0) {
             return;
         }
         addRecordCounter = 0;
