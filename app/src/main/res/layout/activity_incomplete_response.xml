@@ -38,6 +38,14 @@
             android:orientation="horizontal"
             android:paddingRight="30px">
 
+            <!-- Dummy edit to take focus !-->
+            <EditText
+                android:layout_width="0px"
+                android:layout_height="0px"
+                android:focusable="true"
+                android:focusableInTouchMode="true"/>
+
+
             <com.lumstic.ashoka.views.RobotoLightEditText
                 android:id="@+id/inputFilter"
                 android:layout_width="fill_parent"
@@ -46,6 +54,7 @@
                 android:textSize="16sp"
                 android:textStyle="italic"
                 android:singleLine="true"
+                android:hint="@string/filter_hint"
                 android:layout_toLeftOf="@+id/total_survey_container"/>
 
 

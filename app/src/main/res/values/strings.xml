@@ -28,5 +28,7 @@
     <string name="request_password">REQUEST PASSWORD</string>
     <string name="survey_description">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</string>
     <string name="multirecord_tag">tag</string>
+    <string name="filter_hint">Search</string>
+
 
 </resources>
