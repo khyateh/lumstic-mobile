@@ -45,9 +45,11 @@
 
         <activity
             android:name="com.lumstic.ashoka.ui.IncompleteResponseActivity"
+            android:windowSoftInputMode="stateHidden"
             android:screenOrientation="portrait"/>
         <activity
             android:name="com.lumstic.ashoka.ui.NewResponseActivity"
+            android:windowSoftInputMode="stateHidden"
             android:screenOrientation="portrait"/>
         <activity
             android:name="com.lumstic.ashoka.ui.HelpActivity"
