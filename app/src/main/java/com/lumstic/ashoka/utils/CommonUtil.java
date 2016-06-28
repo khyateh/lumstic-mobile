@@ -53,6 +53,13 @@ public class CommonUtil {
     public static final String VERB_GET = "GET";
     public static final String VERB_PATCH = "PATCH";
     public static final String VERB_DELETE = "DELETE";
+
+    public static final String YES = "Yes";
+    public static final String NO = "No";
+
+    public static final String DELETE_RESPONSE_DIALOG_TITLE = "Delete Response";
+    public static final String DELETE_RESPONSE_DIALOG_MSG = "Are you sure you want to delete this response from the device?";
+
     //Question Type isCategory OR NOT
     public static final int TYPE_QUESTION = 0;
     public static final int TYPE_CATEGORY = 1;

@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import com.lumstic.ashoka.R;
 import com.lumstic.ashoka.utils.AppController;
+import com.lumstic.ashoka.utils.CommonUtil;
 
 import java.util.concurrent.Callable;
 
@@ -232,6 +233,18 @@ public class BaseActivity extends Activity implements LocationListener {
         alert.show();
     }
 
+
+    protected void showConfirmDialog(String title, String message, DialogInterface.OnClickListener onYes){
+
+        new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(CommonUtil.YES, onYes)
+                .setNegativeButton(CommonUtil.NO, null)
+                .show();
+
+    }
 
 }
 

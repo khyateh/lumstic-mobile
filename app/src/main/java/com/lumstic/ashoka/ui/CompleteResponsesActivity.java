@@ -2,6 +2,7 @@ package com.lumstic.ashoka.ui;
 
 import android.app.ActionBar;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -191,21 +192,31 @@ catch(Exception e){
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_context, menu);
+        if (surveys.getRespondentList()==null || surveys.getRespondentList().size()==0) {
+            super.onCreateContextMenu(menu, v, menuInfo);
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.menu_context, menu);
+        }
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item
+        final AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item
                 .getMenuInfo();
         if (item.getItemId() == R.id.action_delete) {
-            dbAdapter.deleteFromAnswerTableWithResponseID((String) info.targetView.findViewById(R.id.response_number_text).getTag());
-            dbAdapter.deleteFromResponseTable(surveys.getId(), (String) info.targetView.findViewById(R.id.response_number_text).getTag());
-            completeResponseList.remove(info.position);
-            completeResponsesAdapter.notifyDataSetChanged();
-            updateUI();
+
+            showConfirmDialog(CommonUtil.DELETE_RESPONSE_DIALOG_TITLE, CommonUtil.DELETE_RESPONSE_DIALOG_MSG,
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dbAdapter.deleteFromAnswerTableWithResponseID((String) info.targetView.findViewById(R.id.response_number_text).getTag());
+                            dbAdapter.deleteFromResponseTable(surveys.getId(), (String) info.targetView.findViewById(R.id.response_number_text).getTag());
+                            completeResponseList.remove(info.position);
+                            completeResponsesAdapter.notifyDataSetChanged();
+                            updateUI();
+                        }
+                    });
+
             return true;
         }
         return false;
