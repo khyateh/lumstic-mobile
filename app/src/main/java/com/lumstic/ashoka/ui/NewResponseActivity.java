@@ -1752,6 +1752,9 @@ public class NewResponseActivity extends BaseActivity {
     }
 
     private void backSaveCommonCode() {
+
+        findViewById(R.id.dummy).requestFocus();
+
         for (int i = 0; i < masterQuestionList.size(); i++) {
             if (!masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION))
                 addAnswerNextClick(masterQuestionList.get(i).getQuestions(), masterQuestionList.get(i).getRecordID());
