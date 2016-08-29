@@ -23,3 +23,4 @@
 
 #crashanalytics
 -keepattributes SourceFile,LineNumberTable
+-keep public @com.google.android.gms.common.util.DynamiteApi class * { *; }
