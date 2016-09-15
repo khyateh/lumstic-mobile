@@ -15,12 +15,16 @@ apply plugin: 'io.fabric'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
+    maven{
+        url 'http://repository.codehaus.org'
+    }
+
 }
 
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion '24'
+    compileSdkVersion 22
+    buildToolsVersion "22.0.1"
     useLibrary 'org.apache.http.legacy'
 
     packagingOptions {
@@ -31,9 +35,9 @@ android {
         exclude 'META-INF/NOTICE'
     }
     defaultConfig {
-        applicationId 'com.lumstic.ashoka'
+        applicationId 'com.lumstic.data'
         minSdkVersion 15
-        targetSdkVersion 24
+        targetSdkVersion 22
         versionCode 9
         versionName "1.9a"
 
@@ -56,7 +60,8 @@ dependencies {
     }
     //compile 'com.google.android.gms:play-services-analytics:9.4.0'
     compile 'com.google.gms:google-services:3.0.0'
-    compile 'com.google.firebase:firebase-core:9.4.0'
-    compile 'com.android.support:support-v4:24.1.1'
-    compile 'com.google.firebase:firebase-crash:9.4.0'
+    //// compile 'com.google.firebase:firebase-core:9.4.0'
+    //compile 'com.android.support:support-v4:24.1.1'
+    compile 'com.android.support:support-v4:22.0.0'
+    ////  compile 'com.google.firebase:firebase-crash:9.4.0'
 }
