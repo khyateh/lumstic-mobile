@@ -3,7 +3,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@color/dash_board_background"
-                tools:context="com.lumstic.ashoka.ui.DashBoardActivity">
+                tools:context="com.lumstic.data.ui.DashBoardActivity">
 
     <View
         android:layout_width="fill_parent"
@@ -70,7 +70,7 @@
         android:weightSum="3">
 
 
-        <com.lumstic.ashoka.views.RobotoRegularButton
+        <com.lumstic.data.views.RobotoRegularButton
             android:id="@+id/previous_question"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -87,7 +87,7 @@
             android:textColor="#727272"
             android:textSize="14sp"/>
 
-        <com.lumstic.ashoka.views.RobotoLightButton
+        <com.lumstic.data.views.RobotoLightButton
             android:id="@+id/counter_button"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -97,7 +97,7 @@
             android:textColor="#7e7e7e"
             android:textSize="13sp"/>
 
-        <com.lumstic.ashoka.views.RobotoRegularButton
+        <com.lumstic.data.views.RobotoRegularButton
             android:id="@+id/next_queation"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"

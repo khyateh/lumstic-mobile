@@ -7,7 +7,7 @@
                 android:background="@color/white"
                 android:paddingBottom="24dp">
 
-    <com.lumstic.ashoka.views.RobotoRegularTextView
+    <com.lumstic.data.views.RobotoRegularTextView
         android:id="@+id/tv_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -25,7 +25,7 @@
         android:alpha=".3"
         android:background="@color/black"/>
 
-    <com.lumstic.ashoka.views.RobotoRegularTextView
+    <com.lumstic.data.views.RobotoRegularTextView
         android:id="@+id/mandatory_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -42,7 +42,7 @@
         android:textColor="#212121"
         android:textSize="15sp"/>
 
-    <com.lumstic.ashoka.views.RobotoRegularButton
+    <com.lumstic.data.views.RobotoRegularButton
 
         android:id="@+id/okay"
         android:layout_width="wrap_content"

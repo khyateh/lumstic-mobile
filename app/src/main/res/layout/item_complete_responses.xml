@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <com.lumstic.ashoka.views.RobotoRegularTextView
+    <com.lumstic.data.views.RobotoRegularTextView
         android:id="@+id/response_number_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -17,7 +17,7 @@
         android:textColor="@color/black"
         android:textSize="18sp"/>
 
-    <com.lumstic.ashoka.views.RobotoLightTextView
+    <com.lumstic.data.views.RobotoLightTextView
         android:id="@+id/response_description_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

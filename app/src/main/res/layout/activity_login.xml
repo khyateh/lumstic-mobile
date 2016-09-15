@@ -3,7 +3,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@color/blue_gradient"
-                tools:context="com.lumstic.ashoka.ui.LoginActivity">
+                tools:context="com.lumstic.data.ui.LoginActivity">
 
     <View
         android:layout_width="fill_parent"
@@ -37,7 +37,7 @@
         android:layout_marginTop="44dp"
         android:background="@drawable/ic_logo_splash"/>
 
-    <com.lumstic.ashoka.views.RobotoLightEditText
+    <com.lumstic.data.views.RobotoLightEditText
         android:id="@+id/email_edit_text"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -62,7 +62,7 @@
         android:layout_marginTop="10dp"
         android:visibility="gone">
 
-        <com.lumstic.ashoka.views.RobotoLightTextView
+        <com.lumstic.data.views.RobotoLightTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Please check email id"
@@ -76,7 +76,7 @@
             android:background="@drawable/ic_error"/>
     </RelativeLayout>
 
-    <com.lumstic.ashoka.views.RobotoLightEditText
+    <com.lumstic.data.views.RobotoLightEditText
         android:id="@+id/password_edit_text"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -115,7 +115,7 @@
             android:background="@drawable/ic_error"/>
     </RelativeLayout>
 
-    <com.lumstic.ashoka.views.RobotoRegularButton
+    <com.lumstic.data.views.RobotoRegularButton
         android:id="@+id/login_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

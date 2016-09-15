@@ -3,7 +3,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@color/dash_board_background"
-                tools:context="com.lumstic.ashoka.ui.DashBoardActivity">
+                tools:context="com.lumstic.data.ui.DashBoardActivity">
 
     <RelativeLayout
         android:id="@+id/dashboardContainer"
@@ -29,7 +29,7 @@
             android:layout_marginTop="60dp"
             android:background="@drawable/ic_logo_splash"/>
 
-        <com.lumstic.ashoka.views.RobotoLightTextView
+        <com.lumstic.data.views.RobotoLightTextView
             android:id="@+id/text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -40,7 +40,7 @@
             android:textColor="#212121"
             android:textSize="18sp"/>
 
-        <com.lumstic.ashoka.views.RobotoLightTextView
+        <com.lumstic.data.views.RobotoLightTextView
             android:id="@+id/message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -51,7 +51,7 @@
             android:textColor="#6c6c6c"
             android:textSize="16sp"/>
 
-        <com.lumstic.ashoka.views.RobotoLightTextView
+        <com.lumstic.data.views.RobotoLightTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/message"
@@ -81,7 +81,7 @@
             android:layout_margin="10dp"
             android:background="@color/dash_board_foreground">
 
-            <com.lumstic.ashoka.views.RobotoRegularTextView
+            <com.lumstic.data.views.RobotoRegularTextView
                 android:id="@+id/active_survey_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -112,7 +112,7 @@
                     android:layout_marginRight="14dp"
                     android:background="@drawable/ic_upload"/>
 
-                <com.lumstic.ashoka.views.RobotoMediumButton
+                <com.lumstic.data.views.RobotoMediumButton
                     android:id="@+id/upload_all"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<com.lumstic.ashoka.views.RobotoLightTextView
+<com.lumstic.data.views.RobotoLightTextView
     android:id="@+id/answer_text_date"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"

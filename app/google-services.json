@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "552536047074",
+    "firebase_url": "https://lumstic-598bf.firebaseio.com",
+    "project_id": "lumstic-598bf",
+    "storage_bucket": "lumstic-598bf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:552536047074:android:3cf8e5772ac0c950",
+        "android_client_info": {
+          "package_name": "com.lumstic.data"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "552536047074-72ducuism9ognuim6792ot2ge612lms8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvOHwL2PzZX-6qImL88MRv-zULBThBmNY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

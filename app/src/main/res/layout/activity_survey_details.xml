@@ -2,7 +2,7 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:context="com.lumstic.ashoka.ui.SurveyDetailsActivity">
+                tools:context="com.lumstic.data.ui.SurveyDetailsActivity">
 
     <View
         android:layout_width="fill_parent"
@@ -20,7 +20,7 @@
             android:background="@color/white">
 
 
-            <com.lumstic.ashoka.views.RobotoRegularTextView
+            <com.lumstic.data.views.RobotoRegularTextView
                 android:id="@+id/survey_title_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -30,7 +30,7 @@
                 android:textColor="#212121"
                 android:textSize="20sp"/>
 
-            <com.lumstic.ashoka.views.RobotoRegularTextView
+            <com.lumstic.data.views.RobotoRegularTextView
                 android:id="@+id/survey_description_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -51,14 +51,14 @@
                 android:layout_marginTop="12dp"
                 android:orientation="horizontal">
 
-                <com.lumstic.ashoka.views.RobotoLightTextView
+                <com.lumstic.data.views.RobotoLightTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Ends on:"
                     android:textColor="#6c6c6c"
                     android:textSize="11sp"/>
 
-                <com.lumstic.ashoka.views.RobotoLightTextView
+                <com.lumstic.data.views.RobotoLightTextView
                     android:id="@+id/end_date_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -70,7 +70,7 @@
 
             </LinearLayout>
 
-            <com.lumstic.ashoka.views.RobotoRegularTextView
+            <com.lumstic.data.views.RobotoRegularTextView
                 android:id="@+id/response"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -115,7 +115,7 @@
                         android:paddingLeft="20dp"
                         android:paddingTop="10dp">
 
-                        <com.lumstic.ashoka.views.RobotoRegularTextView
+                        <com.lumstic.data.views.RobotoRegularTextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Complete Responses"
@@ -123,7 +123,7 @@
                             android:textColor="#63b436"
                             android:textSize="19sp"/>
 
-                        <com.lumstic.ashoka.views.RobotoRegularTextView
+                        <com.lumstic.data.views.RobotoRegularTextView
                             android:id="@+id/complete_response"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -181,14 +181,14 @@
                     android:paddingLeft="20dp"
                     android:paddingTop="10dp">
 
-                    <com.lumstic.ashoka.views.RobotoRegularTextView
+                    <com.lumstic.data.views.RobotoRegularTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Incomplete Responses"
                         android:textColor="#FDA500"
                         android:textSize="19sp"/>
 
-                    <com.lumstic.ashoka.views.RobotoRegularTextView
+                    <com.lumstic.data.views.RobotoRegularTextView
                         android:id="@+id/incomplete_response"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -220,7 +220,7 @@
                     android:background="#999999"/>
             </RelativeLayout>
 
-            <com.lumstic.ashoka.views.RobotoRegularButton
+            <com.lumstic.data.views.RobotoRegularButton
                 android:id="@+id/add_responses_button"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"

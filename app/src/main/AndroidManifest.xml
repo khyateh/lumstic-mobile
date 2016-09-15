@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
-    package="com.lumstic.ashoka"
+    package="com.lumstic.data"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -10,14 +10,14 @@
     <uses-permission android:name="android.permission.CAMERA"/>
 
     <application
-        android:name=".utils.AppController"
+        android:name="com.lumstic.data.utils.AppController"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:largeHeap="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.lumstic.ashoka.ui.SplashActivity"
+            android:name="com.lumstic.data.ui.SplashActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen">
@@ -28,31 +28,31 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.lumstic.ashoka.ui.LoginActivity"
+            android:name="com.lumstic.data.ui.LoginActivity"
             android:screenOrientation="portrait"/>
         <activity
-            android:name="com.lumstic.ashoka.ui.SettingsActivity"
+            android:name="com.lumstic.data.ui.SettingsActivity"
             android:screenOrientation="portrait"/>
         <activity
-            android:name="com.lumstic.ashoka.ui.DashBoardActivity"
+            android:name="com.lumstic.data.ui.DashBoardActivity"
             android:screenOrientation="portrait"/>
         <activity
-            android:name="com.lumstic.ashoka.ui.SurveyDetailsActivity"
+            android:name="com.lumstic.data.ui.SurveyDetailsActivity"
             android:screenOrientation="portrait"/>
         <activity
-            android:name="com.lumstic.ashoka.ui.CompleteResponsesActivity"
+            android:name="com.lumstic.data.ui.CompleteResponsesActivity"
             android:screenOrientation="portrait"/>
 
         <activity
-            android:name="com.lumstic.ashoka.ui.IncompleteResponseActivity"
+            android:name="com.lumstic.data.ui.IncompleteResponseActivity"
             android:windowSoftInputMode="stateHidden"
             android:screenOrientation="portrait"/>
         <activity
-            android:name="com.lumstic.ashoka.ui.NewResponseActivity"
+            android:name="com.lumstic.data.ui.NewResponseActivity"
             android:windowSoftInputMode="stateHidden"
             android:screenOrientation="portrait"/>
         <activity
-            android:name="com.lumstic.ashoka.ui.HelpActivity"
+            android:name="com.lumstic.data.ui.HelpActivity"
             android:screenOrientation="portrait"/>
 
         <meta-data
