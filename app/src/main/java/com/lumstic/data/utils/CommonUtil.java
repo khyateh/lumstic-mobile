@@ -305,5 +305,9 @@ public class CommonUtil {
         return System.currentTimeMillis() / 1000;
     }
 
+    /*public static void printmsg(String msg){
+        System.out.println(msg);
+    }*/
+
 
 }

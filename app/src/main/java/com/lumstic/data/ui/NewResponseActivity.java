@@ -691,6 +691,9 @@ public class NewResponseActivity extends BaseActivity {
             List<DropDown> dropDowns = new ArrayList<>();
             dropDowns.add(new DropDown(order, "Select one"));
 
+            // sorting options based on order number is done in  Questions
+
+
             for (int i = 0; i < ques.getOptions().size(); i++) {
                 dropDowns.add(new DropDown(order, ques.getOptions().get(i).getContent()));
 

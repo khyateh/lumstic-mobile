@@ -564,6 +564,9 @@ public class DashBoardActivity extends BaseActivity {
                 String urlString = String.format("%s%s", fetchUrl,  appController.getPreferences().getAccessToken() );
                 URL url = new URL(urlString);
                 conn = (HttpURLConnection) url.openConnection();
+                //TODO below line is for testing
+                int resCode =  conn.getResponseCode();
+               // CommonUtil.printmsg("response code from server:: "+ resCode);
 
                 InputStream is = new BufferedInputStream(conn.getInputStream());
                 BufferedReader br = new BufferedReader(new InputStreamReader(is,"UTF-8"));
@@ -580,8 +583,9 @@ public class DashBoardActivity extends BaseActivity {
             } finally {
             conn.disconnect();
             }
-
+       // CommonUtil.printmsg("Survey data from server:: "+ jsonFetchString);
             return jsonFetchString;
+
         }
 
         boolean validateSurvey(Surveys surveyToValidate){
@@ -592,6 +596,7 @@ public class DashBoardActivity extends BaseActivity {
         protected void onPostExecute(String s) {
 
             try {
+               // CommonUtil.printmsg("raw Survey data from server:: "+ s);
                 if (s != null && s.length() > 0) {
                     appController.getPreferences().setSurveyData(s);
                     surveysList = jsonHelper.tryParsing(s);

@@ -2,6 +2,7 @@ package com.lumstic.data.models;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Questions implements Serializable {
@@ -27,6 +28,8 @@ public class Questions implements Serializable {
 
     public void setOptions(List<Options> options) {
         this.options = options;
+        Collections.sort(options);
+
     }
 
     public int getIdentifier() {
