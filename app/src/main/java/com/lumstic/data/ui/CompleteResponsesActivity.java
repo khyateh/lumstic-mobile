@@ -417,7 +417,7 @@ catch(Exception e){
         private String syncString = null;
 
         protected String doInBackground(String... string) {
-
+        //TODO redundancy in JSON sent to server. Commenting few lines to avoid redundancy
 
             String answersAttributes = string[0];
             String response = string[1];
@@ -431,33 +431,33 @@ catch(Exception e){
             HttpPost httppost = new HttpPost(uploadUrl);
 
             JSONObject finalJsonObject = new JSONObject();
+
+
             try {
-                finalJsonObject.put("answers_attributes", new JSONObject(answersAttributes));
+
                 finalJsonObject.put("response", new JSONObject(response));
-                finalJsonObject.put("status", "complete");
-                finalJsonObject.put("survey_id", surveyId);
-                finalJsonObject.put("updated_at", updatedAt);
-                finalJsonObject.put("longitude", lon + "");
-                finalJsonObject.put("latitude", lat + "");
                 finalJsonObject.put("access_token", appController.getPreferences().getAccessToken());
-                finalJsonObject.put("user_id", appController.getPreferences().getUserId());
-                finalJsonObject.put("organization_id", appController.getPreferences().getOrganizationId());
-                finalJsonObject.put("mobile_id", mobId);
                 finalJsonObject.put("format", "json");
                 finalJsonObject.put("action", "create");
                 finalJsonObject.put("controller", "api/v1/responses");
-            } catch (Exception e) {
+            }catch (Exception e) {
                 e.printStackTrace();
             }
 
-
-            Log.e("TAG", "FINAL->>" + finalJsonObject.toString());
+            try {
+                Log.e("TAG", "FINAL->>" + finalJsonObject.toString(100));
+               // CommonUtil.printmsg("Response JSON being uploaded to server::" + finalJsonObject.toString(100));
+            }catch(JSONException je){je.printStackTrace();}
 
             try {
                 httppost.addHeader("access_token", appController.getPreferences().getAccessToken());
-
-                StringEntity se = new StringEntity(finalJsonObject.toString());
+                //TODO changing code to utf8 encode JSON
+               /* StringEntity se = new StringEntity(finalJsonObject.toString());
                 se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+                httppost.setEntity(se);*/
+                StringEntity se = new StringEntity(finalJsonObject.toString(), "UTF-8");
+                se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json;charset=UTF-8"));
+                //CommonUtil.printmsg("string entity JSON being uploaded to server::" + se.toString());
                 httppost.setEntity(se);
 
                 HttpResponse httpResponse = httpclient.execute(httppost);
