@@ -282,9 +282,12 @@ public class CommonUtil {
                         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                         b.compress(Bitmap.CompressFormat.JPEG, 60, byteArrayOutputStream);
                         byte[] byteArray = byteArrayOutputStream.toByteArray();
-                        String encoded = Base64.encodeToString(byteArray, Base64.NO_WRAP);
+                        //TODO code change to escape base64 image from utf8 encoding during upload
+                        String encoded = "\""+Base64.encodeToString(byteArray, Base64.NO_WRAP)+"\"";
+                       // CommonUtil.printmsg("Encoded base 64 image::"+encoded);
                         jsonObject.put("photo", encoded);
                         jsonObject.put("content", "");
+
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -305,7 +308,7 @@ public class CommonUtil {
         return System.currentTimeMillis() / 1000;
     }
 
-    /*public static void printmsg(String msg){
+   /* public static void printmsg(String msg){
         System.out.println(msg);
     }*/
 
