@@ -296,7 +296,13 @@ public class CommonUtil {
                 e.printStackTrace();
             }
             try {
+                ////TODO jyothi dec 1 2016
+               /* String contentInJsonObj = (String) jsonObject.get("content");
+                CommonUtil.printmsg("Answer content::"+contentInJsonObj+"\n");*/
+                // todo end jyothi dec 1
                 ansJsonObject.putOpt("" + j, jsonObject);
+                String contentInJsonObj = (String) jsonObject.get("content");
+               // CommonUtil.printmsg("Answer content::Answer type"+contentInJsonObj+" "+answers.get(j).getType()+"\n");
             } catch (Exception e) {
 
             }

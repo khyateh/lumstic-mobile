@@ -556,7 +556,7 @@ public class NewResponseActivity extends BaseActivity {
     public void buildLayout(final Questions ques, final boolean isChild, final int parentRecordId, int parentViewPosition) {
 
         final LinearLayout nestedContainer = createNestedContainer();
-
+       // CommonUtil.printmsg("QUESTION  :: TYPE"+ques.getContent().toString()+" "+ques.getType());
         //if question is single line question
         if (ques.getType().equals(CommonUtil.QUESTION_TYPE_SINGLE_LINE_QUESTION)) {
             //LinearLayout nestedContainer = createNestedContainer();
@@ -593,7 +593,7 @@ public class NewResponseActivity extends BaseActivity {
                 masterQuestionList.add(new MasterQuestion(ques, recordId, ques.getId() + IntentConstants.VIEW_CONSTANT + recordId));
             }
             hideKeypad(answer);
-
+//TODO JYOTHI added get type as type was not added to some questions 3 dec 2016
             answer.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View view, boolean hasFocus) {
@@ -602,7 +602,7 @@ public class NewResponseActivity extends BaseActivity {
                         TagModel localTagModel = (TagModel) ((View) view.getParent()).getTag(R.string.multirecord_tag);
                         Answers localAnswer = new Answers(localTagModel.getRecordID(),
                                 currentResponseId, localTagModel.getqID(), answer.getText()
-                                .toString(), CommonUtil.getCurrentTimeStamp());
+                                .toString(), CommonUtil.getCurrentTimeStamp(),ques.getType());
                         saveAnswerIntoDB(localTagModel, localAnswer);
 
                     }
@@ -641,6 +641,7 @@ public class NewResponseActivity extends BaseActivity {
                 answer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT + recordId);
                 masterQuestionList.add(new MasterQuestion(ques, recordId, ques.getId() + IntentConstants.VIEW_CONSTANT + recordId));
             }
+            //JYOTHI
             answer.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View view, boolean hasFocus) {
@@ -650,7 +651,7 @@ public class NewResponseActivity extends BaseActivity {
                         TagModel localTagModel = (TagModel) ((View) view.getParent()).getTag(R.string.multirecord_tag);
                         Answers localAnswer = new Answers(localTagModel.getRecordID(),
                                 currentResponseId, localTagModel.getqID(), answer.getText()
-                                .toString(), CommonUtil.getCurrentTimeStamp());
+                                .toString(), CommonUtil.getCurrentTimeStamp(),ques.getType());
                         saveAnswerIntoDB(localTagModel, localAnswer);
                     }
                 }
@@ -886,6 +887,7 @@ public class NewResponseActivity extends BaseActivity {
             }
             if (ques.getMaxValue() != ques.getMinValue())
                 answer.setHint("Between  " + ques.getMinValue() + " to " + ques.getMaxValue());
+            //Jyothi
             answer.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 public void onFocusChange(View view, boolean hasFocus) {
                     if (hasFocus) {
@@ -894,7 +896,7 @@ public class NewResponseActivity extends BaseActivity {
                         TagModel localTagModel = (TagModel) ((View) view.getParent()).getTag(R.string.multirecord_tag);
                         Answers localAnswer = new Answers(localTagModel.getRecordID(),
                                 currentResponseId, localTagModel.getqID(), answer.getText()
-                                .toString(), CommonUtil.getCurrentTimeStamp());
+                                .toString(), CommonUtil.getCurrentTimeStamp(),ques.getType());
                         saveAnswerIntoDB(localTagModel, localAnswer);
                     }
                 }
@@ -1018,7 +1020,11 @@ public class NewResponseActivity extends BaseActivity {
                         }
 
                         View myView = findViewById(checkedId);
-                        RobotoLightRadioButton radioButton1 = (RobotoLightRadioButton) myView;
+                        //CommonUtil.printmsg("myview , ques.getContent().toString(), radio_checkedId"+myView.toString() +" "+ques.getContent().toString()+" "+radio_checkedId);
+                        //TODO JYOTHI CHANGING TO COMPOUND BUTTON 27 Nov 2016 Multirecord survey crash
+                        //OLD COD**//  RobotoLightRadioButton radioButton1 = (RobotoLightRadioButton) myView;
+                        CompoundButton radioButton1 = (CompoundButton) myView;
+
                         Options options = (Options) radioButton1.getTag();
                         int x = options.getOrderNumber() + 97;
                         String character = Character.toString((char) x);
@@ -1102,9 +1108,10 @@ public class NewResponseActivity extends BaseActivity {
                     if (dbAdapter.doesAnswerExist(ques.getId(), currentResponseId)) {
                         dbAdapter.deleteRatingAnswer(localTagModel.getqID(), currentResponseId, localTagModel.getRecordID());
                     }
+                    //Jyothi
                     Answers localAnswer = new Answers(localTagModel.getRecordID(),
                             currentResponseId, localTagModel.getqID(), String.valueOf(v),
-                            CommonUtil.getCurrentTimeStamp());
+                            CommonUtil.getCurrentTimeStamp(),ques.getType());
                     saveAnswerIntoDB(localTagModel, localAnswer);
 
                 }
@@ -1987,8 +1994,12 @@ public class NewResponseActivity extends BaseActivity {
         try {
             for (int i = 0; i < options.getQuestionsList().size(); i++) {
                 View myView = findViewById(options.getQuestionsList().get(i).getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + localRecordID);
-                ViewGroup parent = (ViewGroup) myView.getParent();
-                parent.removeView(myView);
+                //TODO JYOTHI SOLVING NULL POINTER EXCEPTION 27 Nov
+               // ViewGroup parent = (ViewGroup) myView.getParent();
+                if(null != myView) {
+                    ViewGroup parent = (ViewGroup) myView.getParent();
+                    parent.removeView(myView);
+                }
 
                 if (!options.getQuestionsList().get(i).getOptions().isEmpty()) {
                     for (int j = 0; j < options.getQuestionsList().get(i).getOptions().size(); j++) {
@@ -2022,8 +2033,12 @@ public class NewResponseActivity extends BaseActivity {
     private void removeCategoryTitleFromUI(Categories localCategories, int localRecordID) {
         try {
             View myView = findViewById(localCategories.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + localRecordID);
-            ViewGroup parent = (ViewGroup) myView.getParent();
-            parent.removeView(myView);
+            //TODO JYOTHI CHECKING FOR NULL Nov 27
+            if (null != myView) {
+                ViewGroup parent = (ViewGroup) myView.getParent();
+                parent.removeView(myView);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -2110,7 +2125,7 @@ public class NewResponseActivity extends BaseActivity {
         }
     }
 
-
+//TODO JYOTHI added few ques.get type to set type to answer Dec 5 2016
     public void addAnswerNextClick(Questions questions, int localRecordID) {
 
         Long tsLong = CommonUtil.getCurrentTimeStamp();
@@ -2122,35 +2137,38 @@ public class NewResponseActivity extends BaseActivity {
                 if (localRecordID != 0) {
                     localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), localAns, tsLong, "multirecord");
                 } else {
-                    localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), localAns, tsLong);
+                    //JYOTHI
+                    localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), localAns, tsLong,questions.getType());
                 }
                 if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID)) {
                     dbAdapter.insertDataAnswersTable(localAnswer);
                 }
+                //JYOTHI
             } else if (questions.getType().equals(CommonUtil.QUESTION_TYPE_MULTI_LINE_QUESTION)) {
                 String localAns = ((RobotoLightEditText) findViewById(questions.getId() + IntentConstants.VIEW_CONSTANT + localRecordID)).getText().toString().trim();
-                localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), localAns, tsLong);
+                localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), localAns, tsLong,questions.getType());
 
                 if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID)) {
                     dbAdapter.insertDataAnswersTable(localAnswer);
-                }
+                }//
+
             } else if (questions.getType().equals(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION)) {
                 String localAns = ((RobotoLightEditText) findViewById(questions.getId() + IntentConstants.VIEW_CONSTANT + localRecordID)).getText().toString().trim();
-                localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), localAns, tsLong);
+                localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), localAns, tsLong,questions.getType());
 
                 if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID)) {
                     dbAdapter.insertDataAnswersTable(localAnswer);
                 }
             } else if (questions.getType().equals(CommonUtil.QUESTION_TYPE_DATE_QUESTION)) {
 
-                localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), dateText.getText().toString(), tsLong);
+                localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), dateText.getText().toString(), tsLong,questions.getType());
 
                 if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID))
                     dbAdapter.insertDataAnswersTable(localAnswer);
 
             } else if (questions.getType().equals(CommonUtil.QUESTION_TYPE_RATING_QUESTION)) {
                 RatingBar localRatingBar = (RatingBar) findViewById(questions.getId() + IntentConstants.VIEW_CONSTANT + localRecordID);
-                localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), String.valueOf(localRatingBar.getRating()), tsLong);
+                localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), String.valueOf(localRatingBar.getRating()), tsLong,questions.getType());
                 if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID))
                     dbAdapter.insertDataAnswersTable(localAnswer);
 
@@ -2247,8 +2265,10 @@ public class NewResponseActivity extends BaseActivity {
                 try {
                     int optionId = dbAdapter.getOptionIdFromPrimaryId(choiceTableIds.get(i));
                     optionId = optionId + localRecordId;
+                    //TODO JYOTHI CHANGING TO CompoundButton 27 nov
+                    //*OLD CODE*// RobotoLightRadioButton radioButton = (RobotoLightRadioButton) findViewById(optionId);
+                    CompoundButton radioButton = (CompoundButton) findViewById(optionId);
 
-                    RobotoLightRadioButton radioButton = (RobotoLightRadioButton) findViewById(optionId);
                     radioButton.setChecked(true);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -2645,7 +2665,7 @@ public class NewResponseActivity extends BaseActivity {
             this.localQuestions = localQuestions;
         }
 
-        public void onDateSet(DatePicker view, int year, int monthOfYear,
+        /*public void onDateSet(DatePicker view, int year, int monthOfYear,
                               int dayOfMonth) {
             dateText = (RobotoLightTextView) findViewById(localQuestions.getId() + IntentConstants.VIEW_CONSTANT + localRecordID);
             dateText.setText(year + "/" + (monthOfYear + 1) + "/" + dayOfMonth);
@@ -2654,7 +2674,19 @@ public class NewResponseActivity extends BaseActivity {
                     .getId(), dateText.getText().toString(), CommonUtil.getCurrentTimeStamp());
             saveAnswerIntoDB(new TagModel(localQuestions.getId(), localRecordID), localAnswer);
 
+        }*/
+        //TODO JYOTHI DEC 3 2016
+        public void onDateSet(DatePicker view, int year, int monthOfYear,
+                              int dayOfMonth) {
+            dateText = (RobotoLightTextView) findViewById(localQuestions.getId() + IntentConstants.VIEW_CONSTANT + localRecordID);
+            dateText.setText(year + "/" + (monthOfYear + 1) + "/" + dayOfMonth);
+
+            Answers localAnswer = new Answers(localRecordID, currentResponseId, localQuestions
+                    .getId(), dateText.getText().toString(), CommonUtil.getCurrentTimeStamp(),localQuestions.getType());
+            saveAnswerIntoDB(new TagModel(localQuestions.getId(), localRecordID), localAnswer);
+
         }
+
 
     }
 }
