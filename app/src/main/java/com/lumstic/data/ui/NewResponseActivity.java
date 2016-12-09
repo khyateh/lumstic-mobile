@@ -776,12 +776,14 @@ public class NewResponseActivity extends BaseActivity {
             if (isChild) {
                 nestedContainer.setTag(R.string.multirecord_tag, new TagModel(ques.getId(), parentRecordId, ques));
                 fieldContainer.addView(nestedContainer, parentViewPosition);
-                masterQuestionList.add(new MasterQuestion(ques, parentRecordId));
+                //TODO JYOTHI APP CRASHES when mandatory questions are not answered and clicked 'mark as complete' -- Dec 7 2016 add AndroidAnsId
+                masterQuestionList.add(new MasterQuestion(ques, parentRecordId,ques.getId() + IntentConstants.VIEW_CONSTANT + parentRecordId));
                 addAnswerNextClick(ques, parentRecordId);
             } else {
                 nestedContainer.setTag(R.string.multirecord_tag, new TagModel(ques.getId(), recordId, ques));
                 fieldContainer.addView(nestedContainer);
-                masterQuestionList.add(new MasterQuestion(ques, recordId));
+                //TODO JYOTHI APP CRASHES when mandatory questions are not answered and clicked 'mark as complete' -- Dec 7 2016 add AndroidAnsId
+                masterQuestionList.add(new MasterQuestion(ques, recordId,ques.getId() + IntentConstants.VIEW_CONSTANT + recordId));
                 addAnswerNextClick(ques, recordId);
             }
             final LinearLayout ll = new LinearLayout(this);
@@ -918,11 +920,13 @@ public class NewResponseActivity extends BaseActivity {
             if (isChild) {
                 nestedContainer.setTag(R.string.multirecord_tag, new TagModel(ques.getId(), parentRecordId, ques));
                 fieldContainer.addView(nestedContainer, parentViewPosition);
-                masterQuestionList.add(new MasterQuestion(ques, parentRecordId));
+                //TODO JYOTHI APP CRASHES when mandatory questions are not answered and clicked 'mark as complete' -- Dec 7 2016 add AndroidAnsId
+                masterQuestionList.add(new MasterQuestion(ques, parentRecordId,ques.getId() + IntentConstants.VIEW_CONSTANT + parentRecordId));
             } else {
                 nestedContainer.setTag(R.string.multirecord_tag, new TagModel(ques.getId(), recordId, ques));
                 fieldContainer.addView(nestedContainer);
-                masterQuestionList.add(new MasterQuestion(ques, recordId));
+                //TODO JYOTHI APP CRASHES when mandatory questions are not answered and clicked 'mark as complete' -- Dec 7 2016 add AndroidAnsId
+                masterQuestionList.add(new MasterQuestion(ques, recordId,ques.getId() + IntentConstants.VIEW_CONSTANT + recordId));
             }
 
 
@@ -964,11 +968,15 @@ public class NewResponseActivity extends BaseActivity {
 
             if (isChild) {
                 nestedContainer.setTag(R.string.multirecord_tag, new TagModel(ques.getId(), parentRecordId, ques));
-                masterQuestionList.add(new MasterQuestion(ques, parentRecordId));
+                //TODO JYOTHI APP CRASHES when mandatory questions are not answered and clicked 'mark as complete' -- Dec 7 2016 add AndroidAnsId
+                masterQuestionList.add(new MasterQuestion(ques, parentRecordId,ques.getId() + IntentConstants.VIEW_CONSTANT + parentRecordId
+                ));
                 addAnswerNextClick(ques, parentRecordId);
             } else {
                 nestedContainer.setTag(R.string.multirecord_tag, new TagModel(ques.getId(), recordId, ques));
-                masterQuestionList.add(new MasterQuestion(ques, recordId));
+                //TODO JYOTHI APP CRASHES when mandatory questions are not answered and clicked 'mark as complete' -- Dec 7 2016 add AndroidAnsId
+                masterQuestionList.add(new MasterQuestion(ques, recordId,ques.getId() + IntentConstants.VIEW_CONSTANT + recordId
+                ));
                 addAnswerNextClick(ques, recordId);
             }
             //create new radio group
@@ -1078,10 +1086,13 @@ public class NewResponseActivity extends BaseActivity {
             if (isChild) {
                 nestedContainer.setTag(R.string.multirecord_tag, new TagModel(ques.getId(), parentRecordId, ques));
                 fieldContainer.addView(nestedContainer, parentViewPosition);
-                masterQuestionList.add(new MasterQuestion(ques, parentRecordId));
+                //TODO JYOTHI APP CRASHES when mandatory questions are not answered and clicked 'mark as complete' -- Dec 7 2016 add AndroidAnsId
+                masterQuestionList.add(new MasterQuestion(ques, parentRecordId,ques.getId() + IntentConstants.VIEW_CONSTANT + parentRecordId));
             } else {
                 nestedContainer.setTag(R.string.multirecord_tag, new TagModel(ques.getId(), recordId, ques));
-                masterQuestionList.add(new MasterQuestion(ques, recordId));
+                //TODO JYOTHI APP CRASHES when mandatory questions are not answered and clicked 'mark as complete' -- Dec 7 2016 add AndroidAnsId
+                masterQuestionList.add(new MasterQuestion(ques, recordId,ques.getId() + IntentConstants.VIEW_CONSTANT + recordId
+                ));
                 fieldContainer.addView(nestedContainer);
             }
 
@@ -1152,13 +1163,15 @@ public class NewResponseActivity extends BaseActivity {
 
 //Don't include this code in above if else
             if (isChild) {
-                masterQuestionList.add(new MasterQuestion(ques, parentRecordId));
+                //TODO JYOTHI APP CRASHES when mandatory questions are not answered and clicked 'mark as complete' -- Dec 7 2016 add AndroidAnsId
+                masterQuestionList.add(new MasterQuestion(ques, parentRecordId,ques.getId() + IntentConstants.VIEW_CONSTANT + parentRecordId));
                 deleteImageRelativeLayout.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_FOR_PHOTO1 + parentRecordId);
                 imageViewPhotoQuestion.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_FOR_PHOTO2 + parentRecordId);
                 imageContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_FOR_PHOTO3 + parentRecordId);
                 takePictureContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_FOR_PHOTO4 + parentRecordId);
             } else {
-                masterQuestionList.add(new MasterQuestion(ques, recordId));
+                //TODO JYOTHI APP CRASHES when mandatory questions are not answered and clicked 'mark as complete' -- Dec 7 2016 add AndroidAnsId
+                masterQuestionList.add(new MasterQuestion(ques, recordId,ques.getId() + IntentConstants.VIEW_CONSTANT + recordId));
                 deleteImageRelativeLayout.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_FOR_PHOTO1 + recordId);
                 imageViewPhotoQuestion.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_FOR_PHOTO2 + recordId);
                 imageContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_FOR_PHOTO3 + recordId);
@@ -1462,8 +1475,9 @@ public class NewResponseActivity extends BaseActivity {
                                 .getQuestions().getType().equals(CommonUtil
                                         .QUESTION_TYPE_DROPDOWN_QUESTION) && !masterQuestionList.get
                                 (i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RATING_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_PHOTO_QUESTION)) {
-
-                            showMandatoryDialog((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID()));
+                            //TODO jyothi .. app crashes when no mandatory question is answered and 'mark as complete clicked .. Dec 7
+                           // showMandatoryDialog((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID()));
+                            showMandatoryDialog((View) findViewById(masterQuestionList.get(i).getAnsAndroidID()));
                         } else {
                             showMandatoryDialogGeneric();
                         }
@@ -2134,37 +2148,49 @@ public class NewResponseActivity extends BaseActivity {
         try {
             if (questions.getType().equals(CommonUtil.QUESTION_TYPE_SINGLE_LINE_QUESTION)) {
                 String localAns = ((RobotoLightEditText) findViewById(questions.getId() + IntentConstants.VIEW_CONSTANT + localRecordID)).getText().toString().trim();
-                if (localRecordID != 0) {
-                    localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), localAns, tsLong, "multirecord");
-                } else {
-                    //JYOTHI
-                    localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), localAns, tsLong,questions.getType());
+                //TODO JYOTHI Dec 6 for blank answers getting added
+                if(!localAns.equals(CommonUtil.LUMSTIC_BLANK)) {
+                    if (localRecordID != 0) {
+                        localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), localAns, tsLong, "multirecord");
+                    } else {
+                        //TODO JYOTHI added type
+                        localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), localAns, tsLong, questions.getType());
+                    }
+                    if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID)) {
+                        dbAdapter.insertDataAnswersTable(localAnswer);
+                    }
                 }
-                if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID)) {
-                    dbAdapter.insertDataAnswersTable(localAnswer);
-                }
-                //JYOTHI
+                //TODO JYOTHI added type
             } else if (questions.getType().equals(CommonUtil.QUESTION_TYPE_MULTI_LINE_QUESTION)) {
                 String localAns = ((RobotoLightEditText) findViewById(questions.getId() + IntentConstants.VIEW_CONSTANT + localRecordID)).getText().toString().trim();
-                localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), localAns, tsLong,questions.getType());
+                //TODO JYOTHI Dec 6 for blank answers getting added
+                if(!localAns.equals(CommonUtil.LUMSTIC_BLANK)) {
+                    localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), localAns, tsLong, questions.getType());
 
-                if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID)) {
-                    dbAdapter.insertDataAnswersTable(localAnswer);
-                }//
+                    if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID)) {
+                        dbAdapter.insertDataAnswersTable(localAnswer);
+                    }//
+                }
 
             } else if (questions.getType().equals(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION)) {
                 String localAns = ((RobotoLightEditText) findViewById(questions.getId() + IntentConstants.VIEW_CONSTANT + localRecordID)).getText().toString().trim();
-                localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), localAns, tsLong,questions.getType());
+                //TODO JYOTHI Dec 6 for blank answers getting added
+                if(!localAns.equals(CommonUtil.LUMSTIC_BLANK)) {
+                    localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), localAns, tsLong, questions.getType());
 
-                if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID)) {
-                    dbAdapter.insertDataAnswersTable(localAnswer);
+                    if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID)) {
+                        dbAdapter.insertDataAnswersTable(localAnswer);
+                    }
                 }
             } else if (questions.getType().equals(CommonUtil.QUESTION_TYPE_DATE_QUESTION)) {
+                String localAns = dateText.getText().toString();
+                //TODO JYOTHI Dec 6 for blank answers getting added
+                if(!localAns.equals(CommonUtil.LUMSTIC_BLANK)) {
+                    localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), dateText.getText().toString(), tsLong, questions.getType());
 
-                localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), dateText.getText().toString(), tsLong,questions.getType());
-
-                if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID))
-                    dbAdapter.insertDataAnswersTable(localAnswer);
+                    if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID))
+                        dbAdapter.insertDataAnswersTable(localAnswer);
+                }
 
             } else if (questions.getType().equals(CommonUtil.QUESTION_TYPE_RATING_QUESTION)) {
                 RatingBar localRatingBar = (RatingBar) findViewById(questions.getId() + IntentConstants.VIEW_CONSTANT + localRecordID);
@@ -2608,20 +2634,23 @@ public class NewResponseActivity extends BaseActivity {
     }
 
     //mandatory question dialog
-    public void showMandatoryDialog(final RobotoLightEditText viewById) {
-        final Dialog dialog = new Dialog(NewResponseActivity.this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); //before
-        dialog.setContentView(R.layout.mandatory_question_dialog);
-        dialog.show();
-        RobotoRegularButton button = (RobotoRegularButton) dialog.findViewById(R.id.okay);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                viewById.setFocusable(true);
-                viewById.requestFocus();
-                dialog.dismiss();
-            }
-        });
+    //TODO jyothi dec 7
+    public void showMandatoryDialog(final View viewById) {
+        if(null != viewById) {
+            final Dialog dialog = new Dialog(NewResponseActivity.this);
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); //before
+            dialog.setContentView(R.layout.mandatory_question_dialog);
+            dialog.show();
+            RobotoRegularButton button = (RobotoRegularButton) dialog.findViewById(R.id.okay);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    viewById.setFocusable(true);
+                    viewById.requestFocus();
+                    dialog.dismiss();
+                }
+            });
+        }
 
     }
 
