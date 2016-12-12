@@ -83,6 +83,8 @@ public class CommonUtil {
 
     public static final String SURVEY_STATUS_COMPLETE = "complete";
     public static final String SURVEY_STATUS_INCOMPLETE = "incomplete";
+    //TODO JYOTHI DEC 6
+    public static final String LUMSTIC_BLANK = "";
 
     private CommonUtil() {
     }
