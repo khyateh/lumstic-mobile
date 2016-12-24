@@ -109,6 +109,47 @@
 
 
         </RelativeLayout>
+    <!--Jyothi Dec 22  for location fetch time setting-->
+        <com.lumstic.data.views.RobotoRegularTextView
+            android:id="@+id/gps_waiting_time_label"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/setting_lower_container"
+            android:background="#f1f1f1"
+            android:gravity="center_vertical"
+            android:paddingLeft="16dp"
+            android:text="@string/loc_fetch"
+            android:textColor="@color/back_button_text"
+            android:textSize="14sp"
+            android:typeface="monospace"/>
+
+
+    <RelativeLayout
+        android:id="@+id/setting_loc_time_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/gps_waiting_time_label"
+        android:background="@drawable/bg_card_layer_list">
+
+
+        <com.lumstic.data.views.RobotoLightEditText
+            android:id="@+id/gps_waiting_time"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_alignParentLeft="true"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:paddingLeft="16dp"
+
+            android:textColorHint="@color/black"
+            android:textColor="@color/black"
+            android:inputType="number"
+            android:textSize="14sp"
+            android:maxLength="3"
+            android:textAlignment="center"
+            android:typeface="monospace"/>
+    </RelativeLayout>
 
 
     </RelativeLayout>

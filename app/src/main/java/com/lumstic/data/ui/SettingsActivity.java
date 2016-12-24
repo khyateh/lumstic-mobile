@@ -6,10 +6,13 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -18,6 +21,7 @@ import com.lumstic.data.adapters.DBAdapter;
 import com.lumstic.data.utils.CommonUtil;
 import com.lumstic.data.utils.JSONParser;
 import com.lumstic.data.utils.NetworkUtil;
+import com.lumstic.data.views.LumsticTextChangeListener;
 import com.lumstic.data.views.RobotoLightEditText;
 import com.lumstic.data.views.RobotoRegularButton;
 import com.lumstic.data.views.RobotoRegularTextView;
@@ -176,7 +180,49 @@ public class SettingsActivity extends BaseActivity {
 
             }
         });
+
+        //TODO JYOTHI Dec21/2016 --> location fetch waiting time configurable
+
+        RobotoLightEditText locWaitingTime = (RobotoLightEditText)findViewById(R.id.gps_waiting_time);
+        locWaitingTime.setText(String.valueOf(appController.getPreferences().getLocWaitingTime()));
+       // locWaitingTime.setFilters(new InputFilter[]{ new LumSticMinMaxInputFilter("1", "600")});
+        locWaitingTime.addTextChangedListener(new LumsticTextChangeListener<RobotoLightEditText>(locWaitingTime){
+        @Override
+        public void onTextChanged(RobotoLightEditText target, Editable s) {
+         //   CommonUtil.printmsg("In onTextChanged for time limit");
+         String timeLimit = target.getText().toString();
+
+
+            if (timeLimit != null) {
+                timeLimit = timeLimit.trim();
+
+                try {
+                   int localValue = Integer.parseInt(timeLimit);
+
+                    if (localValue > CommonUtil.LUMSTIC_LOC_WAITING_MAX_TIME || localValue < CommonUtil.LUMSTIC_LOC_WAITING_MIN_TIME) {
+                        CommonUtil.showValidationDialog(target,timeLimit.length(),CommonUtil.LUMSTIC_LOC_WAITING_MIN_TIME,CommonUtil.LUMSTIC_LOC_WAITING_MAX_TIME,SettingsActivity.this);
+                        target.setText(String.valueOf(appController.getPreferences().getLocWaitingTime()));
+                        return;
+                    }else{
+                        appController.getPreferences().setLocWaitTime(localValue);
+                    }
+                } catch (NumberFormatException e) {
+
+                }
+
+            }
+
+
+        }
+
+
+        });
+
+
+
     }
+
+
 
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();

@@ -29,6 +29,10 @@
     <string name="survey_description">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</string>
     <string name="multirecord_tag">tag</string>
     <string name="filter_hint">Search</string>
+    <string name="loc_fetch">location fetch waiting time(seconds)</string>
+    <string name="loc_fetch_time">600</string>
+    <string name="number_in_limits">Number between %1$d and %2$d required.</string>
+
 
 
 </resources>

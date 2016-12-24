@@ -2,7 +2,10 @@ package com.lumstic.data.utils;
 
 import android.app.Activity;
 import android.app.Dialog;
+
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
@@ -16,7 +19,9 @@ import com.lumstic.data.adapters.DBAdapter;
 import com.lumstic.data.models.Answers;
 import com.lumstic.data.models.UserModel;
 import com.lumstic.data.ui.LoginActivity;
+import com.lumstic.data.views.RobotoLightEditText;
 import com.lumstic.data.views.RobotoRegularButton;
+import com.lumstic.data.views.RobotoRegularTextView;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -85,6 +90,13 @@ public class CommonUtil {
     public static final String SURVEY_STATUS_INCOMPLETE = "incomplete";
     //TODO JYOTHI DEC 6
     public static final String LUMSTIC_BLANK = "";
+    //TODO Jyothi added to solve the issue - MarkAsComplete should be clicked to know next wrong or blank ans. Dec 14
+    public static final boolean LUMSTIC_TRUE = true;
+    public static final boolean LUMSTIC_FALSE = false;
+    //TODO Jyothi Dec/21/2016 --> adding default location fetch waiting time to 20
+    public static final int LUMSTIC_LOC_WAITING_DEFAULT_TIME = 20;
+    public static final int LUMSTIC_LOC_WAITING_MAX_TIME = 600;
+    public static final int LUMSTIC_LOC_WAITING_MIN_TIME = 1;
 
     private CommonUtil() {
     }
@@ -206,6 +218,7 @@ public class CommonUtil {
     public static JSONObject getAnswerJsonObject(List<Answers> answers, DBAdapter dbAdapter) {
         JSONObject ansJsonObject = new JSONObject();
         for (int j = 0; j < answers.size(); j++) {
+           // CommonUtil.printmsg("Answer type :: "+answers.get(j).getType());
             JSONObject jsonObject = new JSONObject();
             try {
                 jsonObject.put("question_id", answers.get(j).getQuestionId());
@@ -284,7 +297,7 @@ public class CommonUtil {
                         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                         b.compress(Bitmap.CompressFormat.JPEG, 60, byteArrayOutputStream);
                         byte[] byteArray = byteArrayOutputStream.toByteArray();
-                        //TODO code change to escape base64 image from utf8 encoding during upload
+                        //TODO code change to escape base64 image from utf8 encoding during upload JYOTHI
                         String encoded = "\""+Base64.encodeToString(byteArray, Base64.NO_WRAP)+"\"";
                        // CommonUtil.printmsg("Encoded base 64 image::"+encoded);
                         jsonObject.put("photo", encoded);
@@ -314,6 +327,40 @@ public class CommonUtil {
 
     public static long getCurrentTimeStamp() {
         return System.currentTimeMillis() / 1000;
+    }
+
+
+    //TODO JYOTHI Dec 21/2016 during location time configuration
+    public static void showValidationDialog(final RobotoLightEditText viewById, final int length,int minVal,int maxValue,Activity context) {
+        if(null != context) {
+            final Dialog dialog = new Dialog(context);
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); //before
+            dialog.setContentView(R.layout.number_limit_dialog);
+            RobotoRegularTextView msgEditText = (RobotoRegularTextView) dialog.findViewById(R.id.mandatory_message);
+            Resources res = context.getResources();
+            String text = "";
+            if(null != res) {
+               text  = String.format(res.getString(R.string.number_in_limits), CommonUtil.LUMSTIC_LOC_WAITING_MIN_TIME, CommonUtil.LUMSTIC_LOC_WAITING_MAX_TIME);
+            }
+            if(null != msgEditText && null != res) {
+                msgEditText.setText(text);
+            }
+            dialog.show();
+            RobotoRegularButton button = (RobotoRegularButton) dialog.findViewById(R.id.okay);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    viewById.setFocusable(true);
+                    viewById.setSelection(length);
+                    viewById.requestFocus();
+
+                    dialog.dismiss();
+
+
+                }
+            });
+        }
     }
 
    /* public static void printmsg(String msg){

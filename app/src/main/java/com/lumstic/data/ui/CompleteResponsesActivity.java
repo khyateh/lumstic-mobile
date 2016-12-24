@@ -228,7 +228,10 @@ catch(Exception e){
             progressDialog.dismiss();
         } else {
             completedResponseIds = dbAdapter.getCompleteResponsesIds(surveys.getId());
+           // CommonUtil.printmsg("Total completed surveys:: " +completedResponseIds.size() +"\n");
             for (int i = 0; i < completedResponseIds.size(); i++) {
+
+              //  CommonUtil.printmsg("UPLOADING SURVEY RESPONSE NUMBER:: " + i+"\n");
                 answers = new ArrayList<>();
                 completedResponseIds.get(i);
                 answers = null;
@@ -440,13 +443,18 @@ catch(Exception e){
                 finalJsonObject.put("format", "json");
                 finalJsonObject.put("action", "create");
                 finalJsonObject.put("controller", "api/v1/responses");
-            }catch (Exception e) {
+            }
+            //TODO Upload of list of survey responses halts when any of the surveys thows exception.JYOTHI DEC 18/12/2016
+            /*catch (Exception e) {
                 e.printStackTrace();
+            }*/catch(JSONException j){
+                j.printStackTrace();
+                //j.getMessage()
             }
 
             try {
                 Log.e("TAG", "FINAL->>" + finalJsonObject.toString(100));
-               // CommonUtil.printmsg("Response JSON being uploaded to server::" + finalJsonObject.toString(100));
+              //  CommonUtil.printmsg("Response JSON being uploaded to server::" + finalJsonObject.toString(100));
             }catch(JSONException je){je.printStackTrace();}
 
             try {
@@ -465,6 +473,7 @@ catch(Exception e){
                     HttpEntity httpEntity = httpResponse.getEntity();
                     syncString = EntityUtils.toString(httpEntity);
                 }
+              //  throw new IOException();
 
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
@@ -473,8 +482,10 @@ catch(Exception e){
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-            return syncString;
+        //TODO JYOTHI Upload of list of survey responses halts when any of the surveys fails to upload.DEC 18/12/2016
+            finally {
+                return syncString;
+            }
         }
 
         @Override

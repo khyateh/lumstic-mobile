@@ -15,13 +15,13 @@ public class Answers implements Serializable {
     public Answers() {
     }
 
-    public Answers(int recordId, int responseId, int questionId, String content, long updatedAt) {
+    /*public Answers(int recordId, int responseId, int questionId, String content, long updatedAt) {
         this.recordId = recordId;
         this.responseId = responseId;
         this.questionId = questionId;
         this.content = content;
         this.updatedAt = updatedAt;
-    }
+    }*/
 
     public Answers(int recordId, int responseId, int questionId, String content, long updatedAt, String type) {
         this.recordId = recordId;

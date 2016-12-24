@@ -102,6 +102,9 @@ public class NewResponseActivity extends BaseActivity {
     private ArrayList<MasterSurveyQuestionModel> surveyQuestionsList = new ArrayList();
     private String categoryTitleString = "";
     private boolean isMidlineSurvey = false;
+    //TODO Jyothi added to solve the issue - MarkAsComplete should be clicked to know next wrong or blank ans. Dec 14
+    private boolean MARK_AS_COMPLETE = false;
+    private int MARK_AS_COMPLETE_NUMBER = 0;
 
 
 
@@ -391,7 +394,9 @@ public class NewResponseActivity extends BaseActivity {
     }
 
 
-    public void onMarkComplete() {
+   /* public void onMarkComplete() {
+        //TODO Jyothi added to solve the issue - MarkAsComplete should be clicked to know next wrong or blank ans. Dec 14
+        MARK_AS_COMPLETE = CommonUtil.LUMSTIC_TRUE;
 
         //validate this page
         if (storeDataToDB(true) == 0) {
@@ -421,7 +426,132 @@ public class NewResponseActivity extends BaseActivity {
         startActivity(intent);
         finish();
 
-    }
+    }*/
+
+
+
+    public void onMarkComplete() {
+
+      //  CommonUtil.printmsg("IN onMarkComplete");
+        //TODO Jyothi added to solve the issue - MarkAsComplete should be clicked to know next wrong or blank ans. Dec 14
+      //  MARK_AS_COMPLETE = CommonUtil.LUMSTIC_TRUE;
+        if(MARK_AS_COMPLETE_NUMBER == 0) {
+            MARK_AS_COMPLETE = CommonUtil.LUMSTIC_TRUE;
+            MARK_AS_COMPLETE_NUMBER = 1;
+        }else{
+            MARK_AS_COMPLETE = CommonUtil.LUMSTIC_FALSE;
+        }
+        //validate from beginning
+      //  CommonUtil.printmsg("onMarkComplete MARK_AS_COMPLETE is \t"+MARK_AS_COMPLETE );
+        if(MARK_AS_COMPLETE == CommonUtil.LUMSTIC_TRUE) {
+          //  CommonUtil.printmsg("markascomplete 1");
+            questionCounter = 0;
+            fieldContainer.removeAllViews();
+            masterQuestionList.clear();
+            // setViews();
+            counterButton.setText("1 out of " + totalQuestionCount);
+            setViews();
+            buildFirstQuestion();
+            while (questionCounter < totalQuestionCount - 1) {
+
+               // CommonUtil.printmsg("In onMarkAsComplete ::1  questionCounter********** " + questionCounter);
+                onNextClick();
+              //  CommonUtil.printmsg("In onMarkAsComplete :: 2 questionCounter********** " + questionCounter);
+                if (storeDataToDB(true) == 0) {
+                    return;
+                }
+
+              //  CommonUtil.printmsg("In onMarkAsComplete :: 3 questionCounter********** " + questionCounter);
+
+            }
+        }else{
+          //  CommonUtil.printmsg("markascomplete 2");
+            //validate this page
+            if (storeDataToDB(true) == 0) {
+            //    CommonUtil.printmsg("markascomplete 3");
+                return;
+            }
+            //validate prev pages
+
+          while(questionCounter != 0){
+                onBackClicked();
+                if (storeDataToDB(true) == 0) {
+                    return;
+                }
+            }
+       }
+      //  CommonUtil.printmsg("markascomplete 4");
+        addRecordCounter = 0;
+        recordId = 0;
+
+        if (sortedSurveyQuestionsList.get(questionCounter).getType() == CommonUtil.TYPE_QUESTION) {
+            int surveyID = ((Questions) sortedSurveyQuestionsList.get(questionCounter).getObject()).getSurveyId();
+            dbAdapter.updateCompleteResponse(currentResponseId, surveyID);
+        } else {
+            int surveyID = ((Categories) sortedSurveyQuestionsList.get(questionCounter).getObject()).getSurveyId();
+            dbAdapter.updateCompleteResponse(currentResponseId, surveyID);
+        }
+
+        Intent intent = new Intent(NewResponseActivity.this, SurveyDetailsActivity.class);
+        intent.putExtra(IntentConstants.SURVEY, surveys);
+        startActivity(intent);
+        finish();
+        }
+
+
+    /*public void onMarkComplete() {
+
+        CommonUtil.printmsg("IN onMarkComplete");
+        //TODO Jyothi added to solve the issue - MarkAsComplete should be clicked to know next wrong or blank ans. Dec 14
+        MARK_AS_COMPLETE = CommonUtil.LUMSTIC_TRUE;
+
+        //validate from beginning
+
+        questionCounter = 0;
+        fieldContainer.removeAllViews();
+        masterQuestionList.clear();
+       // setViews();
+        counterButton.setText("1 out of " + totalQuestionCount);
+        setViews();
+        buildFirstQuestion();
+        while(questionCounter != totalQuestionCount) {
+            onNextClick();
+                if (storeDataToDB(true) == 0) {
+                    return;
+                }
+
+
+        }
+
+       //validate this page
+        if (storeDataToDB(true) == 0) {
+            return;
+        }
+        //validate prev pages
+        while(questionCounter != 0){
+            onBackClicked();
+            if (storeDataToDB(true) == 0) {
+                return;
+            }
+        }
+
+        addRecordCounter = 0;
+        recordId = 0;
+
+        if (sortedSurveyQuestionsList.get(questionCounter).getType() == CommonUtil.TYPE_QUESTION) {
+            int surveyID = ((Questions) sortedSurveyQuestionsList.get(questionCounter).getObject()).getSurveyId();
+            dbAdapter.updateCompleteResponse(currentResponseId, surveyID);
+        } else {
+            int surveyID = ((Categories) sortedSurveyQuestionsList.get(questionCounter).getObject()).getSurveyId();
+            dbAdapter.updateCompleteResponse(currentResponseId, surveyID);
+        }
+
+        Intent intent = new Intent(NewResponseActivity.this, SurveyDetailsActivity.class);
+        intent.putExtra(IntentConstants.SURVEY, surveys);
+        startActivity(intent);
+        finish();
+
+    }*/
 
     public void buildFirstQuestion() {
         setCategoryTitleString("Q." + (questionCounter + 1));
@@ -594,6 +724,7 @@ public class NewResponseActivity extends BaseActivity {
             }
             hideKeypad(answer);
 //TODO JYOTHI added get type as type was not added to some questions 3 dec 2016
+            //TODO adding answer with out mandatory check call to the sub question.
             answer.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View view, boolean hasFocus) {
@@ -1418,23 +1549,34 @@ public class NewResponseActivity extends BaseActivity {
     }
 
     private int storeDataToDB(boolean validate) {
+        if(MARK_AS_COMPLETE){
+            validate = CommonUtil.LUMSTIC_TRUE;
+        }
+
+      //  CommonUtil.printmsg("storeDataToDB 1 validate is:: \t"+validate);
         int success = 0;
         boolean addAnswer=false;
+        /////todo testing dec 18
+        /*  try {
 
-        try {
             answer.clearFocus();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        hideKeyBoard();
+        hideKeyBoard();*/
 
         int masterListSize = masterQuestionList.size();
+       // CommonUtil.printmsg("storeDataToDB  masterListSize:: \t"+masterListSize);
         for (int i = 0; i < masterListSize; i++) {
-
+          //  CommonUtil.printmsg("storeDataToDB 2 loop num \t"+ i);
             if (validate) {
+              //  CommonUtil.printmsg("storeDataToDB 3 loop num \t"+ i);
+              //  CommonUtil.printmsg("storeDataToDB question number:: "+ i);
+              //  CommonUtil.printmsg("\n masterQuestionList.get(i).getQuestions() "+ masterQuestionList.get(i).getQuestions().getContent());
 
                 //Check For validation for these types of Questions
                 if (masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_SINGLE_LINE_QUESTION) || masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_MULTI_LINE_QUESTION)) {
+                   // CommonUtil.printmsg("storeDataToDB 4 loop num \t"+ i);
                     int localMaxLength = masterQuestionList.get(i).getQuestions().getMaxLength();
                     if (localMaxLength != 0)
                         if (((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString().trim().length() > localMaxLength) {
@@ -1443,6 +1585,7 @@ public class NewResponseActivity extends BaseActivity {
                         }
                 }
                 if (masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION)) {
+                  //  CommonUtil.printmsg("storeDataToDB 4 loop num \t"+ i);
                     int localMaxValue = masterQuestionList.get(i).getQuestions().getMaxValue();
                     int localMinValue = masterQuestionList.get(i).getQuestions().getMinValue();
                     if (localMaxValue != localMinValue) {
@@ -1464,8 +1607,10 @@ public class NewResponseActivity extends BaseActivity {
                 }
 
                 if (masterQuestionList.get(i).getQuestions().getMandatory() == 1) {
+                  //  CommonUtil.printmsg("storeDataToDB 4 loop num \t"+ i);
 
                     if (checkMandatoryQuestion(masterQuestionList.get(i).getQuestions().getType(), masterQuestionList.get(i).getRecordID(), masterQuestionList.get(i).getQuestions().getId())) {
+                   //     CommonUtil.printmsg("storeDataToDB 5 loop num \t"+ i);
                         if (!masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION)) {
                             addAnswer=true;
                         }
@@ -1476,6 +1621,7 @@ public class NewResponseActivity extends BaseActivity {
                                         .QUESTION_TYPE_DROPDOWN_QUESTION) && !masterQuestionList.get
                                 (i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RATING_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_PHOTO_QUESTION)) {
                             //TODO jyothi .. app crashes when no mandatory question is answered and 'mark as complete clicked .. Dec 7
+                       //     CommonUtil.printmsg("storeDataToDB 5 loop num \t"+ i);
                            // showMandatoryDialog((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID()));
                             showMandatoryDialog((View) findViewById(masterQuestionList.get(i).getAnsAndroidID()));
                         } else {
@@ -1486,15 +1632,19 @@ public class NewResponseActivity extends BaseActivity {
 
                 } else {
 
+                  //  CommonUtil.printmsg("storeDataToDB 6 loop num \t"+ i);
                     if (!masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION)) {
+                  //      CommonUtil.printmsg("storeDataToDB 7 loop num \t"+ i);
                         addAnswer=true;
                     }
                 }
             } else {
+             //   CommonUtil.printmsg("storeDataToDB 8 loop num \t"+ i);
                 addAnswer=true;
             }
 
             if(addAnswer){
+              //  CommonUtil.printmsg("storeDataToDB 9 loop num \t"+ i);
                 addAnswerNextClick(masterQuestionList.get(i).getQuestions(), masterQuestionList.get(i).getRecordID());
                 addAnswer=false;
             }
@@ -1503,8 +1653,10 @@ public class NewResponseActivity extends BaseActivity {
 
 
         //////////////////////////////
+       // CommonUtil.printmsg("storeDataToDB 10   \n");
         success = 1;
         masterQuestionList.clear();
+      //  CommonUtil.printmsg("storeDataToDB 11   \n");
         //////////////////////////////
 
         return success;
@@ -1547,7 +1699,9 @@ public class NewResponseActivity extends BaseActivity {
 //        defaultParentIndex = 0;
 
         //set next and previous buttons
-        if (questionCounter < totalQuestionCount - 1) {
+
+       if (questionCounter < totalQuestionCount - 1) {
+
             previousQuestion.setBackgroundColor(getResources().getColor(R.color.login_button_color));
             previousQuestion.setTextColor(getResources().getColor(R.color.white));
             previousQuestion.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_arrow_back, 0, 0, 0);
@@ -2140,6 +2294,7 @@ public class NewResponseActivity extends BaseActivity {
     }
 
 //TODO JYOTHI added few ques.get type to set type to answer Dec 5 2016
+    //This method adds answers to db
     public void addAnswerNextClick(Questions questions, int localRecordID) {
 
         Long tsLong = CommonUtil.getCurrentTimeStamp();
@@ -2235,8 +2390,12 @@ public class NewResponseActivity extends BaseActivity {
     //this will check if the answer is saved and can be retrieved from the tables
     public void checkForAnswer(Questions qu, int responseId, int localRecordId) {
         if ((qu.getType().equals(CommonUtil.QUESTION_TYPE_SINGLE_LINE_QUESTION)) || (qu.getType().equals(CommonUtil.QUESTION_TYPE_MULTI_LINE_QUESTION)) || (qu.getType().equals(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION))) {
-            answer = (RobotoLightEditText) findViewById(qu.getId() + IntentConstants.VIEW_CONSTANT + localRecordId);
-            answer.setText(dbAdapter.getAnswer(responseId, qu.getId(), localRecordId));
+            //TODO Jyothi Dec 24 / 2016
+           // if(qu.getMandatory() != 1) {
+                answer = (RobotoLightEditText) findViewById(qu.getId() + IntentConstants.VIEW_CONSTANT + localRecordId);
+              //  CommonUtil.printmsg("child single ans from db::" + dbAdapter.getAnswer(responseId, qu.getId(), localRecordId));
+                answer.setText(dbAdapter.getAnswer(responseId, qu.getId(), localRecordId));
+           // }
         } else if (qu.getType().equals(CommonUtil.QUESTION_TYPE_DATE_QUESTION)) {
             dateText = (RobotoLightTextView) findViewById(qu.getId() + IntentConstants.VIEW_CONSTANT + localRecordId);
             dateText.setText(dbAdapter.getAnswer(responseId, qu.getId(), localRecordId));

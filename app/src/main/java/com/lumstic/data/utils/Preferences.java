@@ -17,8 +17,11 @@ public class Preferences {
     private String password = "password";
     private String accessTokenCreatedAt = "access_token_created_at";
     private String surveyData = "SURVEY_DATA";
+    //TODO Jyothi added Dec 22/2016 for waiting time gps configuration.
+    private String LOC_WAITING_TIME = "loc_waiting_time";
     private Context context;
     private long lastSucessfulUpload;
+
 
     public long getLastSucessfulUpload() {
         return lastSucessfulUpload;
@@ -58,6 +61,19 @@ public class Preferences {
         SharedPreferences prefs = getSharedPreferences(key);
         Editor e = prefs.edit();
         e.putBoolean(key, val);
+        e.commit();
+    }
+
+    //TODO Jyothi nov 21/2016 --> adding for int
+    private int getInt(String key, int def) {
+        SharedPreferences prefs = getSharedPreferences(key);
+        return prefs.getInt(key, def);
+    }
+    //TODO Jyothi nov 21/2016 --> adding for int
+    private void setInt(String key, int intVal) {
+        SharedPreferences prefs = getSharedPreferences(key);
+        Editor e = prefs.edit();
+        e.putInt(key, intVal);
         e.commit();
     }
 
@@ -159,5 +175,16 @@ public class Preferences {
 
     public void setUserBaseUrl(String baseUrl) {
         setString(userBaseUrl, baseUrl);
+    }
+
+    //TODO Jyothi Dec 21/2016 -> Making GPS fetch location waiting time configurable
+    public int getLocWaitingTime() {
+        return getInt(LOC_WAITING_TIME,CommonUtil.LUMSTIC_LOC_WAITING_DEFAULT_TIME);
+    }
+
+    public void setLocWaitTime(int waitTime) {
+      //  CommonUtil.printmsg("new waiting time"+ String.valueOf(waitTime));
+
+        setInt(LOC_WAITING_TIME, waitTime);
     }
 }

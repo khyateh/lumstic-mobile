@@ -156,7 +156,16 @@ public class BaseActivity extends Activity implements LocationListener {
         }else{
             locationRequested=true;
             locationRequestedParm = parm;
-            appController.showToast(LOCATION_WAITING, 20, true, new Callable<Integer>() {
+           /* appController.showToast(LOCATION_WAITING, 20, true, new Callable<Integer>() {
+                @Override
+                public Integer call() throws Exception {
+                    stopLocationUpdates();
+                    onLocationReceived(parm);
+                    return 1;
+                }
+            });*/
+            //TODO Jyothi Dec 22 2016 for configuring location access time limit
+            appController.showToast(LOCATION_WAITING,appController.getPreferences().getLocWaitingTime(), true, new Callable<Integer>() {
                 @Override
                 public Integer call() throws Exception {
                     stopLocationUpdates();
@@ -174,6 +183,7 @@ public class BaseActivity extends Activity implements LocationListener {
      */
     protected void startLocationUpdates() {
         Log.d(TAG, "Location update started .....................");
+      //  CommonUtil.printmsg( "Location update started .....................");
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 50, 0, this);
     }
 
@@ -197,6 +207,7 @@ public class BaseActivity extends Activity implements LocationListener {
 
     @Override
     public void onProviderEnabled(String s){
+
     }
 
     @Override
