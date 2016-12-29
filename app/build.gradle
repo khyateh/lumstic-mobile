@@ -38,8 +38,8 @@ android {
         applicationId 'com.lumstic.data'
         minSdkVersion 15
         targetSdkVersion 22
-        versionCode 15
-        versionName 'Lumstic 2.3'
+        versionCode 16
+        versionName 'Lumstic 2.4'
 
     }
     buildTypes {
