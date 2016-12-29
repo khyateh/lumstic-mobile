@@ -758,6 +758,8 @@ public class DashBoardActivity extends BaseActivity {
 
                     while ((inputStr = br.readLine()) != null) responseBuilder.append(inputStr);
                     String errString = responseBuilder.toString();
+                    //TODO jyothi 29/dec/16
+                    syncString = errString;
                     br.close();
 
 
@@ -777,22 +779,27 @@ public class DashBoardActivity extends BaseActivity {
         @Override
         protected void onPostExecute(String s) {
 
+            //TODO jyothi Dec 29 to fix:: uploading incomplete response throws error.
+
+           // CommonUtil.printmsg("response string::" + syncString);
+
+            if(null != s){
             JSONObject result;
             try {
                 result = new JSONObject(s);
-                if( CommonUtil.SURVEY_STATUS_COMPLETE.equals(result.get("status"))) {
+                if (CommonUtil.SURVEY_STATUS_COMPLETE.equals(result.get("status"))) {
                     //handle complete response results
                     if (jsonParser.parseSyncResult(s)) {
                         surveyUploadCount++;
                         int ret = dbAdapter.deleteFromResponseTableOnUpload(Integer.parseInt(localSurveyID), localResponseID);
-                        if(ret>0){
+                        if (ret > 0) {
                             dbAdapter.deleteFromAnswerTableWithResponseID(localResponseID);
                         }
 
                     } else {
                         surveyUploadFailedCount++;
                     }
-                }else{
+                } else {
                     //handle incomplete response results
 
                     //set the Server ID in the response record
@@ -803,6 +810,9 @@ public class DashBoardActivity extends BaseActivity {
             } catch (JSONException e) {
                 surveyUploadFailedCount++;
                 e.printStackTrace();
+            }
+        } //TODO jyothi Dec 29 to fix:: uploading incomplete response throws error.
+             else{                surveyUploadFailedCount++;
             }
 
             completeCount = dbAdapter.getCompleteResponseFull();
