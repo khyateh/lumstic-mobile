@@ -449,6 +449,7 @@ public class JSONParser {
         } catch (Exception e) {
             e.printStackTrace();
         }
+     //   CommonUtil.printmsg("After catch in parseSyncResult");
         return false;
     }
 

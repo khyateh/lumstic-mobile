@@ -596,7 +596,7 @@ public class DashBoardActivity extends BaseActivity {
         protected void onPostExecute(String s) {
 
             try {
-               // CommonUtil.printmsg("raw Survey data from server:: "+ s);
+//                CommonUtil.printmsg("raw Survey data from server:: "+ s);
                 if (s != null && s.length() > 0) {
                     appController.getPreferences().setSurveyData(s);
                     surveysList = jsonHelper.tryParsing(s);
@@ -703,7 +703,10 @@ public class DashBoardActivity extends BaseActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            Log.e("TAG", "FINAL->>" + finalJsonObject.toString());
+            try {
+                Log.e("TAG", "FINAL->>" + finalJsonObject.toString(100));
+             //   CommonUtil.printmsg("Response JSON being uploaded to server::DASHBOARD::" + finalJsonObject.toString(100));
+            }catch(JSONException je){je.printStackTrace();}
 
 
             HttpURLConnection conn = null;

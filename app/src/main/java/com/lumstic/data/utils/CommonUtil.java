@@ -218,7 +218,7 @@ public class CommonUtil {
     public static JSONObject getAnswerJsonObject(List<Answers> answers, DBAdapter dbAdapter) {
         JSONObject ansJsonObject = new JSONObject();
         for (int j = 0; j < answers.size(); j++) {
-           // CommonUtil.printmsg("Answer type :: "+answers.get(j).getType());
+           // CommonUtil.printmsg("question id :: "+answers.get(j).getQuestionId());
             JSONObject jsonObject = new JSONObject();
             try {
                 jsonObject.put("question_id", answers.get(j).getQuestionId());
@@ -363,7 +363,7 @@ public class CommonUtil {
         }
     }
 
-   /* public static void printmsg(String msg){
+    /*public static void printmsg(String msg){
         System.out.println(msg);
     }*/
 

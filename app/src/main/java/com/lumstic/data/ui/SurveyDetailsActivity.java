@@ -458,8 +458,12 @@ public class SurveyDetailsActivity extends BaseActivity {
 
             }
 
+        //TODO jyothi Dec 29
+            try {
+                Log.e("TAG", "FINAL->>" + finalJsonObject.toString(100));
+             //   CommonUtil.printmsg("Response JSON being uploaded to server::SURVEY_DETAIL_ACTIVITY" + finalJsonObject.toString(100));
+            }catch(JSONException je){je.printStackTrace();}
 
-            Log.e("TAG", "FINAL->>" + finalJsonObject.toString());
 
             try {
                 httppost.addHeader("access_token", appController.getPreferences().getAccessToken());

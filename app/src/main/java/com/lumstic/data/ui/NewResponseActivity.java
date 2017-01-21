@@ -53,6 +53,7 @@ import com.lumstic.data.models.Surveys;
 import com.lumstic.data.models.TagModel;
 import com.lumstic.data.utils.CommonUtil;
 import com.lumstic.data.utils.IntentConstants;
+
 import com.lumstic.data.views.RobotoLightCheckBox;
 import com.lumstic.data.views.RobotoLightEditText;
 import com.lumstic.data.views.RobotoLightRadioButton;
@@ -1018,8 +1019,13 @@ public class NewResponseActivity extends BaseActivity {
                 answer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT + recordId);
                 masterQuestionList.add(new MasterQuestion(ques, recordId, ques.getId() + IntentConstants.VIEW_CONSTANT + recordId));
             }
-            if (ques.getMaxValue() != ques.getMinValue())
-                answer.setHint("Between  " + ques.getMinValue() + " to " + ques.getMaxValue());
+            //TODO Jyothi -->Number range  filter addition Jan 12 2017
+            final float maxVal = ques.getMaxValue();
+            final float minVal = ques.getMinValue();
+            if (maxVal != minVal && maxVal > minVal) {
+             //   answer.setFilters(new LumSticMinMaxInputFilter[]{new LumSticMinMaxInputFilter(minVal, maxVal)});
+                answer.setHint("Between  " + minVal + " to " + maxVal);
+            }
             //Jyothi
             answer.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 public void onFocusChange(View view, boolean hasFocus) {
@@ -1027,9 +1033,35 @@ public class NewResponseActivity extends BaseActivity {
                         answer = (RobotoLightEditText) view;
                     } else {
                         TagModel localTagModel = (TagModel) ((View) view.getParent()).getTag(R.string.multirecord_tag);
+                        //TODO Jyothi -->Number range  filter addition Jan 12 2017
+
+                        /*start of change*/
+
+                    float localMaxValue = maxVal;
+                    float localMinValue = minVal;
+                    String num = answer.getText().toString();
+
+                    if (localMaxValue != localMinValue) {
+
+                        if (num != null && !num.equals(CommonUtil.LUMSTIC_BLANK)) {
+
+                            float number_entered = Float.valueOf(num);
+                            try {
+
+                                if (number_entered > localMaxValue || number_entered < localMinValue) {
+                                    showValidationDialog(answer,answer.getText().toString().length());
+
+                                }
+                            } catch (NumberFormatException e) {
+
+                            }
+
+                        }
+                    }
+
+                /*end of change*/
                         Answers localAnswer = new Answers(localTagModel.getRecordID(),
-                                currentResponseId, localTagModel.getqID(), answer.getText()
-                                .toString(), CommonUtil.getCurrentTimeStamp(),ques.getType());
+                                currentResponseId, localTagModel.getqID(),num, CommonUtil.getCurrentTimeStamp(),ques.getType());
                         saveAnswerIntoDB(localTagModel, localAnswer);
                     }
                 }
@@ -1553,6 +1585,9 @@ public class NewResponseActivity extends BaseActivity {
             validate = CommonUtil.LUMSTIC_TRUE;
         }
 
+
+
+
       //  CommonUtil.printmsg("storeDataToDB 1 validate is:: \t"+validate);
         int success = 0;
         boolean addAnswer=false;
@@ -1568,14 +1603,21 @@ public class NewResponseActivity extends BaseActivity {
         int masterListSize = masterQuestionList.size();
        // CommonUtil.printmsg("storeDataToDB  masterListSize:: \t"+masterListSize);
         for (int i = 0; i < masterListSize; i++) {
+            //TODO Jyothi jan 16 2017 validating if numeric when on click next
+            String questionType = masterQuestionList.get(i).getQuestions().getType();
+            String localData = "";
+            if(questionType.equals(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION) ){
+                 localData = ((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString();
+                if(null!= localData && !localData.equals(CommonUtil.LUMSTIC_BLANK )&& !validate){
+                    validate = CommonUtil.LUMSTIC_TRUE;
+                }
+            }
+
           //  CommonUtil.printmsg("storeDataToDB 2 loop num \t"+ i);
             if (validate) {
-              //  CommonUtil.printmsg("storeDataToDB 3 loop num \t"+ i);
-              //  CommonUtil.printmsg("storeDataToDB question number:: "+ i);
-              //  CommonUtil.printmsg("\n masterQuestionList.get(i).getQuestions() "+ masterQuestionList.get(i).getQuestions().getContent());
 
                 //Check For validation for these types of Questions
-                if (masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_SINGLE_LINE_QUESTION) || masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_MULTI_LINE_QUESTION)) {
+                if (questionType.equals(CommonUtil.QUESTION_TYPE_SINGLE_LINE_QUESTION) || questionType.equals(CommonUtil.QUESTION_TYPE_MULTI_LINE_QUESTION)) {
                    // CommonUtil.printmsg("storeDataToDB 4 loop num \t"+ i);
                     int localMaxLength = masterQuestionList.get(i).getQuestions().getMaxLength();
                     if (localMaxLength != 0)
@@ -1584,7 +1626,35 @@ public class NewResponseActivity extends BaseActivity {
                             return success;
                         }
                 }
-                if (masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION)) {
+                //TODO jyothi jan 16/jan/2017 changing int to float to support decimal entry
+                if (questionType.equals(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION)) {
+
+                    localData = ((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString();
+                        //  CommonUtil.printmsg("storeDataToDB 4 loop num \t"+ i);
+                        float localMaxValue = masterQuestionList.get(i).getQuestions().getMaxValue();
+                        float localMinValue = masterQuestionList.get(i).getQuestions().getMinValue();
+                        if (localMaxValue != localMinValue) {
+                            //String localData = ((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString();
+                            float localValue;
+                            if (localData != null) {
+                                try {
+                                    if (localData != null && !localData.equals(CommonUtil.LUMSTIC_BLANK)) {
+                                        localValue = Float.parseFloat(localData);
+                                       // CommonUtil.printmsg("local value:: "+localValue);
+                                        if (localValue > localMaxValue || localValue < localMinValue) {
+                                            showValidationDialog((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID()), ((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString().length());
+                                            return success;
+                                        }
+                                    }
+                                } catch (NumberFormatException e) {
+                                    showValidationDialog((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID()), ((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString().length());
+                                }
+
+                            }
+                        }
+
+                }
+                /*if (masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION)) {
                   //  CommonUtil.printmsg("storeDataToDB 4 loop num \t"+ i);
                     int localMaxValue = masterQuestionList.get(i).getQuestions().getMaxValue();
                     int localMinValue = masterQuestionList.get(i).getQuestions().getMinValue();
@@ -1604,22 +1674,21 @@ public class NewResponseActivity extends BaseActivity {
 
                         }
                     }
-                }
+                }*/
 
                 if (masterQuestionList.get(i).getQuestions().getMandatory() == 1) {
                   //  CommonUtil.printmsg("storeDataToDB 4 loop num \t"+ i);
 
-                    if (checkMandatoryQuestion(masterQuestionList.get(i).getQuestions().getType(), masterQuestionList.get(i).getRecordID(), masterQuestionList.get(i).getQuestions().getId())) {
+                    if (checkMandatoryQuestion(questionType, masterQuestionList.get(i).getRecordID(), masterQuestionList.get(i).getQuestions().getId())) {
                    //     CommonUtil.printmsg("storeDataToDB 5 loop num \t"+ i);
-                        if (!masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION)) {
+                        if (!questionType.equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION) && !questionType.equals(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION) && !questionType.equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION)) {
                             addAnswer=true;
                         }
                     } else {
-                        if (!masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil
+                        if (!questionType.equals(CommonUtil
                                 .QUESTION_TYPE_MULTI_CHOICE_QUESTION) && !masterQuestionList.get(i)
                                 .getQuestions().getType().equals(CommonUtil
-                                        .QUESTION_TYPE_DROPDOWN_QUESTION) && !masterQuestionList.get
-                                (i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RATING_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_PHOTO_QUESTION)) {
+                                        .QUESTION_TYPE_DROPDOWN_QUESTION) && !questionType.equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION) && !questionType.equals(CommonUtil.QUESTION_TYPE_RATING_QUESTION) && !questionType.equals(CommonUtil.QUESTION_TYPE_PHOTO_QUESTION)) {
                             //TODO jyothi .. app crashes when no mandatory question is answered and 'mark as complete clicked .. Dec 7
                        //     CommonUtil.printmsg("storeDataToDB 5 loop num \t"+ i);
                            // showMandatoryDialog((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID()));
@@ -1633,7 +1702,7 @@ public class NewResponseActivity extends BaseActivity {
                 } else {
 
                   //  CommonUtil.printmsg("storeDataToDB 6 loop num \t"+ i);
-                    if (!masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION) && !masterQuestionList.get(i).getQuestions().getType().equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION)) {
+                    if (!questionType.equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION) && !questionType.equals(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION) && !questionType.equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION)) {
                   //      CommonUtil.printmsg("storeDataToDB 7 loop num \t"+ i);
                         addAnswer=true;
                     }
@@ -1758,6 +1827,14 @@ public class NewResponseActivity extends BaseActivity {
     }
 
     public void onAddRecordClick(int localRecordID, Categories currentCategory) {
+
+        //TODO Jyothi Jan 3/2017 --> to fix blank space ddition in record based questions.
+
+        if(null != answer && !(answer.getText().toString().equals(CommonUtil.LUMSTIC_BLANK))) {
+           //CommonUtil.printmsg("answer::: addRecordCounter ---> "+answer.getText().toString()+"::::"+addRecordCounter);
+           answer.clearFocus();
+           answer.getOnFocusChangeListener().onFocusChange(answer,answer.hasFocus());
+        }
 
         removeMarkAsCompleteUI();
 

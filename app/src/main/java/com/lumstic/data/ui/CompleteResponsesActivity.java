@@ -444,7 +444,7 @@ catch(Exception e){
                 finalJsonObject.put("action", "create");
                 finalJsonObject.put("controller", "api/v1/responses");
             }
-            //TODO Upload of list of survey responses halts when any of the surveys thows exception.JYOTHI DEC 18/12/2016
+            //TODO Upload of list of survey responses halts when any of the surveys throws exception.JYOTHI DEC 18/12/2016
             /*catch (Exception e) {
                 e.printStackTrace();
             }*/catch(JSONException j){
@@ -454,8 +454,10 @@ catch(Exception e){
 
             try {
                 Log.e("TAG", "FINAL->>" + finalJsonObject.toString(100));
-              //  CommonUtil.printmsg("Response JSON being uploaded to server::" + finalJsonObject.toString(100));
-            }catch(JSONException je){je.printStackTrace();}
+              //  CommonUtil.printmsg("Response JSON being uploaded to server::COMPLETERESPONSE" + finalJsonObject.toString(100));
+            }catch(JSONException je){
+              //  CommonUtil.printmsg("Response JSON being uploaded to server::COMPLETERESPONSE failed");
+                je.printStackTrace();}
 
             try {
                 httppost.addHeader("access_token", appController.getPreferences().getAccessToken());
@@ -484,13 +486,15 @@ catch(Exception e){
             }
         //TODO JYOTHI Upload of list of survey responses halts when any of the surveys fails to upload.DEC 18/12/2016
             finally {
+
                 return syncString;
             }
         }
 
         @Override
         protected void onPostExecute(String s) {
-            if (jsonParser.parseSyncResult(s)) {
+            //TODO Jyothi Jan 11 2017 adding null != s
+            if (null != s  && jsonParser.parseSyncResult(s)) {
                 surveyUploadCount++;
                 dbAdapter.deleteFromResponseTableOnUpload(surveys.getId(), localResponseID);
                 dbAdapter.deleteFromAnswerTableWithResponseID(localResponseID);
