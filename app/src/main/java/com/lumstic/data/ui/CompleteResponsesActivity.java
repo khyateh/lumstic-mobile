@@ -454,7 +454,7 @@ catch(Exception e){
 
             try {
                 Log.e("TAG", "FINAL->>" + finalJsonObject.toString(100));
-              //  CommonUtil.printmsg("Response JSON being uploaded to server::COMPLETERESPONSE" + finalJsonObject.toString(100));
+             //  CommonUtil.printmsg("Response JSON being uploaded to server::COMPLETERESPONSE" + finalJsonObject.toString(100));
             }catch(JSONException je){
               //  CommonUtil.printmsg("Response JSON being uploaded to server::COMPLETERESPONSE failed");
                 je.printStackTrace();}

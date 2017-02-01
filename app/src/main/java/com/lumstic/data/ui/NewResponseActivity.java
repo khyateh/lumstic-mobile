@@ -282,6 +282,8 @@ public class NewResponseActivity extends BaseActivity {
         getSortedQuestionList(surveyQuestionsList);
 
         totalQuestionCount = sortedSurveyQuestionsList.size();
+       // CommonUtil.printmsg("NewResponseActivity::totalQuestionCount "+ totalQuestionCount);
+
         counterButton.setText("1 out of " + totalQuestionCount);
 
         //get app response id
@@ -455,7 +457,7 @@ public class NewResponseActivity extends BaseActivity {
             buildFirstQuestion();
             while (questionCounter < totalQuestionCount - 1) {
 
-               // CommonUtil.printmsg("In onMarkAsComplete ::1  questionCounter********** " + questionCounter);
+               /// CommonUtil.printmsg("In onMarkAsComplete ::1  questionCounter********** " + totalQuestionCount);
                 onNextClick();
               //  CommonUtil.printmsg("In onMarkAsComplete :: 2 questionCounter********** " + questionCounter);
                 if (storeDataToDB(true) == 0) {
@@ -556,9 +558,15 @@ public class NewResponseActivity extends BaseActivity {
 
     public void buildFirstQuestion() {
         setCategoryTitleString("Q." + (questionCounter + 1));
+
+        //TODO jyothi remove below for loop later
+        for(int i = 0;i<sortedSurveyQuestionsList.size();i++){
+           // CommonUtil.printmsg("buildFirstQuestion::Markasxcomplete"+((Questions)sortedSurveyQuestionsList.get(i).getObject()).getContent()+":"+MARK_AS_COMPLETE);
+        }
         if (sortedSurveyQuestionsList.get(questionCounter).getType() == CommonUtil.TYPE_QUESTION) {
 
             Questions cq = (Questions) sortedSurveyQuestionsList.get(questionCounter).getObject();
+          //  CommonUtil.printmsg("buildFirstQuestion:: question content :: MARK_AS_COMPLETE_COUNT"+cq.getContent()+" :: "+MARK_AS_COMPLETE_NUMBER);
             buildLayout(cq, CommonUtil.IS_PARENT_VIEW, recordId, defaultParentIndex);
         } else {
             Categories currentCategory = (Categories) sortedSurveyQuestionsList.get(questionCounter).getObject();
@@ -686,6 +694,11 @@ public class NewResponseActivity extends BaseActivity {
 
     public void buildLayout(final Questions ques, final boolean isChild, final int parentRecordId, int parentViewPosition) {
 
+        ///TODO remove below code later
+        if(MARK_AS_COMPLETE) {
+          //  CommonUtil.printmsg("In NewResponseActivity: buildLayout: Question is::" + ques.getContent());
+        }
+
         final LinearLayout nestedContainer = createNestedContainer();
        // CommonUtil.printmsg("QUESTION  :: TYPE"+ques.getContent().toString()+" "+ques.getType());
         //if question is single line question
@@ -731,11 +744,17 @@ public class NewResponseActivity extends BaseActivity {
                 public void onFocusChange(View view, boolean hasFocus) {
                     if (!hasFocus) {
                         answer = (RobotoLightEditText) view;
-                        TagModel localTagModel = (TagModel) ((View) view.getParent()).getTag(R.string.multirecord_tag);
-                        Answers localAnswer = new Answers(localTagModel.getRecordID(),
-                                currentResponseId, localTagModel.getqID(), answer.getText()
-                                .toString(), CommonUtil.getCurrentTimeStamp(),ques.getType());
-                        saveAnswerIntoDB(localTagModel, localAnswer);
+                        String ansString = answer.getText().toString();
+
+                       // if(null != ansString && ansString.equals(CommonUtil.LUMSTIC_BLANK)) {
+                            TagModel localTagModel = (TagModel) ((View) view.getParent()).getTag(R.string.multirecord_tag);
+
+                            Answers localAnswer = new Answers(localTagModel.getRecordID(),
+                                    currentResponseId, localTagModel.getqID(), ansString, CommonUtil.getCurrentTimeStamp(), ques.getType());
+
+                            saveAnswerIntoDB(localTagModel, localAnswer);
+
+
 
                     }
                 }
@@ -764,6 +783,7 @@ public class NewResponseActivity extends BaseActivity {
             }
             answer = (RobotoLightEditText) findViewById(R.id.answer_text);
             answer.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+
             if (ques.getMaxLength() > 0)
                 answer.setHint(ques.getMaxLength() + " Characters");
             if (isChild) {
@@ -777,14 +797,17 @@ public class NewResponseActivity extends BaseActivity {
             answer.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View view, boolean hasFocus) {
+                    //TODO Jyothi Jan 27 2017******
+                    String ansString = answer.getText().toString();
                     if (hasFocus) {
                         answer = (RobotoLightEditText) view;
                     } else {
                         TagModel localTagModel = (TagModel) ((View) view.getParent()).getTag(R.string.multirecord_tag);
-                        Answers localAnswer = new Answers(localTagModel.getRecordID(),
-                                currentResponseId, localTagModel.getqID(), answer.getText()
-                                .toString(), CommonUtil.getCurrentTimeStamp(),ques.getType());
-                        saveAnswerIntoDB(localTagModel, localAnswer);
+
+                            Answers localAnswer = new Answers(localTagModel.getRecordID(),
+                                    currentResponseId, localTagModel.getqID(), ansString, CommonUtil.getCurrentTimeStamp(), ques.getType());
+                            saveAnswerIntoDB(localTagModel, localAnswer);
+
                     }
                 }
             });
@@ -801,7 +824,21 @@ public class NewResponseActivity extends BaseActivity {
             } else {
                 nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + recordId);
             }
+            //TODO jyothi Jan 31 change the below code  again.******
             spinner = new Spinner(NewResponseActivity.this);
+         /*   spinner = new Spinner(NewResponseActivity.this){
+                @Override public void
+                setSelection(int position)
+                {
+                    boolean sameSelected = position == getSelectedItemPosition();
+                    super.setSelection(position);
+                    if (sameSelected) {
+                        // Spinner does not call the OnItemSelectedListener if the same item is selected, so do it manually now
+                        getOnItemSelectedListener().onItemSelected(this, getSelectedView(), position, getSelectedItemId());
+                    }
+                }
+
+            };*/
             spinner = (Spinner) getLayoutInflater().inflate(R.layout.answer_dropdown, null);
             nestedContainer.addView(spinner);
             spinner.setTag(order);
@@ -834,11 +871,22 @@ public class NewResponseActivity extends BaseActivity {
 
             DropDownAdapter dropDownAdapter = new DropDownAdapter(NewResponseActivity.this, dropDowns);
             spinner.setAdapter(dropDownAdapter);
+            if(MARK_AS_COMPLETE) {
+             //   CommonUtil.printmsg("DROPDOWN:dropDownAdapter.getCount()" + dropDownAdapter.getCount());
+            }
             if (isChild) {
                 spinner.setTag(R.string.multirecord_tag, new TagModel(ques.getId(), parentRecordId, ques));
             } else {
                 spinner.setTag(R.string.multirecord_tag, new TagModel(ques.getId(), recordId, ques));
+
             }
+            ///////////////
+            //TODO jyothi jan 31******
+        /*  final AdapterView<View> spinnerView =  spinner.getSelectedView();
+            final int  positionSelected = spinner.getSelectedItemPosition();*/
+
+
+            //////////////////////
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -869,7 +917,11 @@ public class NewResponseActivity extends BaseActivity {
                         String questionNumber = getQuestionNumber(spinerQuestionTitleText.getText().toString());
                         setCategoryTitleString(questionNumber);
 
-                        //create nested questions
+                        //create nested questions////TODO important nested que creationn
+                        ///TODO remove below code later****
+                      /*  if(MARK_AS_COMPLETE) {
+                            CommonUtil.printmsg("options sub que creation");
+                        }*/
                         buildOptionLayout(options.getQuestionsList(), options.getCategoriesList(), ques,
                                 ((TagModel) nestedContainer.getTag(R.string.multirecord_tag))
                                         .getRecordID(), CommonUtil.IS_CHILD_VIEW, fieldContainer
@@ -1039,6 +1091,7 @@ public class NewResponseActivity extends BaseActivity {
 
                     float localMaxValue = maxVal;
                     float localMinValue = minVal;
+                        //TODO check numeric default value later..here it is being taken as string*******
                     String num = answer.getText().toString();
 
                     if (localMaxValue != localMinValue) {
@@ -1412,6 +1465,8 @@ public class NewResponseActivity extends BaseActivity {
 
         if (!questions.isEmpty()) {
             for (int index1 = 0; index1 < questions.size(); index1++) {
+                //Todo remove below code
+
                 localMasterList.add(new MasterSurveyQuestionModel(questions.get(index1), questions.get
                         (index1).getOrderNumber(), CommonUtil.TYPE_QUESTION));
             }
@@ -1437,7 +1492,7 @@ public class NewResponseActivity extends BaseActivity {
             }
         });
 
-
+//TODO important dealing with sub questions
         if (!localMasterList.isEmpty()) {
             String tmp = order;
             String categoryTitleString = getCategoryTitleString();
@@ -1601,10 +1656,11 @@ public class NewResponseActivity extends BaseActivity {
         hideKeyBoard();*/
 
         int masterListSize = masterQuestionList.size();
-       // CommonUtil.printmsg("storeDataToDB  masterListSize:: \t"+masterListSize);
+     //   CommonUtil.printmsg("storeDataToDB  masterListSize:: validate \t"+masterListSize+":"+validate);
         for (int i = 0; i < masterListSize; i++) {
             //TODO Jyothi jan 16 2017 validating if numeric when on click next
             String questionType = masterQuestionList.get(i).getQuestions().getType();
+         //   CommonUtil.printmsg("NewResponse:StoreToDb:question title :: type :: mandatorystatus "+masterQuestionList.get(i).getQuestions().getContent()+" :: "+questionType+" :: "+masterQuestionList.get(i).getQuestions().getMandatory());
             String localData = "";
             if(questionType.equals(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION) ){
                  localData = ((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString();
@@ -1615,10 +1671,11 @@ public class NewResponseActivity extends BaseActivity {
 
           //  CommonUtil.printmsg("storeDataToDB 2 loop num \t"+ i);
             if (validate) {
-
+             //   CommonUtil.printmsg("In Validate");
+             //   CommonUtil.printmsg("NewResponse:In validate:StoreToDb:question title :: type "+masterQuestionList.get(i).getQuestions().getContent()+" :: "+questionType);
                 //Check For validation for these types of Questions
                 if (questionType.equals(CommonUtil.QUESTION_TYPE_SINGLE_LINE_QUESTION) || questionType.equals(CommonUtil.QUESTION_TYPE_MULTI_LINE_QUESTION)) {
-                   // CommonUtil.printmsg("storeDataToDB 4 loop num \t"+ i);
+                  //  CommonUtil.printmsg("storeDataToDB in validate "+ i);
                     int localMaxLength = masterQuestionList.get(i).getQuestions().getMaxLength();
                     if (localMaxLength != 0)
                         if (((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString().trim().length() > localMaxLength) {
@@ -1678,8 +1735,10 @@ public class NewResponseActivity extends BaseActivity {
 
                 if (masterQuestionList.get(i).getQuestions().getMandatory() == 1) {
                   //  CommonUtil.printmsg("storeDataToDB 4 loop num \t"+ i);
-
+                  //  CommonUtil.printmsg("storeDataToDB in validate mandatory:: content "+ masterQuestionList.get(i).getQuestions().getContent());
                     if (checkMandatoryQuestion(questionType, masterQuestionList.get(i).getRecordID(), masterQuestionList.get(i).getQuestions().getId())) {
+                     //   CommonUtil.printmsg("It is a mandatory question******");
+                     //   CommonUtil.printmsg("NewResponse:StoreToDb:question title :: type "+masterQuestionList.get(i).getQuestions().getContent()+" :: "+questionType);
                    //     CommonUtil.printmsg("storeDataToDB 5 loop num \t"+ i);
                         if (!questionType.equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION) && !questionType.equals(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION) && !questionType.equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION)) {
                             addAnswer=true;
@@ -1713,7 +1772,7 @@ public class NewResponseActivity extends BaseActivity {
             }
 
             if(addAnswer){
-              //  CommonUtil.printmsg("storeDataToDB 9 loop num \t"+ i);
+               // CommonUtil.printmsg("in storeDataToDB validate ..addanswer");
                 addAnswerNextClick(masterQuestionList.get(i).getQuestions(), masterQuestionList.get(i).getRecordID());
                 addAnswer=false;
             }
@@ -1787,6 +1846,9 @@ public class NewResponseActivity extends BaseActivity {
             if (sortedSurveyQuestionsList.get(questionCounter).getType() == CommonUtil.TYPE_QUESTION) {
 
                 Questions cq = (Questions) sortedSurveyQuestionsList.get(questionCounter).getObject();
+                //TODO jyothi delete this later
+
+              //  CommonUtil.printmsg("onNextClick:: cq"+cq.getContent());
                 buildLayout(cq, CommonUtil.IS_PARENT_VIEW, recordId, defaultParentIndex);
             } else {
                 Categories currentCategory = (Categories) sortedSurveyQuestionsList.get(questionCounter).getObject();
@@ -2097,24 +2159,29 @@ public class NewResponseActivity extends BaseActivity {
 
     //get data from camera activity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == cameraRequest && resultCode == RESULT_OK) {
-            double photoFileSizeInMB = getImageSizeInMB(fname);
-            if ((tagMasterQuestion.getQuestions().getMaxLength() >= photoFileSizeInMB) || (tagMasterQuestion.getQuestions().getMaxLength() == 0)) {
-                scaleDownImage(fname);
-                Bitmap photo = loadImageFromStorage(fname);
-                findViewById(tagMasterQuestion.getQuestions().getId() + IntentConstants.VIEW_CONSTANT_FOR_PHOTO3 + tagMasterQuestion.getRecordID()).setVisibility(View.VISIBLE);
-                ((ImageView) findViewById(tagMasterQuestion.getQuestions().getId() + IntentConstants.VIEW_CONSTANT_FOR_PHOTO2 + tagMasterQuestion.getRecordID())).setImageBitmap(photo);
-                findViewById(tagMasterQuestion.getQuestions().getId() + IntentConstants.VIEW_CONSTANT_FOR_PHOTO4 + tagMasterQuestion.getRecordID()).setVisibility(View.GONE);
-                dbAdapter.deleteFromAnswerTable(tagMasterQuestion.getQuestions().getId(), currentResponseId, tagMasterQuestion.getRecordID());
-                addAnswerNextClick(tagMasterQuestion.getQuestions(), tagMasterQuestion.getRecordID());
+      //  CommonUtil.printmsg("In OnActivityResult");
+
+        //TODO Jyothi Feb1 2017 to fix app crash
+        if(resultCode != RESULT_CANCELED) {
+            if (requestCode == cameraRequest && resultCode == RESULT_OK ) {
+                double photoFileSizeInMB = getImageSizeInMB(fname);
+                if ((tagMasterQuestion.getQuestions().getMaxLength() >= photoFileSizeInMB) || (tagMasterQuestion.getQuestions().getMaxLength() == 0)) {
+                    scaleDownImage(fname);
+                    Bitmap photo = loadImageFromStorage(fname);
+                    findViewById(tagMasterQuestion.getQuestions().getId() + IntentConstants.VIEW_CONSTANT_FOR_PHOTO3 + tagMasterQuestion.getRecordID()).setVisibility(View.VISIBLE);
+                    ((ImageView) findViewById(tagMasterQuestion.getQuestions().getId() + IntentConstants.VIEW_CONSTANT_FOR_PHOTO2 + tagMasterQuestion.getRecordID())).setImageBitmap(photo);
+                    findViewById(tagMasterQuestion.getQuestions().getId() + IntentConstants.VIEW_CONSTANT_FOR_PHOTO4 + tagMasterQuestion.getRecordID()).setVisibility(View.GONE);
+                    dbAdapter.deleteFromAnswerTable(tagMasterQuestion.getQuestions().getId(), currentResponseId, tagMasterQuestion.getRecordID());
+                    addAnswerNextClick(tagMasterQuestion.getQuestions(), tagMasterQuestion.getRecordID());
+                } else {
+                    fname = "";
+                    Toast.makeText(NewResponseActivity.this, "Image size exceeds allowable limit, " +
+                            "Please try again...", Toast.LENGTH_LONG).show();
+                }
             } else {
                 fname = "";
-                Toast.makeText(NewResponseActivity.this, "Image size exceeds allowable limit, " +
-                        "Please try again...", Toast.LENGTH_LONG).show();
             }
-        } else {
-            fname = "";
-        }
+       }
     }
 
     //load image from memory card
@@ -2377,11 +2444,12 @@ public class NewResponseActivity extends BaseActivity {
         Long tsLong = CommonUtil.getCurrentTimeStamp();
         Answers localAnswer;
 
+
         try {
             if (questions.getType().equals(CommonUtil.QUESTION_TYPE_SINGLE_LINE_QUESTION)) {
                 String localAns = ((RobotoLightEditText) findViewById(questions.getId() + IntentConstants.VIEW_CONSTANT + localRecordID)).getText().toString().trim();
                 //TODO JYOTHI Dec 6 for blank answers getting added
-                if(!localAns.equals(CommonUtil.LUMSTIC_BLANK)) {
+               //// if(!localAns.equals(CommonUtil.LUMSTIC_BLANK)) {
                     if (localRecordID != 0) {
                         localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), localAns, tsLong, "multirecord");
                     } else {
@@ -2391,7 +2459,7 @@ public class NewResponseActivity extends BaseActivity {
                     if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID)) {
                         dbAdapter.insertDataAnswersTable(localAnswer);
                     }
-                }
+             ////   }
                 //TODO JYOTHI added type
             } else if (questions.getType().equals(CommonUtil.QUESTION_TYPE_MULTI_LINE_QUESTION)) {
                 String localAns = ((RobotoLightEditText) findViewById(questions.getId() + IntentConstants.VIEW_CONSTANT + localRecordID)).getText().toString().trim();
@@ -2803,8 +2871,12 @@ public class NewResponseActivity extends BaseActivity {
      */
     public boolean checkMandatoryQuestion(String type, int recordId, int qId) {
 
+      //  CommonUtil.printmsg("In checkMandatoryQuestion question type::"+type);
+
+
         //this will check for answers for questions having answers in answers table
         if (type.equals(CommonUtil.QUESTION_TYPE_SINGLE_LINE_QUESTION) || type.equals(CommonUtil.QUESTION_TYPE_MULTI_LINE_QUESTION) || type.equals(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION)) {
+
             if (((RobotoLightEditText) findViewById(qId + IntentConstants.VIEW_CONSTANT + recordId)).getText().toString().trim().equals("")) {
                 return false;
             }
@@ -2953,5 +3025,12 @@ public class NewResponseActivity extends BaseActivity {
         }
 
 
+
+        }
+
+    //TODO Jyothi added on Feb 1 2017 to fix a crash
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+
+        super.onRestoreInstanceState(savedInstanceState);
     }
 }

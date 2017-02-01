@@ -596,7 +596,7 @@ public class DashBoardActivity extends BaseActivity {
         protected void onPostExecute(String s) {
 
             try {
-//                CommonUtil.printmsg("raw Survey data from server:: "+ s);
+             //   CommonUtil.printmsg("DashBoardActivity::raw Survey data from server:: "+ s);
                 if (s != null && s.length() > 0) {
                     appController.getPreferences().setSurveyData(s);
                     surveysList = jsonHelper.tryParsing(s);

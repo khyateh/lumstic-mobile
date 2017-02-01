@@ -363,9 +363,9 @@ public class CommonUtil {
         }
     }
 
-    /*public static void printmsg(String msg){
+  public static void printmsg(String msg){
         System.out.println(msg);
-    }*/
+    }
 
 
 }
