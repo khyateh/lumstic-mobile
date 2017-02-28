@@ -90,6 +90,7 @@ public class CommonUtil {
     public static final String SURVEY_STATUS_INCOMPLETE = "incomplete";
     //TODO JYOTHI DEC 6
     public static final String LUMSTIC_BLANK = "";
+    public static final int LUMSTIC_VALUE_ONE = 1;
     //TODO Jyothi added to solve the issue - MarkAsComplete should be clicked to know next wrong or blank ans. Dec 14
     public static final boolean LUMSTIC_TRUE = true;
     public static final boolean LUMSTIC_FALSE = false;
@@ -97,6 +98,14 @@ public class CommonUtil {
     public static final int LUMSTIC_LOC_WAITING_DEFAULT_TIME = 20;
     public static final int LUMSTIC_LOC_WAITING_MAX_TIME = 600;
     public static final int LUMSTIC_LOC_WAITING_MIN_TIME = 1;
+
+    //TODO jyothi feb 16 2017
+    public static final String  MARK_COMP_BUTTON_LABLE = "CompleteValidation";
+    public static final String  COMP_BUTTON_LABLE = "MarkAsComplete";
+
+    //TODO Jyothi to handle Nullpointerexception from "fromfile()" Feb 26 2017
+    public static final String  LUMSTIC_IMAGE_CAPTURE_ERROR = "Sorry,problem with image capture";
+    public static final String LUMSTIC_ERROR = "There is an error:: ";
 
     private CommonUtil() {
     }

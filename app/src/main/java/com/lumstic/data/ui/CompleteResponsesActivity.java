@@ -454,9 +454,9 @@ catch(Exception e){
 
             try {
                 Log.e("TAG", "FINAL->>" + finalJsonObject.toString(100));
-             //  CommonUtil.printmsg("Response JSON being uploaded to server::COMPLETERESPONSE" + finalJsonObject.toString(100));
+             // CommonUtil.printmsg("Response JSON being uploaded to server::COMPLETERESPONSE" + finalJsonObject.toString(100));
             }catch(JSONException je){
-              //  CommonUtil.printmsg("Response JSON being uploaded to server::COMPLETERESPONSE failed");
+               // CommonUtil.printmsg("Response JSON being uploaded to server::COMPLETERESPONSE failed");
                 je.printStackTrace();}
 
             try {
@@ -466,6 +466,7 @@ catch(Exception e){
                 se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
                 httppost.setEntity(se);*/
                 StringEntity se = new StringEntity(finalJsonObject.toString(), "UTF-8");
+
                 se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json;charset=UTF-8"));
                 //CommonUtil.printmsg("string entity JSON being uploaded to server::" + se.toString());
                 httppost.setEntity(se);

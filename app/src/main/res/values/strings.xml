@@ -32,6 +32,9 @@
     <string name="loc_fetch">location fetch waiting time(seconds)</string>
     <string name="loc_fetch_time">600</string>
     <string name="number_in_limits">Number between %1$d and %2$d required.</string>
+    <!--Jyothi added below two texts Complete and Cancel-->
+    <string name="complete">Complete</string>
+    <string name="cancel">Cancel</string>
 
 
 

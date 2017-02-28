@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "552536047074-8laq440nv4h6kmu9i2j41rqmkbqgabd6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.lumstic.data",
+            "certificate_hash": "9385fe047d6f8fbd627f22eaa7c1b3cc7447cbae"
+          }
+        },
+        {
           "client_id": "552536047074-72ducuism9ognuim6792ot2ge612lms8.apps.googleusercontent.com",
           "client_type": 3
         }

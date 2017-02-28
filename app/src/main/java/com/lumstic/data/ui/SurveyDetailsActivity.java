@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.NetworkOnMainThreadException;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,6 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.RuntimeExecutionException;
 import com.lumstic.data.R;
 import com.lumstic.data.adapters.DBAdapter;
 import com.lumstic.data.models.Answers;
@@ -454,14 +456,12 @@ public class SurveyDetailsActivity extends BaseActivity {
                 finalJsonObject.put("format", "json");
                 finalJsonObject.put("action", "create");
                 finalJsonObject.put("controller", "api/v1/responses");
-            } catch (Exception e) {
-
-            }
+            }catch(JSONException je){je.printStackTrace();}
 
         //TODO jyothi Dec 29
             try {
                 Log.e("TAG", "FINAL->>" + finalJsonObject.toString(100));
-             //   CommonUtil.printmsg("Response JSON being uploaded to server::SURVEY_DETAIL_ACTIVITY" + finalJsonObject.toString(100));
+               // CommonUtil.printmsg("Response JSON being uploaded to server::SURVEY_DETAIL_ACTIVITY" + finalJsonObject.toString(100));
             }catch(JSONException je){je.printStackTrace();}
 
 
@@ -469,8 +469,11 @@ public class SurveyDetailsActivity extends BaseActivity {
                 httppost.addHeader("access_token", appController.getPreferences().getAccessToken());
 
                 StringEntity se = new StringEntity(finalJsonObject.toString());
-                se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-                httppost.setEntity(se);
+
+               // throw new RuntimeExecutionException(new IOException());
+                 se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+
+                  httppost.setEntity(se);
 
                 HttpResponse httpResponse = httpclient.execute(httppost);
                 if (httpResponse.getStatusLine().getStatusCode() == 200) {
@@ -480,7 +483,7 @@ public class SurveyDetailsActivity extends BaseActivity {
 
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
-            } catch (ClientProtocolException e) {
+            } catch (ClientProtocolException e) {//TODO jyothi uncomment this after testing ****
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -491,7 +494,8 @@ public class SurveyDetailsActivity extends BaseActivity {
 
         @Override
         protected void onPostExecute(String s) {
-            if (jsonParser.parseSyncResult(s)) {
+            //TODO Jyothi feb 27 2016 to fix loss of data when upload failed.
+            if (null != s && jsonParser.parseSyncResult(s)) {
                 surveyUploadCount++;
                 dbAdapter.deleteFromResponseTableOnUpload(surveyId, localResponseID);
                 dbAdapter.deleteFromAnswerTableWithResponseID(localResponseID);

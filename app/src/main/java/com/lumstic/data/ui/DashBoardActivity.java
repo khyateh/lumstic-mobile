@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+//import android.os.NetworkOnMainThreadException;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,6 +19,9 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+//import com.google.android.gms.tasks.RuntimeExecutionException;
+import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.crash.FirebaseCrash;
 import com.lumstic.data.R;
 import com.lumstic.data.adapters.DBAdapter;
 import com.lumstic.data.adapters.DashBoardAdapter;
@@ -141,6 +145,7 @@ public class DashBoardActivity extends BaseActivity {
 
         jsonHelper = new JsonHelper();
         jsonParser = new JSONParser();
+        //CommonUtil.printmsg("\n SURVEY: "+ appController.getPreferences().getSurveyData()+"\n***********************");
         surveysList = jsonHelper.tryParsing(appController.getPreferences().getSurveyData());
 
 
@@ -596,7 +601,7 @@ public class DashBoardActivity extends BaseActivity {
         protected void onPostExecute(String s) {
 
             try {
-             //   CommonUtil.printmsg("DashBoardActivity::raw Survey data from server:: "+ s);
+                 //  CommonUtil.printmsg("DashBoardActivity::raw Survey data from server:: "+ s);
                 if (s != null && s.length() > 0) {
                     appController.getPreferences().setSurveyData(s);
                     surveysList = jsonHelper.tryParsing(s);
@@ -666,6 +671,8 @@ public class DashBoardActivity extends BaseActivity {
         String localSurveyID;
         String verb = CommonUtil.VERB_POST;
         private String syncString = null;
+        //TODO Jyothi feb 27 2017 to fix loss of data during upload of data
+        boolean error = CommonUtil.LUMSTIC_FALSE;
 
         public UploadResponse(String action){
             verb = action;
@@ -705,7 +712,7 @@ public class DashBoardActivity extends BaseActivity {
             }
             try {
                 Log.e("TAG", "FINAL->>" + finalJsonObject.toString(100));
-             //   CommonUtil.printmsg("Response JSON being uploaded to server::DASHBOARD::" + finalJsonObject.toString(100));
+              //  CommonUtil.printmsg("Response JSON being uploaded to server::DASHBOARD::" + finalJsonObject.toString(100));
             }catch(JSONException je){je.printStackTrace();}
 
 
@@ -734,7 +741,7 @@ public class DashBoardActivity extends BaseActivity {
                 out.flush();
                 out.close();
 
-                try {
+               try {
                     res = conn.getResponseCode();
                     resMess = conn.getResponseMessage();
                 }
@@ -754,6 +761,7 @@ public class DashBoardActivity extends BaseActivity {
                     br.close();
                 }
                 else {
+                    error = CommonUtil.LUMSTIC_TRUE;
                     BufferedInputStream is = new BufferedInputStream(conn.getErrorStream());
                     BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
                     StringBuilder responseBuilder = new StringBuilder();
@@ -763,6 +771,7 @@ public class DashBoardActivity extends BaseActivity {
                     String errString = responseBuilder.toString();
                     //TODO jyothi 29/dec/16
                     syncString = errString;
+                    FirebaseCrash.log(CommonUtil.LUMSTIC_ERROR+syncString);
                     br.close();
 
 
@@ -776,7 +785,7 @@ public class DashBoardActivity extends BaseActivity {
                 conn.disconnect();
             }
 
-            return syncString;
+           return syncString;
         }
 
         @Override
@@ -785,8 +794,8 @@ public class DashBoardActivity extends BaseActivity {
             //TODO jyothi Dec 29 to fix:: uploading incomplete response throws error.
 
            // CommonUtil.printmsg("response string::" + syncString);
-
-            if(null != s){
+            //TODO Jyothi feb 27 2017 to fix loss of data during upload of data
+            if(!error && null != s){
             JSONObject result;
             try {
                 result = new JSONObject(s);

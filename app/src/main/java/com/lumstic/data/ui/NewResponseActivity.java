@@ -1,8 +1,10 @@
 package com.lumstic.data.ui;
 
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -61,6 +63,7 @@ import com.lumstic.data.views.RobotoLightTextView;
 import com.lumstic.data.views.RobotoRegularButton;
 import com.lumstic.data.views.RobotoRegularTextView;
 
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -69,6 +72,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import android.view.View.OnClickListener;
 
 
 public class NewResponseActivity extends BaseActivity {
@@ -106,7 +110,8 @@ public class NewResponseActivity extends BaseActivity {
     //TODO Jyothi added to solve the issue - MarkAsComplete should be clicked to know next wrong or blank ans. Dec 14
     private boolean MARK_AS_COMPLETE = false;
     private int MARK_AS_COMPLETE_NUMBER = 0;
-
+    private boolean lastQueNumeric = CommonUtil.LUMSTIC_FALSE;
+    private boolean validating = CommonUtil.LUMSTIC_FALSE;
 
 
     private static void setViewAndChildrenEnabled(View view, boolean enabled) {
@@ -347,6 +352,82 @@ public class NewResponseActivity extends BaseActivity {
         return sortedSurveyQuestionsList;
     }
 
+    //TODO jyothi feb 21 2017 sub mandatory question not validated******
+    private void mimicOnCreate(){
+
+       // setContentView(R.layout.activity_new_response);
+        //action bar attributes
+      //  setActionbar();
+        //views declaration
+        setViews();
+        //layout inflater initialization
+      //  inflater = getLayoutInflater();
+       // dbAdapter = new DBAdapter(NewResponseActivity.this);
+        //declaration of list items
+        List<Questions> questionsList = new ArrayList<>();
+        List<Categories> categoriesList;
+        List<Questions> nonRootedQuestionsList = new ArrayList<>();
+
+        //create mark as complete button and mandatory text
+        makeMandatoryText();
+        previousQuestion.setText("BACK");
+        //surveys from previous activity
+        surveys = (Surveys) getIntent().getExtras().getSerializable(IntentConstants.SURVEY);
+        isMidlineSurvey = surveys.getRespondentList().size()>0?true:false;
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        addRootLevelQuestionsTOList(questionsList, nonRootedQuestionsList);
+
+        categoriesList = addCategoriesToCategoryList();
+
+
+        //Root Level Questions
+        addNestedQuestionsToQuestionList(questionsList, categoriesList);
+        //Non Root Level Questions
+        addNestedQuestionsToQuestionList(nonRootedQuestionsList, categoriesList);
+
+        addCategoryQuestionsTOCategory(nonRootedQuestionsList, categoriesList);
+
+
+        addQuestionsToMasterList(questionsList, categoriesList);
+
+        getSortedQuestionList(surveyQuestionsList);
+
+        totalQuestionCount = sortedSurveyQuestionsList.size();
+        // CommonUtil.printmsg("NewResponseActivity::totalQuestionCount "+ totalQuestionCount);
+
+        counterButton.setText("1 out of " + totalQuestionCount);
+
+        //get app response id
+        getResponseId();
+        if (!sortedSurveyQuestionsList.isEmpty()) {
+            buildFirstQuestion();
+        }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+        //on next pressed
+        nextQuestion.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                if ((questionCounter + 1) != totalQuestionCount) {
+                    onNextClick();
+                }
+            }
+        });
+
+        //on previous pressed
+        previousQuestion.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (questionCounter != 0) {
+                    onBackClicked();
+                }
+            }
+        });
+    }
+
     public void setActionbar() {
         actionBar = getActionBar();
         actionBar.setTitle("New Response Activity");
@@ -363,6 +444,8 @@ public class NewResponseActivity extends BaseActivity {
         previousQuestion.setBackgroundColor(getResources().getColor(R.color.back_button_background));
 
     }
+    //TODO jyothi Feb 15 2017 for fixing dialog disappear issue
+/*
 
     public void createMarkAsComplete() {
         markAsComplete = new Button(this);
@@ -372,10 +455,30 @@ public class NewResponseActivity extends BaseActivity {
         params.bottomMargin = 30;
         params.gravity = Gravity.CENTER;
         markAsComplete.setBackgroundResource(R.drawable.selector_button);
-        markAsComplete.setText("mark as complete");
+        markAsComplete.setText("Complete");
         markAsComplete.setGravity(Gravity.CENTER_HORIZONTAL);
         markAsComplete.setTextColor(getResources().getColor(R.color.white));
         markAsComplete.setLayoutParams(params);
+    }
+
+*/
+
+    public Button createMarkAsComplete(String lable) {
+        Button  button = new Button(this);
+
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.leftMargin = 5;
+        params.topMargin = 30;
+        params.bottomMargin = 30;
+        params.gravity = Gravity.CENTER;
+        button.setBackgroundResource(R.drawable.selector_button);
+        button.setText(lable);
+        button.setGravity(Gravity.CENTER_HORIZONTAL);
+        button.setTextColor(getResources().getColor(R.color.white));
+        button.setLayoutParams(params);
+        button.setTransformationMethod(null);
+        return button;
+
     }
 
     public RobotoLightTextView makeMandatoryText() {
@@ -435,38 +538,84 @@ public class NewResponseActivity extends BaseActivity {
 
     public void onMarkComplete() {
 
+
       //  CommonUtil.printmsg("IN onMarkComplete");
         //TODO Jyothi added to solve the issue - MarkAsComplete should be clicked to know next wrong or blank ans. Dec 14
       //  MARK_AS_COMPLETE = CommonUtil.LUMSTIC_TRUE;
         if(MARK_AS_COMPLETE_NUMBER == 0) {
             MARK_AS_COMPLETE = CommonUtil.LUMSTIC_TRUE;
             MARK_AS_COMPLETE_NUMBER = 1;
-        }else{
+        }//TODO jyothi commented below code
+        /*else{
             MARK_AS_COMPLETE = CommonUtil.LUMSTIC_FALSE;
-        }
+        }*/
         //validate from beginning
       //  CommonUtil.printmsg("onMarkComplete MARK_AS_COMPLETE is \t"+MARK_AS_COMPLETE );
         if(MARK_AS_COMPLETE == CommonUtil.LUMSTIC_TRUE) {
-          //  CommonUtil.printmsg("markascomplete 1");
+
+            //TODO Jyothi 9 Feb To fix number to E
+
+
             questionCounter = 0;
-            fieldContainer.removeAllViews();
+
+             fieldContainer.removeAllViews();
             masterQuestionList.clear();
             // setViews();
             counterButton.setText("1 out of " + totalQuestionCount);
             setViews();
+            //TODO Jyothi feb 21 2017 mandatory sub question not validated
             buildFirstQuestion();
+           // mimicOnCreate();
+            int validationComplete = 0;
             while (questionCounter < totalQuestionCount - 1) {
 
                /// CommonUtil.printmsg("In onMarkAsComplete ::1  questionCounter********** " + totalQuestionCount);
                 onNextClick();
               //  CommonUtil.printmsg("In onMarkAsComplete :: 2 questionCounter********** " + questionCounter);
                 if (storeDataToDB(true) == 0) {
+                    validationComplete = 0;
                     return;
+                }else{
+                    validationComplete = CommonUtil.LUMSTIC_VALUE_ONE;
                 }
 
               //  CommonUtil.printmsg("In onMarkAsComplete :: 3 questionCounter********** " + questionCounter);
 
             }
+            //TODO jyothi when total number question is 1
+            if (storeDataToDB(true) == 0) {
+                validationComplete = 0;
+                return;
+            }else{
+                validationComplete = CommonUtil.LUMSTIC_VALUE_ONE;
+            }
+               // int counter = questionCounter;
+            Button markAsComplete2 = null;
+            if(validationComplete == CommonUtil.LUMSTIC_VALUE_ONE && !validating) {
+           // if(counter+1 == totalQuestionCount && storeDataToDB(true) > 0) {
+
+
+                //TODO jyothi feb 16 2017 to fix dialog disappear due to calling of next activity.
+                showMarkAsCompDialog(NewResponseActivity.this);
+              /*  markAsComplete.setVisibility(View.GONE);
+
+                 markAsComplete2 = createMarkAsComplete(CommonUtil.COMP_BUTTON_LABLE);
+
+                markAsComplete2.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        callSurveyDetailActivity();
+                    }
+                });
+                fieldContainer.addView(markAsComplete2);*/
+
+            }/*else{
+                if(markAsComplete2 != null) {
+                    markAsComplete2.setVisibility(View.GONE);
+                }
+                markAsComplete.setVisibility(View.VISIBLE);
+            }*/
+
         }else{
           //  CommonUtil.printmsg("markascomplete 2");
             //validate this page
@@ -474,6 +623,7 @@ public class NewResponseActivity extends BaseActivity {
             //    CommonUtil.printmsg("markascomplete 3");
                 return;
             }
+
             //validate prev pages
 
           while(questionCounter != 0){
@@ -495,11 +645,9 @@ public class NewResponseActivity extends BaseActivity {
             dbAdapter.updateCompleteResponse(currentResponseId, surveyID);
         }
 
-        Intent intent = new Intent(NewResponseActivity.this, SurveyDetailsActivity.class);
-        intent.putExtra(IntentConstants.SURVEY, surveys);
-        startActivity(intent);
-        finish();
         }
+
+
 
 
     /*public void onMarkComplete() {
@@ -556,6 +704,15 @@ public class NewResponseActivity extends BaseActivity {
 
     }*/
 
+    //TODO jyothi feb 16 2017 to fix disappear of dialog as a result of calling of next activity.
+    private void callSurveyDetailActivity(Activity activity){
+        Intent intent = new Intent(activity, SurveyDetailsActivity.class);
+        intent.putExtra(IntentConstants.SURVEY, surveys);
+        startActivity(intent);
+        finish();
+
+    }
+
     public void buildFirstQuestion() {
         setCategoryTitleString("Q." + (questionCounter + 1));
 
@@ -593,7 +750,7 @@ public class NewResponseActivity extends BaseActivity {
     public void checkIfLastQuestion() {
 
         if (questionCounter + 1 == totalQuestionCount) {
-            createMarkAsComplete();
+            markAsComplete =  createMarkAsComplete(CommonUtil.MARK_COMP_BUTTON_LABLE);
             //save various answers on mark as complete
             markAsComplete.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -694,11 +851,12 @@ public class NewResponseActivity extends BaseActivity {
 
     public void buildLayout(final Questions ques, final boolean isChild, final int parentRecordId, int parentViewPosition) {
 
+     //   CommonUtil.printmsg("In NewResponseActivity: buildLayout: Question is::" + ques.getMaxLength());
         ///TODO remove below code later
-        if(MARK_AS_COMPLETE) {
-          //  CommonUtil.printmsg("In NewResponseActivity: buildLayout: Question is::" + ques.getContent());
+       /* if(MARK_AS_COMPLETE) {
+            CommonUtil.printmsg("In NewResponseActivity: buildLayout: Question is::" + ques.getContent());
         }
-
+*/
         final LinearLayout nestedContainer = createNestedContainer();
        // CommonUtil.printmsg("QUESTION  :: TYPE"+ques.getContent().toString()+" "+ques.getType());
         //if question is single line question
@@ -746,18 +904,29 @@ public class NewResponseActivity extends BaseActivity {
                         answer = (RobotoLightEditText) view;
                         String ansString = answer.getText().toString();
 
-                       // if(null != ansString && ansString.equals(CommonUtil.LUMSTIC_BLANK)) {
-                            TagModel localTagModel = (TagModel) ((View) view.getParent()).getTag(R.string.multirecord_tag);
+                        // if(null != ansString && ansString.equals(CommonUtil.LUMSTIC_BLANK)) {
+                        TagModel localTagModel = (TagModel) ((View) view.getParent()).getTag(R.string.multirecord_tag);
+                     //   //TODO jyothi feb 21 sub mandatory questions not validated
+                        // if(  ques.getMandatory() != 1 && null != ansString && !ansString.equals(CommonUtil.LUMSTIC_BLANK) ) {
+                       // boolean dontSave = false;
+                       // if (isChild && ques.getMandatory() == 1){
 
-                            Answers localAnswer = new Answers(localTagModel.getRecordID(),
-                                    currentResponseId, localTagModel.getqID(), ansString, CommonUtil.getCurrentTimeStamp(), ques.getType());
+                        //    dontSave = CommonUtil.LUMSTIC_TRUE;
+                      //  }else{
+                      //      dontSave = CommonUtil.LUMSTIC_FALSE;
+                      //  }
+                      //      if(!dontSave) {
+                                Answers localAnswer = new Answers(localTagModel.getRecordID(),
+                                        currentResponseId, localTagModel.getqID(), ansString, CommonUtil.getCurrentTimeStamp(), ques.getType());
 
-                            saveAnswerIntoDB(localTagModel, localAnswer);
+                                saveAnswerIntoDB(localTagModel, localAnswer);
+                         //   }
+                        }
 
 
 
                     }
-                }
+
             });
 
 
@@ -1045,6 +1214,10 @@ public class NewResponseActivity extends BaseActivity {
 
         } else if (ques.getType().contains(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION)) {
             //LinearLayout nestedContainer = createNestedContainer();
+            //TODO Jyothi Feb 9 2017 to fix number to E
+            if(isMarkAsCompleteAdded){
+                lastQueNumeric = CommonUtil.LUMSTIC_TRUE;
+            }
             View questionTextSingleLine = createQuestionTitle(ques, isChild, parentRecordId);
             nestedContainer.addView(questionTextSingleLine);
             nestedContainer.addView(inflater.inflate(R.layout.answer_numeric, null));
@@ -1072,52 +1245,83 @@ public class NewResponseActivity extends BaseActivity {
                 masterQuestionList.add(new MasterQuestion(ques, recordId, ques.getId() + IntentConstants.VIEW_CONSTANT + recordId));
             }
             //TODO Jyothi -->Number range  filter addition Jan 12 2017
-            final float maxVal = ques.getMaxValue();
+          //  CommonUtil.printmsg("ques.getMaxValue():: "+ques.getMaxValue());
+            //TODO Jyothi Feb 7 2017 to fix number to E format
+            //final float maxVal = ques.getMaxValue();
+            final double maxVal = ques.getMaxValue();
+          //  CommonUtil.printmsg("maxVal "+maxVal);
             final float minVal = ques.getMinValue();
             if (maxVal != minVal && maxVal > minVal) {
              //   answer.setFilters(new LumSticMinMaxInputFilter[]{new LumSticMinMaxInputFilter(minVal, maxVal)});
                 answer.setHint("Between  " + minVal + " to " + maxVal);
             }
+
             //Jyothi
+
             answer.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 public void onFocusChange(View view, boolean hasFocus) {
-                    if (hasFocus) {
-                        answer = (RobotoLightEditText) view;
-                    } else {
-                        TagModel localTagModel = (TagModel) ((View) view.getParent()).getTag(R.string.multirecord_tag);
-                        //TODO Jyothi -->Number range  filter addition Jan 12 2017
+                    //TODO Jyothi addded to fix Number to E validation failure Feb 12 2017
+
+                      //  CommonUtil.printmsg("In validation 1" + view);
+
+                        if (hasFocus) {
+                            answer = (RobotoLightEditText) view;
+                        } else {
+                         //   CommonUtil.printmsg("In validation 2");
+                            TagModel localTagModel = (TagModel) ((View) view.getParent()).getTag(R.string.multirecord_tag);
+                            //TODO Jyothi -->Number range  filter addition Jan 12 2017
 
                         /*start of change*/
+                            //TODO Jyothi Feb7 2017 to fix number to E format
+                            //float localMaxValue = maxVal;
+                            double localMaxValue = maxVal;
+                            double localMinValue = minVal;
+                            //TODO check numeric default value later..here it is being taken as string*******
+                            String num = answer.getText().toString();
 
-                    float localMaxValue = maxVal;
-                    float localMinValue = minVal;
-                        //TODO check numeric default value later..here it is being taken as string*******
-                    String num = answer.getText().toString();
+                            if (localMaxValue != localMinValue) {
 
-                    if (localMaxValue != localMinValue) {
+                                if (num != null && !num.equals(CommonUtil.LUMSTIC_BLANK)) {
 
-                        if (num != null && !num.equals(CommonUtil.LUMSTIC_BLANK)) {
+                                    //TODO Jyothi Feb7 2017 fix for number to E
+                                    //float number_entered = Float.valueOf(num);
+                                    double number_entered = Double.valueOf(num);
+                                  //  CommonUtil.printmsg("In validation 4" + number_entered + ":" + localMaxValue);
+                                    try {
+                                     //   CommonUtil.printmsg("In validation 4" + number_entered + ":" + localMaxValue);
+                                        if (number_entered > localMaxValue || number_entered < localMinValue) {
+                                           // CommonUtil.printmsg("In validation 3" + number_entered);
+                                            //TODO Jyothi added Feb 20 2017
+                                                validating = CommonUtil.LUMSTIC_TRUE;
+                                            showValidationDialog(answer, answer.getText().toString().length());
+                                            }else{
+                                            //TODO Jyothi added Feb 20 2017
+                                            validating = CommonUtil.LUMSTIC_FALSE;
+                                            Answers localAnswer = new Answers(localTagModel.getRecordID(),
+                                                    currentResponseId, localTagModel.getqID(), num, CommonUtil.getCurrentTimeStamp(), ques.getType());
+                                            saveAnswerIntoDB(localTagModel, localAnswer);
+                                        }
 
-                            float number_entered = Float.valueOf(num);
-                            try {
 
-                                if (number_entered > localMaxValue || number_entered < localMinValue) {
-                                    showValidationDialog(answer,answer.getText().toString().length());
+                                    } catch (NumberFormatException e) {
+                                      //  CommonUtil.printmsg("number format exception");
+                                    }
 
                                 }
-                            } catch (NumberFormatException e) {
-
                             }
 
+                /*end of change*/
+                            //TODO jyothi changed ..uncomment after testing feb 20
+
+                            Answers localAnswer = new Answers(localTagModel.getRecordID(),
+                                    currentResponseId, localTagModel.getqID(), num, CommonUtil.getCurrentTimeStamp(), ques.getType());
+                            saveAnswerIntoDB(localTagModel, localAnswer);
                         }
                     }
 
-                /*end of change*/
-                        Answers localAnswer = new Answers(localTagModel.getRecordID(),
-                                currentResponseId, localTagModel.getqID(),num, CommonUtil.getCurrentTimeStamp(),ques.getType());
-                        saveAnswerIntoDB(localTagModel, localAnswer);
-                    }
-                }
+
+
+
             });
 
 
@@ -1670,7 +1874,7 @@ public class NewResponseActivity extends BaseActivity {
             }
 
           //  CommonUtil.printmsg("storeDataToDB 2 loop num \t"+ i);
-            if (validate) {
+            if (validate ) {
              //   CommonUtil.printmsg("In Validate");
              //   CommonUtil.printmsg("NewResponse:In validate:StoreToDb:question title :: type "+masterQuestionList.get(i).getQuestions().getContent()+" :: "+questionType);
                 //Check For validation for these types of Questions
@@ -1679,31 +1883,57 @@ public class NewResponseActivity extends BaseActivity {
                     int localMaxLength = masterQuestionList.get(i).getQuestions().getMaxLength();
                     if (localMaxLength != 0)
                         if (((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString().trim().length() > localMaxLength) {
+                         /*   //TODO jyothi adding feb 20 2017
+                            validating = CommonUtil.LUMSTIC_TRUE;*/
+
                             showValidationDialog((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID()), ((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString().length());
                             return success;
                         }
+                        //TODO jyothi adding feb 20 2017
+                       /*     else{
+
+                            validating = CommonUtil.LUMSTIC_FALSE;
+                        }*/
                 }
                 //TODO jyothi jan 16/jan/2017 changing int to float to support decimal entry
-                if (questionType.equals(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION)) {
+                //TODO jyothi added 'validating' to avoid revalidation of numeric fields as it will be done in onfocusChanged
+                if (questionType.equals(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION) && !validating) {
 
                     localData = ((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString();
                         //  CommonUtil.printmsg("storeDataToDB 4 loop num \t"+ i);
-                        float localMaxValue = masterQuestionList.get(i).getQuestions().getMaxValue();
+                    //TODO jyothi feb 7 2017 to fix number to E format
+                        //float localMaxValue = masterQuestionList.get(i).getQuestions().getMaxValue();
+                    double localMaxValue = masterQuestionList.get(i).getQuestions().getMaxValue();
                         float localMinValue = masterQuestionList.get(i).getQuestions().getMinValue();
                         if (localMaxValue != localMinValue) {
                             //String localData = ((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString();
-                            float localValue;
+                            //TODO jyothi 8 feb 2017 to fix number to E
+                            //float localValue;
+                            double localValue;
                             if (localData != null) {
                                 try {
-                                    if (localData != null && !localData.equals(CommonUtil.LUMSTIC_BLANK)) {
-                                        localValue = Float.parseFloat(localData);
+                                    if (!localData.equals(CommonUtil.LUMSTIC_BLANK)) {
+
+                                        //TODO jyothi 8 feb 2017 to fix number to E
+                                        //localValue = Float.parseFloat(localData);
+                                        localValue = Double.parseDouble(localData);
+
                                        // CommonUtil.printmsg("local value:: "+localValue);
                                         if (localValue > localMaxValue || localValue < localMinValue) {
+                                          //  CommonUtil.printmsg("Validation 2");
+                                            //TODO jyothi adding feb 20 2017
+                                            validating = CommonUtil.LUMSTIC_TRUE;
                                             showValidationDialog((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID()), ((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString().length());
                                             return success;
                                         }
+                                        //TODO jyothi adding feb 20 2017
+                                        else{
+
+                                            validating = CommonUtil.LUMSTIC_FALSE;
+                                        }
                                     }
                                 } catch (NumberFormatException e) {
+                                   // CommonUtil.printmsg("NumberFormat Exception 3");
                                     showValidationDialog((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID()), ((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString().length());
                                 }
 
@@ -1743,7 +1973,12 @@ public class NewResponseActivity extends BaseActivity {
                         if (!questionType.equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION) && !questionType.equals(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION) && !questionType.equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION)) {
                             addAnswer=true;
                         }
+                      /*  //TODO jyothi adding feb 20 2017
+                        validating = CommonUtil.LUMSTIC_FALSE;*/
+
                     } else {
+                    /*    //TODO jyothi adding feb 20 2017
+                        validating = CommonUtil.LUMSTIC_TRUE;*/
                         if (!questionType.equals(CommonUtil
                                 .QUESTION_TYPE_MULTI_CHOICE_QUESTION) && !masterQuestionList.get(i)
                                 .getQuestions().getType().equals(CommonUtil
@@ -1763,6 +1998,8 @@ public class NewResponseActivity extends BaseActivity {
                   //  CommonUtil.printmsg("storeDataToDB 6 loop num \t"+ i);
                     if (!questionType.equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION) && !questionType.equals(CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION) && !questionType.equals(CommonUtil.QUESTION_TYPE_RADIO_QUESTION)) {
                   //      CommonUtil.printmsg("storeDataToDB 7 loop num \t"+ i);
+                      /*  //TODO jyothi adding feb 20 2017
+                        validating = CommonUtil.LUMSTIC_FALSE;*/
                         addAnswer=true;
                     }
                 }
@@ -1790,13 +2027,115 @@ public class NewResponseActivity extends BaseActivity {
         return success;
     }
 
-    private void showValidationDialog(final RobotoLightEditText viewById, final int length) {
-        final Dialog dialog = new Dialog(NewResponseActivity.this);
+    //TODO jyothi feb 20 2017 for dialog dissappearing
+    private void showMarkAsCompDialog(final Activity activity) {
+
+
+        final Dialog dialog = new Dialog(activity);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); //before
-        dialog.setContentView(R.layout.number_limit_dialog);
+        dialog.setContentView(R.layout.mark_as_complete);
+
         dialog.show();
-        RobotoRegularButton button = (RobotoRegularButton) dialog.findViewById(R.id.okay);
-        button.setOnClickListener(new View.OnClickListener() {
+
+        final RobotoRegularButton markAsComplete2 = (RobotoRegularButton) dialog.findViewById(R.id.okay);
+        final RobotoRegularButton cancel = (RobotoRegularButton) dialog.findViewById(R.id.cancel);
+
+
+        markAsComplete2.setOnClickListener(new View.OnClickListener() {
+                                               @Override
+                                               public void onClick(View view) {
+
+                                                   // markAsComplete2.setVisibility(View.GONE);
+
+                                                   // markAsComplete2 = createMarkAsComplete(CommonUtil.COMP_BUTTON_LABLE);
+
+
+                                                   dialog.dismiss();
+                                                   callSurveyDetailActivity(activity);
+                                               }
+                                           }
+
+
+                );
+
+
+
+
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+
+                    }
+
+
+                );
+
+            }
+
+
+
+    private void showValidationDialog(final RobotoLightEditText viewById, final int length) {
+
+
+         final Dialog dialog = new Dialog(NewResponseActivity.this);
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); //before
+            dialog.setContentView(R.layout.number_limit_dialog);
+
+            dialog.show();
+
+          RobotoRegularButton button = (RobotoRegularButton) dialog.findViewById(R.id.okay);
+
+          button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    viewById.setFocusable(true);
+                    viewById.setSelection(length);
+                    viewById.requestFocus();
+
+                    dialog.dismiss();
+
+
+                }
+            });
+        }
+
+
+   /* private void showValidationDialog(final RobotoLightEditText viewById, final int length) {
+        ////TODO Jyothi remove below code
+
+            DialogFragment frag = new DialogFragment();
+            frag.show(NewResponseActivity.this.getFragmentManager(), "Dialog");
+        NewResponseActivity.this.getFragmentManager().executePendingTransactions();
+        final Dialog dialog2 = frag.getDialog();
+           // final Dialog dialog = new Dialog(NewResponseActivity.this);
+           // dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); //before
+           // dialog2.requestWindowFeature(Window.FEATURE_NO_TITLE);
+          //  dialog.setContentView(R.layout.number_limit_dialog);
+            dialog2.setContentView(R.layout.number_limit_dialog);
+
+         //   dialog.show();
+            dialog2.show();
+          //  RobotoRegularButton button = (RobotoRegularButton) dialog.findViewById(R.id.okay);
+            RobotoRegularButton button2 = (RobotoRegularButton) dialog2.findViewById(R.id.okay);
+         *//* button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    viewById.setFocusable(true);
+                    viewById.setSelection(length);
+                    viewById.requestFocus();
+
+                    dialog.dismiss();
+
+
+                }
+            });*//*
+
+        button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -1804,12 +2143,13 @@ public class NewResponseActivity extends BaseActivity {
                 viewById.setSelection(length);
                 viewById.requestFocus();
 
-                dialog.dismiss();
+                dialog2.dismiss();
 
 
             }
         });
-    }
+
+    }*/
 
 
     //on next ic clicked
@@ -2517,7 +2857,10 @@ public class NewResponseActivity extends BaseActivity {
                 localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), "", tsLong, CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION);
                 if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID)) {
                     dbAdapter.insertDataAnswersTable(localAnswer);
-                }
+                }/*else{
+                 RobotoLightEditText ansField  =  ((RobotoLightEditText) findViewById(questions.getId() + IntentConstants.VIEW_CONSTANT + localRecordID));
+                    ansField.setText();
+                }*/
             } else if (questions.getType().equals(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION)) {
                 localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), "", tsLong, CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION);
                 if (!dbAdapter.doesAnswerExist(questions.getId(), currentResponseId, localRecordID)) {
@@ -2666,34 +3009,39 @@ public class NewResponseActivity extends BaseActivity {
     //this is remove option from table in case of multi choice
     public void removeOptionFromDataBaseForCheckBox(Options options, Questions qu, int
             localRecordID) {
-        if (!options.getQuestionsList().isEmpty()) {
 
-            for (int k = 0; k < options.getQuestionsList().size(); k++) {
-                ArrayList<MasterQuestion> localMasterQuestion = getQuestionByRecordIDAndQuestionID(new MasterQuestion(options.getQuestionsList().get(k), localRecordID));
-                for (int j = 0; j < localMasterQuestion.size(); j++) {
-                    dbAdapter.deleteFromAnswerTable(localMasterQuestion.get(j).getQuestions().getId(), currentResponseId, localRecordID);
-                    masterQuestionList.remove(localMasterQuestion.get(j));
-                }
+        //TODO jyothi feb 21 2017
+        if (null != options) {
+            if (!options.getQuestionsList().isEmpty()) {
 
-                if (!options.getQuestionsList().get(k).getOptions().isEmpty()) {
-                    for (int i = 0; i < options.getQuestionsList().get(k).getOptions().size(); i++) {
-                        removeOptionFromDataBaseForCheckBox(options.getQuestionsList().get(k).getOptions().get
-                                (i), options.getQuestionsList().get(k), localRecordID);
+                for (int k = 0; k < options.getQuestionsList().size(); k++) {
+                    ArrayList<MasterQuestion> localMasterQuestion = getQuestionByRecordIDAndQuestionID(new MasterQuestion(options.getQuestionsList().get(k), localRecordID));
+                    for (int j = 0; j < localMasterQuestion.size(); j++) {
+                        dbAdapter.deleteFromAnswerTable(localMasterQuestion.get(j).getQuestions().getId(), currentResponseId, localRecordID);
+                        masterQuestionList.remove(localMasterQuestion.get(j));
+                    }
+
+                    if (!options.getQuestionsList().get(k).getOptions().isEmpty()) {
+                        for (int i = 0; i < options.getQuestionsList().get(k).getOptions().size(); i++) {
+                            removeOptionFromDataBaseForCheckBox(options.getQuestionsList().get(k).getOptions().get
+                                    (i), options.getQuestionsList().get(k), localRecordID);
+                        }
                     }
                 }
             }
-        }
 
 
-        //this removes all the category questions stored in answers table
-        if (!options.getCategoriesList().isEmpty()) {
-            for (int m = 0; m < options.getCategoriesList().size(); m++) {
-                removeCategoryQuestionsFromDBForCheckBox(options.getCategoriesList().get(m), localRecordID);
+            //this removes all the category questions stored in answers table
+            if (!options.getCategoriesList().isEmpty()) {
+                for (int m = 0; m < options.getCategoriesList().size(); m++) {
+                    removeCategoryQuestionsFromDBForCheckBox(options.getCategoriesList().get(m), localRecordID);
+                }
             }
-        }
 
-        dbAdapter.deleteFromChoicesTableWhereAnswerId(dbAdapter.getAnswerId
-                (currentResponseId, qu.getId(), localRecordID), options.getId());
+
+            dbAdapter.deleteFromChoicesTableWhereAnswerId(dbAdapter.getAnswerId
+                    (currentResponseId, qu.getId(), localRecordID), options.getId());
+        }
     }
 
     private void removeCategoryQuestionsFromDBForCheckBox(Categories localCategories, int
@@ -2917,8 +3265,14 @@ public class NewResponseActivity extends BaseActivity {
     private void takePicture(Questions ques, int parentRecordId) {
         tagMasterQuestion = new MasterQuestion(ques, parentRecordId);
         Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(getOutputMediaFile()));
-        startActivityForResult(cameraIntent, cameraRequest);
+        //TODO Jyothi to handle Nullpointerexception from "fromfile()" Feb 26 2017
+        File f = getOutputMediaFile();
+        if(null != f) {
+            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
+            startActivityForResult(cameraIntent, cameraRequest);
+        }else{
+            appController.showToast(CommonUtil.LUMSTIC_IMAGE_CAPTURE_ERROR);
+        }
     }
 
     private File getOutputMediaFile() {

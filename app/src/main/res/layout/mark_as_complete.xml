@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@color/white"
+                android:paddingBottom="24dp">
+
+    <com.lumstic.data.views.RobotoRegularTextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:text="ALERT"
+        android:textColor="#f58220"
+        android:textSize="18sp"/>
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/tv_title"
+        android:layout_margin="2dp"
+        android:alpha=".3"
+        android:background="@color/black"/>
+
+    <com.lumstic.data.views.RobotoRegularTextView
+        android:id="@+id/mandatory_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/divider"
+        android:layout_centerHorizontal="true"
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:gravity="center"
+        android:paddingBottom="20dp"
+        android:paddingTop="20dp"
+        android:text="Survey is validated.Please mark the survey as complete"
+        android:textAlignment="center"
+        android:textColor="#212121"
+        android:textSize="15sp"/>
+    <!-- android:layout_centerHorizontal="true"-->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/mandatory_message"
+        android:orientation="horizontal"
+        android:layout_centerHorizontal="true"
+        >
+        <com.lumstic.data.views.RobotoRegularButton
+
+            android:id="@+id/okay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/login_button_color"
+            android:paddingLeft="10dp"
+            android:paddingRight="20dp"
+            android:text="@string/complete"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            android:layout_marginLeft="10dp"/>
+
+
+        <com.lumstic.data.views.RobotoRegularButton
+
+            android:id="@+id/cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/login_button_color"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:layout_marginLeft="40dp"
+            android:text="@string/cancel"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            android:layout_marginRight="3dp"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

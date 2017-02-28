@@ -17,7 +17,9 @@ public class JsonHelper {
 
     public List<Surveys> tryParsing(String rawJson) {
         try {
+
             JSONArray jsonArray = new JSONArray(rawJson);
+
             JSONParser jsonParser = new JSONParser();
             return getSurveyListSortedByType(getSortedSurveyList(jsonParser.parseSurvey(jsonArray)));
         } catch (JSONException e) {

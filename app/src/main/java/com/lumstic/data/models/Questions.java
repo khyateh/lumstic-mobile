@@ -13,7 +13,10 @@ public class Questions implements Serializable {
     int identifier;
     int parentId;
     int minValue;
-    int maxValue;
+    //TODO jyothi Feb 7 number to E format issue.
+    //int maxValue;
+    double maxValue;
+
     int surveyId;
     int maxLength;
     int mandatory;
@@ -56,11 +59,18 @@ public class Questions implements Serializable {
         this.minValue = minValue;
     }
 
-    public int getMaxValue() {
+    //TODO jyothi Feb 7 2017 number to E format issue.
+   /* public int getMaxValue() {
+        return maxValue;
+    }*/
+    public double getMaxValue() {
         return maxValue;
     }
-
-    public void setMaxValue(int maxValue) {
+//TODO jyothi Feb 7 2017 to fix number to E format
+    /*public void setMaxValue(int maxValue) {
+        this.maxValue = maxValue;
+    }*/
+    public void setMaxValue(double maxValue) {
         this.maxValue = maxValue;
     }
 
@@ -79,6 +89,8 @@ public class Questions implements Serializable {
     public void setSurveyId(int surveyId) {
         this.surveyId = surveyId;
     }
+//TODO jyothi Feb 7 number to E format issue.
+
 
     public int getMaxLength() {
         return maxLength;

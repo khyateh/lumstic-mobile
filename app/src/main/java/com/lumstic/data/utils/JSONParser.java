@@ -159,7 +159,9 @@ public class JSONParser {
         }
 
         try {
-            questions.setMaxValue(jsonObjectQuestions.getInt("max_value"));
+          //  CommonUtil.printmsg("jsonObjectQuestions.getInt(\"max_value\"):: "+jsonObjectQuestions.getInt("max_value"));
+            //TODO jyothi Feb 7 2017 To fix Number to E issue
+            questions.setMaxValue(jsonObjectQuestions.getDouble("max_value"));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -399,6 +401,7 @@ public class JSONParser {
                 JSONArray sortedArrayForQuestion = jsonParse(jsonArray);
                 for (int j = 0; j < sortedArrayForQuestion.length(); j++) {
                     JSONObject jsonObjectQuestion = sortedArrayForQuestion.getJSONObject(j);
+                    CommonUtil.printmsg("jsonObjectQuestion:: "+jsonObjectQuestion.toString());
                     Questions questions = parseQuestions(jsonObjectQuestion);
                     if (questions != null) {
                         questionsList.add(j, questions);
