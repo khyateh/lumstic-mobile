@@ -5,7 +5,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.lumstic.data.models.Answers;
 import com.lumstic.data.models.Categories;
@@ -19,11 +22,13 @@ import com.lumstic.data.utils.CommonUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class DBAdapter {
     DBhelper dBhelper;
     SQLiteDatabase sqLiteDb;
     Context context;
+    private static final String LOG_TAG = CommonUtil.APP_NAME;
 
     public DBAdapter(Context context) throws SQLException {
         if (dBhelper == null) {
@@ -198,7 +203,7 @@ public class DBAdapter {
                 .QUESTION_ID + " =? AND " + DBhelper.RECORD_ID + " =?", selectionArgs);
     }
 
-    public int getCompletedRespondents(int surveyId) {
+    public  int getCompletedRespondents(int surveyId) {
         int value = 0;
         String[] coloumns = {DBhelper.RESPONDENT_ID};
         String[] selectionArgs = {String.valueOf(surveyId)};
@@ -834,13 +839,36 @@ public class DBAdapter {
         if (sqLiteDb != null) {
             sqLiteDb.close();
         }
+        dBhelper.close();
     }
 
 
+   /* private synchronized SQLiteDatabase getSQLiteDB() throws SQLException {
+    //TODO jyothi modified March 27 2017
+       if(null != sqLiteDb) {
+           return sqLiteDb;
+       }else {
+
+           return dBhelper.getWritableDatabase();
+       }
+
+    }*/
+
+    //TODO jyothi modified March 31 2017
     private synchronized SQLiteDatabase getSQLiteDB() throws SQLException {
-        return dBhelper.getWritableDatabase();
-    }
 
+        if(null == sqLiteDb) {
+
+            try {
+                sqLiteDb = dBhelper.getWritableDatabase();
+            } catch (SQLiteException e) {
+                sqLiteDb = dBhelper.getReadableDatabase();
+
+            }
+        }
+        return sqLiteDb;
+
+    }
 
     public class DBhelper extends SQLiteOpenHelper {
         public static final String DATABASE_NAME = "SurveyAppDatabase";
@@ -923,6 +951,15 @@ public class DBAdapter {
             super(mContext, DATABASE_NAME, null, DATABASE_VERSION);
         }
 
+        //TODO Jyothi added March 27 2017 to solve "android.database.sqlite.SQLiteException: Failed to change locale for db"
+        @Override
+        public void onConfigure(SQLiteDatabase sqLiteDatabase){
+            Locale lumstic_locale = new Locale(CommonUtil.LOCALE_LANG_EN,CommonUtil.LOCALE_COUNTRY_US);
+            sqLiteDatabase.setLocale(lumstic_locale);
+            Log.d(CommonUtil.LUMSTIC_LOG_TAG,CommonUtil.LUMSTIC_DB_DEFAULT_LOCALE);
+
+            super.onConfigure(sqLiteDatabase);
+        }
         @Override
         public void onCreate(SQLiteDatabase sqLiteDatabase) {
             sqLiteDatabase.execSQL(CREATE_TABLE_CHOICES);
@@ -938,6 +975,8 @@ public class DBAdapter {
 
         @Override
         public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i2) {
+
+
 
 
         }

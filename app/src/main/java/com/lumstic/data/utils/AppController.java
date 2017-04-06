@@ -3,6 +3,7 @@ package com.lumstic.data.utils;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.CountDownTimer;
 import android.util.Log;
 import android.widget.Toast;
@@ -11,6 +12,7 @@ import com.crashlytics.android.Crashlytics;
 import com.google.firebase.crash.FirebaseCrash;
 import com.lumstic.data.ui.SplashActivity;
 
+import java.util.Locale;
 import java.util.concurrent.Callable;
 
 import io.fabric.sdk.android.Fabric;
@@ -32,10 +34,47 @@ public class AppController extends Application {
         return mInstance;
     }
 
+    private Locale locale = null;
+
+
+
+
+    @Override
+
+    public void onConfigurationChanged(Configuration config)
+
+    {
+
+        super.onConfigurationChanged(config);
+
+        if (locale != null)
+
+        {
+
+            config.locale = locale;
+
+            Locale.setDefault(locale);
+
+            getBaseContext().getResources().updateConfiguration(config, getBaseContext().getResources().getDisplayMetrics());
+
+        }
+
+    }
+
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        //TODO Jyothi April 4 2017 -->to fix crash with unable to change locale error .. fixing the locale of app to en_US
+        Configuration config = getBaseContext().getResources().getConfiguration();
+        locale = new Locale(CommonUtil.LOCALE_LANG_EN,CommonUtil.LOCALE_COUNTRY_US);
+        Locale.setDefault(locale);
+        config.locale = locale;
+        getBaseContext().getResources().updateConfiguration(config, getBaseContext().getResources().getDisplayMetrics());
+        Log.d(CommonUtil.LUMSTIC_LOG_TAG, CommonUtil.LUMSTIC_DEFAULT_LOCALE);
+
+
         Fabric.with(this, new Crashlytics());
         doInit();
         //TODO Jyothi adding code for handling unhandled exception Feb 26 2017
@@ -67,6 +106,10 @@ public class AppController extends Application {
             intent.addFlags( Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK );
             startActivity( intent );
         }
+
+
+
+
     }
 
 

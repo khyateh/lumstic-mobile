@@ -401,7 +401,7 @@ public class JSONParser {
                 JSONArray sortedArrayForQuestion = jsonParse(jsonArray);
                 for (int j = 0; j < sortedArrayForQuestion.length(); j++) {
                     JSONObject jsonObjectQuestion = sortedArrayForQuestion.getJSONObject(j);
-                    CommonUtil.printmsg("jsonObjectQuestion:: "+jsonObjectQuestion.toString());
+                    //CommonUtil.printmsg("jsonObjectQuestion:: "+jsonObjectQuestion.toString());
                     Questions questions = parseQuestions(jsonObjectQuestion);
                     if (questions != null) {
                         questionsList.add(j, questions);

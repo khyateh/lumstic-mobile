@@ -24,7 +24,7 @@ repositories {
 
 android {
     compileSdkVersion 22
-    buildToolsVersion "22.0.1"
+    buildToolsVersion '25.0.0'
     useLibrary 'org.apache.http.legacy'
 
     packagingOptions {
@@ -38,8 +38,8 @@ android {
         applicationId 'com.lumstic.data'
         minSdkVersion 15
         targetSdkVersion 22
-        versionCode 18
-        versionName 'Lumstic 2.6'
+        versionCode 19
+        versionName 'Lumstic 2.7'
 
     }
     buildTypes {

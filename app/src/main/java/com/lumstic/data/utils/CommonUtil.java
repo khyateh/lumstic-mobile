@@ -106,6 +106,17 @@ public class CommonUtil {
     //TODO Jyothi to handle Nullpointerexception from "fromfile()" Feb 26 2017
     public static final String  LUMSTIC_IMAGE_CAPTURE_ERROR = "Sorry,problem with image capture";
     public static final String LUMSTIC_ERROR = "There is an error:: ";
+    //TODO jyothi added March 27 2017
+    public static final String  APP_NAME = "LUMSTIC";
+
+    //TODO jyothi April 3  2017 -> Unable to resume activity {com.lumstic.data/com.lumstic.data.ui.NewResponseActivity}: java.lang.RuntimeException: Failure delivering result ResultInfo{who=null, request=1, result=-1, data=null}
+    public static final String CAMERA_IMAGE_FILE_URI_BUNDLE_KEY = "camera_image_file_uri_bundle_key";
+    public static final String CAMERA_IMAGE_FILE_NAME = "camera_img_file_name";
+    public static final String LOCALE_LANG_EN = "en";
+    public static final String LOCALE_COUNTRY_US = "US";
+    public static final String LUMSTIC_LOG_TAG = "LUMSTIC_LOG";
+    public static final String LUMSTIC_DB_DEFAULT_LOCALE = "Setting Lumstic database to locale en_US";
+    public static final String LUMSTIC_DEFAULT_LOCALE = "Setting Lumstic  to locale en_US";
 
     private CommonUtil() {
     }

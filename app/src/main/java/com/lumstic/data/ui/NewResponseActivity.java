@@ -66,6 +66,7 @@ import com.lumstic.data.views.RobotoRegularTextView;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -84,7 +85,7 @@ public class NewResponseActivity extends BaseActivity {
     private int currentResponseId = 0;
     private int totalQuestionCount = 0;
     private int cameraRequest = 1;
-    private int questionCounter = 0;
+    private int  questionCounter = 0;
     private Surveys surveys;
     private RobotoLightEditText answer;
     private RobotoLightTextView dateText;
@@ -112,6 +113,7 @@ public class NewResponseActivity extends BaseActivity {
     private int MARK_AS_COMPLETE_NUMBER = 0;
     private boolean lastQueNumeric = CommonUtil.LUMSTIC_FALSE;
     private boolean validating = CommonUtil.LUMSTIC_FALSE;
+    private Uri CAMERA_IMAGE_FILE_URI = null;
 
 
     private static void setViewAndChildrenEnabled(View view, boolean enabled) {
@@ -352,81 +354,8 @@ public class NewResponseActivity extends BaseActivity {
         return sortedSurveyQuestionsList;
     }
 
-    //TODO jyothi feb 21 2017 sub mandatory question not validated******
-    private void mimicOnCreate(){
-
-       // setContentView(R.layout.activity_new_response);
-        //action bar attributes
-      //  setActionbar();
-        //views declaration
-        setViews();
-        //layout inflater initialization
-      //  inflater = getLayoutInflater();
-       // dbAdapter = new DBAdapter(NewResponseActivity.this);
-        //declaration of list items
-        List<Questions> questionsList = new ArrayList<>();
-        List<Categories> categoriesList;
-        List<Questions> nonRootedQuestionsList = new ArrayList<>();
-
-        //create mark as complete button and mandatory text
-        makeMandatoryText();
-        previousQuestion.setText("BACK");
-        //surveys from previous activity
-        surveys = (Surveys) getIntent().getExtras().getSerializable(IntentConstants.SURVEY);
-        isMidlineSurvey = surveys.getRespondentList().size()>0?true:false;
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        addRootLevelQuestionsTOList(questionsList, nonRootedQuestionsList);
-
-        categoriesList = addCategoriesToCategoryList();
 
 
-        //Root Level Questions
-        addNestedQuestionsToQuestionList(questionsList, categoriesList);
-        //Non Root Level Questions
-        addNestedQuestionsToQuestionList(nonRootedQuestionsList, categoriesList);
-
-        addCategoryQuestionsTOCategory(nonRootedQuestionsList, categoriesList);
-
-
-        addQuestionsToMasterList(questionsList, categoriesList);
-
-        getSortedQuestionList(surveyQuestionsList);
-
-        totalQuestionCount = sortedSurveyQuestionsList.size();
-        // CommonUtil.printmsg("NewResponseActivity::totalQuestionCount "+ totalQuestionCount);
-
-        counterButton.setText("1 out of " + totalQuestionCount);
-
-        //get app response id
-        getResponseId();
-        if (!sortedSurveyQuestionsList.isEmpty()) {
-            buildFirstQuestion();
-        }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-        //on next pressed
-        nextQuestion.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                if ((questionCounter + 1) != totalQuestionCount) {
-                    onNextClick();
-                }
-            }
-        });
-
-        //on previous pressed
-        previousQuestion.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (questionCounter != 0) {
-                    onBackClicked();
-                }
-            }
-        });
-    }
 
     public void setActionbar() {
         actionBar = getActionBar();
@@ -565,7 +494,7 @@ public class NewResponseActivity extends BaseActivity {
             setViews();
             //TODO Jyothi feb 21 2017 mandatory sub question not validated
             buildFirstQuestion();
-           // mimicOnCreate();
+
             int validationComplete = 0;
             while (questionCounter < totalQuestionCount - 1) {
 
@@ -597,24 +526,9 @@ public class NewResponseActivity extends BaseActivity {
 
                 //TODO jyothi feb 16 2017 to fix dialog disappear due to calling of next activity.
                 showMarkAsCompDialog(NewResponseActivity.this);
-              /*  markAsComplete.setVisibility(View.GONE);
 
-                 markAsComplete2 = createMarkAsComplete(CommonUtil.COMP_BUTTON_LABLE);
 
-                markAsComplete2.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        callSurveyDetailActivity();
-                    }
-                });
-                fieldContainer.addView(markAsComplete2);*/
-
-            }/*else{
-                if(markAsComplete2 != null) {
-                    markAsComplete2.setVisibility(View.GONE);
-                }
-                markAsComplete.setVisibility(View.VISIBLE);
-            }*/
+            }
 
         }else{
           //  CommonUtil.printmsg("markascomplete 2");
@@ -717,13 +631,26 @@ public class NewResponseActivity extends BaseActivity {
         setCategoryTitleString("Q." + (questionCounter + 1));
 
         //TODO jyothi remove below for loop later
-        for(int i = 0;i<sortedSurveyQuestionsList.size();i++){
-           // CommonUtil.printmsg("buildFirstQuestion::Markasxcomplete"+((Questions)sortedSurveyQuestionsList.get(i).getObject()).getContent()+":"+MARK_AS_COMPLETE);
+       /* if(MARK_AS_COMPLETE)
+            {
+                CommonUtil.printmsg("sortedSurveyQuestionsList.size() buildFirstQuestion" + sortedSurveyQuestionsList.size());
+            }*/
+            for(int i = 0;i<sortedSurveyQuestionsList.size();i++){
+            if(MARK_AS_COMPLETE) {
+               // CommonUtil.printmsg("buildFirstQuestion::Markascomplete:sortedSurveyQuestionsList" + ((Questions) sortedSurveyQuestionsList.get(i).getObject()).getContent());
+                //CommonUtil.printmsg("buildFirstQuestion::Markascomplete:option questions" + ((Questions) sortedSurveyQuestionsList.get(i).getObject()).getOptions().get(0).getContent());
+            }else{
+               // CommonUtil.printmsg("buildFirstQuestion::before Markascomplete:sortedSurveyQuestionsList" + ((Questions) sortedSurveyQuestionsList.get(i).getObject()).getContent());
+            }
         }
         if (sortedSurveyQuestionsList.get(questionCounter).getType() == CommonUtil.TYPE_QUESTION) {
 
             Questions cq = (Questions) sortedSurveyQuestionsList.get(questionCounter).getObject();
-          //  CommonUtil.printmsg("buildFirstQuestion:: question content :: MARK_AS_COMPLETE_COUNT"+cq.getContent()+" :: "+MARK_AS_COMPLETE_NUMBER);
+            if(MARK_AS_COMPLETE) {
+            //    CommonUtil.printmsg("buildFirstQuestion:: question content" + cq.getOptions().get(0).getContent());
+            }else{
+              //  CommonUtil.printmsg("buildFirstQuestion:: question content before mark as complete" + cq.getOptions().get(0).getContent());
+            }
             buildLayout(cq, CommonUtil.IS_PARENT_VIEW, recordId, defaultParentIndex);
         } else {
             Categories currentCategory = (Categories) sortedSurveyQuestionsList.get(questionCounter).getObject();
@@ -993,21 +920,40 @@ public class NewResponseActivity extends BaseActivity {
             } else {
                 nestedContainer.setId(ques.getId() + IntentConstants.VIEW_CONSTANT_NESTED_CONTAINERS + recordId);
             }
-            //TODO jyothi Jan 31 change the below code  again.******
-            spinner = new Spinner(NewResponseActivity.this);
-         /*   spinner = new Spinner(NewResponseActivity.this){
+            //TODO jyothi Jan 31 change the below code  again.******************************************************************************************************
+           // spinner = new Spinner(NewResponseActivity.this);
+           spinner = new Spinner(NewResponseActivity.this){
                 @Override public void
                 setSelection(int position)
                 {
                     boolean sameSelected = position == getSelectedItemPosition();
-                    super.setSelection(position);
-                    if (sameSelected) {
-                        // Spinner does not call the OnItemSelectedListener if the same item is selected, so do it manually now
+                    if(sameSelected){
+
+                        ignoreOldSelectionByReflection();
                         getOnItemSelectedListener().onItemSelected(this, getSelectedView(), position, getSelectedItemId());
+
                     }
+                    super.setSelection(position);
+
                 }
 
-            };*/
+               private void ignoreOldSelectionByReflection() {
+                   try {
+                       Class<?> c = this.getClass().getSuperclass().getSuperclass().getSuperclass();
+                       Field reqField = c.getDeclaredField("mOldSelectedPosition");
+                       reqField.setAccessible(true);
+                       reqField.setInt(this, -1);
+                   } catch (NoSuchFieldException  e) {
+                      Log.d("Exception Private", "ex", e);
+                       // TODO: handle exception
+                  }catch (IllegalAccessException  e) {
+                       Log.d("Exception Private", "ex", e);
+                       // TODO: handle exception
+                   }
+               }
+
+            };
+
             spinner = (Spinner) getLayoutInflater().inflate(R.layout.answer_dropdown, null);
             nestedContainer.addView(spinner);
             spinner.setTag(order);
@@ -1026,23 +972,27 @@ public class NewResponseActivity extends BaseActivity {
 
             }
 
-
+           /* //TODO jyothi mar 5 subquestion validation not happenning
+            if(MARK_AS_COMPLETE) {
+                localAnswer = new Answers(localRecordID, currentResponseId, questions.getId(), "", tsLong, CommonUtil.QUESTION_TYPE_DROPDOWN_QUESTION);
+            }*/
             List<DropDown> dropDowns = new ArrayList<>();
             dropDowns.add(new DropDown(order, "Select one"));
 
-            // sorting options based on order number is done in  Questions
-
-
+            // sorting options based on order number is done in  Questions*******
             for (int i = 0; i < ques.getOptions().size(); i++) {
                 dropDowns.add(new DropDown(order, ques.getOptions().get(i).getContent()));
+               /* if(MARK_AS_COMPLETE){
+                    CommonUtil.printmsg("ques.getOptions().get(i).getContent():: "+ques.getOptions().get(i).getContent());
+                }*/
 
             }
 
             DropDownAdapter dropDownAdapter = new DropDownAdapter(NewResponseActivity.this, dropDowns);
             spinner.setAdapter(dropDownAdapter);
-            if(MARK_AS_COMPLETE) {
+           // if(MARK_AS_COMPLETE) {
              //   CommonUtil.printmsg("DROPDOWN:dropDownAdapter.getCount()" + dropDownAdapter.getCount());
-            }
+           // }
             if (isChild) {
                 spinner.setTag(R.string.multirecord_tag, new TagModel(ques.getId(), parentRecordId, ques));
             } else {
@@ -1087,10 +1037,7 @@ public class NewResponseActivity extends BaseActivity {
                         setCategoryTitleString(questionNumber);
 
                         //create nested questions////TODO important nested que creationn
-                        ///TODO remove below code later****
-                      /*  if(MARK_AS_COMPLETE) {
-                            CommonUtil.printmsg("options sub que creation");
-                        }*/
+
                         buildOptionLayout(options.getQuestionsList(), options.getCategoriesList(), ques,
                                 ((TagModel) nestedContainer.getTag(R.string.multirecord_tag))
                                         .getRecordID(), CommonUtil.IS_CHILD_VIEW, fieldContainer
@@ -1110,9 +1057,11 @@ public class NewResponseActivity extends BaseActivity {
                 @Override
                 public void onNothingSelected(AdapterView<?> adapterView) {
 
+
                 }
 
             });
+
 
         } else if (ques.getType().contains(CommonUtil.QUESTION_TYPE_MULTI_CHOICE_QUESTION)) {
 
@@ -1861,9 +1810,15 @@ public class NewResponseActivity extends BaseActivity {
 
         int masterListSize = masterQuestionList.size();
      //   CommonUtil.printmsg("storeDataToDB  masterListSize:: validate \t"+masterListSize+":"+validate);
+
+
         for (int i = 0; i < masterListSize; i++) {
             //TODO Jyothi jan 16 2017 validating if numeric when on click next
             String questionType = masterQuestionList.get(i).getQuestions().getType();
+
+          /*  if(MARK_AS_COMPLETE){CommonUtil.printmsg("master question list after mark as complete :: "+masterQuestionList.get(i).getQuestions().getContent());}else{
+                CommonUtil.printmsg("master question list before mark as complete :: "+masterQuestionList.get(i).getQuestions().getContent());
+            }*/
          //   CommonUtil.printmsg("NewResponse:StoreToDb:question title :: type :: mandatorystatus "+masterQuestionList.get(i).getQuestions().getContent()+" :: "+questionType+" :: "+masterQuestionList.get(i).getQuestions().getMandatory());
             String localData = "";
             if(questionType.equals(CommonUtil.QUESTION_TYPE_NUMERIC_QUESTION) ){
@@ -1933,8 +1888,12 @@ public class NewResponseActivity extends BaseActivity {
                                         }
                                     }
                                 } catch (NumberFormatException e) {
-                                   // CommonUtil.printmsg("NumberFormat Exception 3");
-                                    showValidationDialog((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID()), ((RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID())).getText().toString().length());
+                                   //TODO Jyothi April 3  adding below code to fix Exception java.lang.NullPointerException -> Attempt to invoke virtual method 'android.text.Editable com.lumstic.data.views.RobotoLightEditText.getText()' on a null object reference
+                                    RobotoLightEditText ansEditText = (RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID());
+                                    RobotoLightEditText queEditText = (RobotoLightEditText) findViewById(masterQuestionList.get(i).getAnsAndroidID());
+                                    if(null != ansEditText && null != queEditText) {
+                                        showValidationDialog(ansEditText, queEditText.getText().toString().length());
+                                    }
                                 }
 
                             }
@@ -2455,6 +2414,7 @@ public class NewResponseActivity extends BaseActivity {
             if (sortedSurveyQuestionsList.get(questionCounter).getType() == CommonUtil.TYPE_QUESTION) {
 
                 Questions cq = (Questions) sortedSurveyQuestionsList.get(questionCounter).getObject();
+                //CommonUtil.printmsg("In onBackClicked:: question content is :"+cq.getContent());
                 buildLayout(cq, CommonUtil.IS_PARENT_VIEW, recordId, defaultParentIndex);
             } else {
                 Categories currentCategory = (Categories) sortedSurveyQuestionsList.get(questionCounter).getObject();
@@ -2500,9 +2460,14 @@ public class NewResponseActivity extends BaseActivity {
     //get data from camera activity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
       //  CommonUtil.printmsg("In OnActivityResult");
+        //TODO jyothi April 3 2017 -> null pointer exception with a crash and data == null
+
 
         //TODO Jyothi Feb1 2017 to fix app crash
-        if(resultCode != RESULT_CANCELED) {
+        //TODO jyothi April 3 2017 -> null pointer exception with a crash and data == null
+        super.onActivityResult(requestCode, resultCode, data);
+      //  if(resultCode != RESULT_CANCELED && null != data) {
+        if(resultCode != RESULT_CANCELED ) {
             if (requestCode == cameraRequest && resultCode == RESULT_OK ) {
                 double photoFileSizeInMB = getImageSizeInMB(fname);
                 if ((tagMasterQuestion.getQuestions().getMaxLength() >= photoFileSizeInMB) || (tagMasterQuestion.getQuestions().getMaxLength() == 0)) {
@@ -2521,7 +2486,11 @@ public class NewResponseActivity extends BaseActivity {
             } else {
                 fname = "";
             }
-       }
+       }  //TODO jyothi April 3 2017 -> null pointer exception with a crash and data == null
+       else{
+            Toast.makeText(NewResponseActivity.this, "Sorry, could not take the image", Toast.LENGTH_LONG).show();
+
+        }
     }
 
     //load image from memory card
@@ -2966,7 +2935,10 @@ public class NewResponseActivity extends BaseActivity {
                     for (int j = 0; j < qu.getOptions().size(); j++) {
                         if (qu.getOptions().get(j).getId() == list2.get(i)) {
                             spinner = (Spinner) findViewById(qu.getId() + IntentConstants.VIEW_CONSTANT + localRecordId);
+                           // //TODO jyothi remove the line below later**********
+                           // spinner.setSelection(-1);
                             spinner.setSelection(j + 1);
+
                         }
 
                     }
@@ -3262,16 +3234,34 @@ public class NewResponseActivity extends BaseActivity {
     }
 
 
+    /*private void takePicture(Questions ques, int parentRecordId) {
+        tagMasterQuestion = new MasterQuestion(ques, parentRecordId);
+        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        //TODO Jyothi to handle Nullpointerexception from "fromfile()" Feb 26 2017
+        //TODO jyothi to fix
+        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+            File f = getOutputMediaFile();
+            if (null != f) {
+                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
+                startActivityForResult(cameraIntent, cameraRequest);
+            }
+        }
+    }*/
+
     private void takePicture(Questions ques, int parentRecordId) {
         tagMasterQuestion = new MasterQuestion(ques, parentRecordId);
         Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
         //TODO Jyothi to handle Nullpointerexception from "fromfile()" Feb 26 2017
-        File f = getOutputMediaFile();
-        if(null != f) {
-            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
-            startActivityForResult(cameraIntent, cameraRequest);
+        //TODO jyothi to fix -->NullPointerException: Attempt to invoke virtual method 'com.lumstic.data.b.l com.lumstic.data.b.i.a()' on a null object reference com.lumstic.data.ui.NewResponseActivity.onActivityResult
+        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+            File f = getOutputMediaFile();
+            if (null != f) {
+                CAMERA_IMAGE_FILE_URI = Uri.fromFile(f);
+                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,CAMERA_IMAGE_FILE_URI);
+                startActivityForResult(cameraIntent, cameraRequest);
+            }
         }else{
-            appController.showToast(CommonUtil.LUMSTIC_IMAGE_CAPTURE_ERROR);
+            Toast.makeText(NewResponseActivity.this, CommonUtil.LUMSTIC_ERROR, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -3304,7 +3294,7 @@ public class NewResponseActivity extends BaseActivity {
             dialog.setContentView(R.layout.mandatory_question_dialog);
             dialog.show();
             RobotoRegularButton button = (RobotoRegularButton) dialog.findViewById(R.id.okay);
-            button.setOnClickListener(new View.OnClickListener() {
+            button.setOnClickListener(  new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     viewById.setFocusable(true);
@@ -3343,7 +3333,8 @@ public class NewResponseActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        dbAdapter.close();
+
+            dbAdapter.close();
     }
 
     //this is a class which implements date picker dialog and shows up on item click of date questuions
@@ -3382,9 +3373,38 @@ public class NewResponseActivity extends BaseActivity {
 
         }
 
-    //TODO Jyothi added on Feb 1 2017 to fix a crash
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
+    //TODO jyothi April 3  2017 -> Unable to resume activity {com.lumstic.data/com.lumstic.data.ui.NewResponseActivity}: java.lang.RuntimeException: Failure delivering result ResultInfo{who=null, request=1, result=-1, data=null}
+    @Override
+    public void onSaveInstanceState(Bundle bundle) {
 
-        super.onRestoreInstanceState(savedInstanceState);
+        if (CAMERA_IMAGE_FILE_URI != null) {
+
+            bundle.putString(CommonUtil.CAMERA_IMAGE_FILE_URI_BUNDLE_KEY, CAMERA_IMAGE_FILE_URI.toString());
+            if(null != fname) {
+                bundle.putString(CommonUtil.CAMERA_IMAGE_FILE_NAME, fname);
+            }
+
+        }
+        super.onSaveInstanceState(bundle);
+
+    }
+
+    @Override
+    //TODO jyothi April 3  2017 -> Unable to resume activity {com.lumstic.data/com.lumstic.data.ui.NewResponseActivity}: java.lang.RuntimeException: Failure delivering result ResultInfo{who=null, request=1, result=-1, data=null}
+    protected void onRestoreInstanceState(Bundle bundle) {
+
+        if (bundle.containsKey(CommonUtil.CAMERA_IMAGE_FILE_URI_BUNDLE_KEY)) {
+
+            CAMERA_IMAGE_FILE_URI = Uri.parse(bundle.getString(CommonUtil.CAMERA_IMAGE_FILE_URI_BUNDLE_KEY));
+            fname = bundle.getString(CommonUtil.CAMERA_IMAGE_FILE_NAME);
+        }
+
+        super.onRestoreInstanceState(bundle);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
     }
 }
